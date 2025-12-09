@@ -13,10 +13,12 @@
     <script src="https://cdnjs.cloudflare.com/ajax/libs/firebase/9.22.0/firebase-auth-compat.min.js"></script>
     <style>
         * {
-            font-family: -apple-system, BlinkMacSystemFont, 'SF Pro Display', 'SF Pro Text', 'Helvetica Neue', Arial, sans-serif;
+            font-family: 'Inter', system-ui, -apple-system, sans-serif;
             -webkit-font-smoothing: antialiased;
             -moz-osx-font-smoothing: grayscale;
         }
+
+        @import url('https://fonts.googleapis.com/css2?family=Inter:wght@200;300;400;500;600;700&display=swap');
 
         body {
             background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
@@ -162,23 +164,20 @@
         }
 
         /* Adjust glass transparency for readability on different backgrounds */
-        body.light-mode .glass {
+        body .glass {
             background: rgba(255, 255, 255, 0.1);
-            border: 1px solid rgba(255, 255, 255, 0.2);
-            /* Keep original border for light mode glass */
-            box-shadow: 0 8px 32px 0 rgba(31, 38, 135, 0.37);
-            /* Keep original shadow for light mode glass */
+            backdrop-filter: blur(20px);
+            -webkit-backdrop-filter: blur(20px);
+            border: 1px solid rgba(255, 255, 255, 0.15);
+            box-shadow: 0 8px 32px 0 rgba(0, 0, 0, 0.25);
         }
 
-        body .glass {
-            background: rgba(255, 255, 255, 0.03);
-            /* Lighter, more airy */
+        body.light-mode .glass {
+            background: rgba(255, 255, 255, 0.4);
+            /* Much more visible glass in light mode */
+            border: 1px solid rgba(255, 255, 255, 0.4);
             backdrop-filter: blur(24px);
-            /* Stronger blur */
-            -webkit-backdrop-filter: blur(24px);
-            border: 1px solid rgba(255, 255, 255, 0.08);
-            /* Subtler border */
-            box-shadow: 0 4px 24px -1px rgba(0, 0, 0, 0.2);
+            box-shadow: 0 8px 32px 0 rgba(31, 38, 135, 0.15);
         }
 
         body.light-mode .glass-dark {
@@ -322,7 +321,20 @@
         </button>
     </nav>
 
-    <div id="app" class="container mx-auto px-4 pt-32 pb-12 max-w-2xl transition-all duration-500">
+    <!-- Theme Toggle (Floating Top Right) -->
+    <button onclick="toggleTheme()"
+        class="fixed top-6 right-6 z-[60] p-3 rounded-full glass hover:bg-white/20 transition-all text-white active:scale-95">
+        <svg id="theme-icon-sun" class="w-6 h-6 hidden" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
+                d="M12 3v1m0 16v1m9-9h-1M4 12H3m15.364 6.364l-.707-.707M6.343 6.343l-.707-.707m12.728 0l-.707.707M6.343 17.657l-.707.707M16 12a4 4 0 11-8 0 4 4 0 018 0z" />
+        </svg>
+        <svg id="theme-icon-moon" class="w-6 h-6" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
+                d="M20.354 15.354A9 9 0 018.646 3.646 9.003 9.003 0 0012 21a9.003 9.003 0 008.354-5.646z" />
+        </svg>
+    </button>
+
+    <div id="app" class="container mx-auto px-4 pt-32 pb-12 max-w-xl transition-all duration-500">
         <!-- Main Content -->
         <div id="session-view" class="space-y-8 fade-in"></div>
         <div id="profile-view" class="hidden space-y-8 fade-in"></div>
@@ -629,12 +641,11 @@
         }
 
         // Initialize
-        // Initial Render
-        // renderHeader(); // Header removed in this design iteration for "Airy" feel
         loadSession();
         setupScrollBehavior();
+        loadTheme();
 
-        // --- HEADER RENDERER (DISABLED) ---
+        // --- HEADER RENDERER (Wrapper for Theme) ---
         function renderHeader() {
             // Deprecated for the new "Top Nav" Airy Design
             // The content is now implicitly handled by the top nav and the views
@@ -797,25 +808,27 @@
                 </div>
 
                 <div class="glass rounded-3xl p-6 md:p-8 relative group">
-                    <button onclick="openEditModal()" class="absolute top-3 right-3 p-3 rounded-full bg-white/10 hover:bg-white/20 text-white/70 hover:text-white transition-all active:scale-95 touch-manipulation">
-                        <svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15.232 5.232l3.536 3.536m-2.036-5.036a2.5 2.5 0 113.536 3.536L6.5 21.036H3v-3.572L16.732 3.732z"></path>
-                        </svg>
-                    </button>
-
-                    <div class="flex items-center justify-between mb-6">
+                    <!-- Header with Arrows -->
+                    <div class="flex items-center justify-between mb-8 relative">
                         <button onclick="prevExercise()" class="p-3 rounded-full bg-white/5 hover:bg-white/10 text-white/70 hover:text-white transition-all active:scale-95 ${currentExerciseIndex === 0 ? 'opacity-0 pointer-events-none' : ''}">
-                            <svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 19l-7-7 7-7"></path></svg>
+                            <svg class="w-8 h-8" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 19l-7-7 7-7"></path></svg>
                         </button>
                         
                         <div class="text-center flex-1 px-2">
-                            <p class="text-white/70 text-sm mb-1">${programName}</p>
-                            <h2 class="text-2xl md:text-3xl font-bold text-white mb-1 leading-tight">${exercise.name}</h2>
-                            <p class="text-white/80 text-sm">${exercise.focus}</p>
+                             <div class="flex flex-col items-center">
+                                <span class="text-xs font-light text-white/50 tracking-widest uppercase mb-1">${programName}</span>
+                                <h2 class="text-2xl md:text-3xl font-light text-white mb-2 leading-tight">${exercise.name}</h2>
+                                <span class="bg-white/10 px-3 py-1 rounded-full text-[10px] text-white/80 font-medium">${exercise.focus}</span>
+                            </div>
                         </div>
 
                         <button onclick="nextExercise()" class="p-3 rounded-full bg-white/5 hover:bg-white/10 text-white/70 hover:text-white transition-all active:scale-95 ${currentExerciseIndex === programs[currentDay].exercises.length - 1 ? 'opacity-0 pointer-events-none' : ''}">
-                            <svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 5l7 7-7 7"></path></svg>
+                            <svg class="w-8 h-8" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 5l7 7-7 7"></path></svg>
+                        </button>
+
+                        <!-- Edit Button (Moved out of flow prevents overlap) -->
+                         <button onclick="openEditModal()" class="absolute -top-4 -right-2 p-2 rounded-full text-white/30 hover:text-white transition-all">
+                            <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15.232 5.232l3.536 3.536m-2.036-5.036a2.5 2.5 0 113.536 3.536L6.5 21.036H3v-3.572L16.732 3.732z"></path></svg>
                         </button>
                     </div>
 
@@ -836,15 +849,15 @@
                     <!-- Set Input -->
                     <div class="space-y-4 mb-6">
                         <div>
-                            <label class="text-white/70 text-sm mb-2 block">Poids (kg)</label>
+                            <label class="text-white/50 text-xs font-light uppercase tracking-wide mb-2 block">Poids (kg)</label>
                             <input type="number" id="weight-input" 
-                                   class="w-full glass-dark rounded-2xl px-6 py-4 text-white text-2xl font-bold text-center border-0 focus:outline-none focus:ring-2 focus:ring-white/30"
+                                   class="w-full bg-white/5 hover:bg-white/10 transition-colors rounded-2xl px-6 py-6 text-white text-4xl font-light text-center border border-white/10 focus:outline-none focus:ring-2 focus:ring-purple-500/50"
                                    placeholder="0" step="0.5" min="0">
                         </div>
                         <div>
-                            <label class="text-white/70 text-sm mb-2 block">Répétitions</label>
+                            <label class="text-white/50 text-xs font-light uppercase tracking-wide mb-2 block">Répétitions</label>
                             <input type="number" id="reps-input" 
-                                   class="w-full glass-dark rounded-2xl px-6 py-4 text-white text-2xl font-bold text-center border-0 focus:outline-none focus:ring-2 focus:ring-white/30"
+                                   class="w-full bg-white/5 hover:bg-white/10 transition-colors rounded-2xl px-6 py-6 text-white text-4xl font-light text-center border border-white/10 focus:outline-none focus:ring-2 focus:ring-purple-500/50"
                                    placeholder="0" min="0">
                         </div>
                     </div>
@@ -1260,6 +1273,7 @@
                 renderSettings();
             } else if (view === 'auth') {
                 document.getElementById('auth-view').classList.remove('hidden');
+                // renderAuth is static now, handled in HTML initially? no, we need to inject
                 renderAuth();
             }
 
@@ -1495,28 +1509,37 @@
             const settingsView = document.getElementById('settings-view');
             settingsView.innerHTML = `
                 <div class="glass rounded-3xl p-8">
-                    <h2 class="text-2xl font-bold text-white mb-6">Paramètres</h2>
+                    <h2 class="text-2xl font-light text-white mb-8">Paramètres</h2>
                     <div class="space-y-6">
                         ${currentUser ? `
-                        <div class="glass-dark rounded-2xl p-4 border border-green-500/30">
-                             <p class="text-white font-bold mb-2">Compte</p>
-                             <p class="text-white/70 text-sm mb-3">${currentUser.email}</p>
-                             <button onclick="handleLogout()" class="text-red-400 text-sm font-semibold hover:text-white transition-colors">Déconnexion</button>
+                        <div class="glass-dark rounded-2xl p-6 border border-green-500/30">
+                             <p class="text-white font-medium mb-1">Compte Connecté</p>
+                             <p class="text-white/60 text-sm font-light mb-4">${currentUser.email}</p>
+                             <button onclick="handleLogout()" class="w-full py-3 bg-red-500/10 hover:bg-red-500/20 text-red-300 rounded-xl text-sm font-medium transition-colors">Se déconnecter</button>
                         </div>` : ''}
 
-                        <div class="glass-dark rounded-2xl p-4">
-                            <p class="text-white font-semibold mb-2">À propos</p>
-                            <p class="text-white/70 text-sm">Yutoow Fit Track v1.1</p>
-                            <p class="text-white/50 text-xs mt-1">Développé avec ❤️ pour la performance.</p>
+                        <div class="glass-dark rounded-2xl p-6">
+                            <p class="text-white font-medium mb-1">À propos</p>
+                            <p class="text-white/60 text-sm font-light">Yutoow Fit Track v2.0</p>
+                            <p class="text-white/40 text-[10px] mt-2 font-light">Développé avec ❤️ pour la performance.</p>
                         </div>
 
-                        <div class="glass-dark rounded-2xl p-4 border border-red-500/30">
-                            <p class="text-red-400 font-bold mb-3 flex items-center gap-2">
+                        <div class="glass-dark rounded-2xl p-6 border border-red-500/30">
+                            <p class="text-red-400 font-medium mb-4 flex items-center gap-2">
                                 <svg class="w-5 h-5" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 9v2m0 4h.01m-6.938 4h13.856c1.54 0 2.502-1.667 1.732-3L13.732 4c-.77-1.333-2.694-1.333-3.464 0L3.34 16c-.77 1.333.192 3 1.732 3z"/></svg>
                                 Zone de Danger
                             </p>
+                            <div class="space-y-3">
+                                <button onclick="clearHistory()" class="w-full py-3 bg-red-500/10 hover:bg-red-500/20 text-red-400 rounded-xl text-sm transition-colors border border-red-500/20">
+                                    Effacer l'historique
+                                </button>
+                                <button onclick="resetApp()" class="w-full py-3 bg-red-900/20 hover:bg-red-900/30 text-red-500 rounded-xl text-sm font-bold transition-colors border border-red-500/20">
+                                    Tout réinitialiser (Usine)
+                                </button>
+                            </div>
+                        </div>
                     </div>
-                </div >
+                </div>
             `;
         }
 
@@ -1606,8 +1629,11 @@
         }
 
         async function handleLogout() {
-            await auth.signOut();
-            switchView('profile');
+            if (confirm("Se déconnecter ?")) {
+                await auth.signOut();
+                currentUser = null;
+                switchView('profile'); // Forces refresh
+            }
         }
 
         // --- CLOUD SYNC FUNCTIONS ---
