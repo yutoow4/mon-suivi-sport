@@ -105,10 +105,92 @@
             background: rgba(0, 0, 0, 0.7);
             backdrop-filter: blur(5px);
         }
+
+        /* --- LIGHT MODE OVERRIDES --- */
+        body.light-mode {
+            background: linear-gradient(135deg, #fdfbfb 0%, #ebedee 100%);
+            color: #1f2937;
+        }
+
+        body.light-mode .glass {
+            background: rgba(255, 255, 255, 0.75);
+            border: 1px solid rgba(0, 0, 0, 0.05);
+            box-shadow: 0 8px 32px 0 rgba(0, 0, 0, 0.05);
+        }
+
+        body.light-mode .glass-dark {
+            background: rgba(0, 0, 0, 0.05);
+            border: 1px solid rgba(0, 0, 0, 0.05);
+        }
+
+        /* Text Color Inversions for Light Mode */
+        body.light-mode .text-white {
+            color: #111827 !important;
+        }
+
+        body.light-mode .text-white\/70 {
+            color: #4b5563 !important;
+        }
+
+        body.light-mode .text-white\/60 {
+            color: #6b7280 !important;
+        }
+
+        body.light-mode .text-white\/50 {
+            color: #9ca3af !important;
+        }
+
+        body.light-mode .text-white\/40 {
+            color: #d1d5db !important;
+        }
+
+        body.light-mode .text-white\/80 {
+            color: #374151 !important;
+        }
+
+        /* Specific element adjustments */
+        body.light-mode .bg-white\/5 {
+            background-color: rgba(0, 0, 0, 0.05) !important;
+        }
+
+        body.light-mode .bg-white\/10 {
+            background-color: rgba(0, 0, 0, 0.1) !important;
+        }
+
+        body.light-mode .bg-white\/20 {
+            background-color: rgba(0, 0, 0, 0.15) !important;
+        }
+
+        body.light-mode .border-white\/20 {
+            border-color: rgba(0, 0, 0, 0.1) !important;
+        }
+
+        body.light-mode input {
+            color: #111827 !important;
+        }
+
+        /* Nav Icons in Light Mode */
+        body.light-mode .nav-item svg.text-white {
+            color: #7c3aed !important;
+        }
+
+        /* Active Purple */
+        body.light-mode .nav-item span.text-white {
+            color: #7c3aed !important;
+        }
+
+        /* Smooth transition for theme switch */
+        body,
+        .glass,
+        .glass-dark,
+        .text-white,
+        button {
+            transition: background-color 0.3s ease, color 0.3s ease, border-color 0.3s ease;
+        }
     </style>
 </head>
 
-<body class="pb-32">
+<body class="pb-32 transition-colors duration-300">
     <!-- Edit Modal -->
     <div id="edit-modal" class="fixed inset-0 z-[100] hidden items-center justify-center p-4 modal-overlay">
         <div class="glass glass-dark bg-black/80 rounded-3xl p-6 w-full max-w-sm space-y-4">
@@ -154,11 +236,24 @@
                 exercice</button>
         </div>
     </div>
-    <div id="app" class="container mx-auto px-4 py-6 max-w-2xl">
+    <div id="app" class="container mx-auto px-4 py-4 md:py-6 max-w-2xl">
         <!-- Header -->
-        <div class="glass rounded-3xl p-6 mb-6 flex flex-col items-center text-center">
-            <img src="logo.jpg" alt="Logo YF Tracker" class="h-16 w-auto mb-4 rounded-xl shadow-lg">
-            <h1 class="text-3xl font-bold text-white mb-2">On Air Tracking</h1>
+        <div class="glass rounded-3xl p-4 md:p-6 mb-6 flex flex-col items-center text-center relative">
+            <!-- Theme Toggle -->
+            <button onclick="toggleTheme()"
+                class="absolute top-4 right-4 p-2 rounded-full bg-white/10 hover:bg-white/20 transition-all text-white/80 hover:text-white">
+                <svg id="theme-icon-sun" class="w-6 h-6 hidden" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
+                        d="M12 3v1m0 16v1m9-9h-1M4 12H3m15.364 6.364l-.707-.707M6.343 6.343l-.707-.707m12.728 0l-.707.707M6.343 17.657l-.707.707M16 12a4 4 0 11-8 0 4 4 0 018 0z" />
+                </svg>
+                <svg id="theme-icon-moon" class="w-6 h-6" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
+                        d="M20.354 15.354A9 9 0 018.646 3.646 9.003 9.003 0 0012 21a9.003 9.003 0 008.354-5.646z" />
+                </svg>
+            </button>
+
+            <img src="logo.jpg" alt="Logo YF Tracker" class="h-12 w-auto mb-2 md:h-16 md:mb-4 rounded-xl shadow-lg">
+            <h1 class="text-2xl md:text-3xl font-bold text-white mb-1 md:mb-2">On Air Tracking</h1>
             <p class="text-white/70 text-sm">Ton coach personnel de fitness</p>
         </div>
 
@@ -446,8 +541,38 @@
         }
 
         // Initialize
+        loadTheme();
         loadSession();
         setupScrollBehavior();
+
+        function loadTheme() {
+            const theme = localStorage.getItem('onair_theme');
+            if (theme === 'light') {
+                document.body.classList.add('light-mode');
+            }
+            updateThemeIcon();
+        }
+
+        function toggleTheme() {
+            document.body.classList.toggle('light-mode');
+            const isLight = document.body.classList.contains('light-mode');
+            localStorage.setItem('onair_theme', isLight ? 'light' : 'dark');
+            updateThemeIcon();
+        }
+
+        function updateThemeIcon() {
+            const isLight = document.body.classList.contains('light-mode');
+            const sun = document.getElementById('theme-icon-sun');
+            const moon = document.getElementById('theme-icon-moon');
+
+            if (isLight) {
+                sun.classList.remove('hidden');
+                moon.classList.add('hidden');
+            } else {
+                sun.classList.add('hidden');
+                moon.classList.remove('hidden');
+            }
+        }
 
 
         function loadSession() {
@@ -571,7 +696,7 @@
                 </div>
 
                 <!-- Current Exercise -->
-                <div class="glass rounded-3xl p-8 relative group">
+                <div class="glass rounded-3xl p-6 md:p-8 relative group">
                     <!-- Edit Button -->
                     <button onclick="openEditModal()" class="absolute top-4 right-4 p-2 rounded-full bg-white/10 hover:bg-white/20 text-white/70 hover:text-white transition-all">
                         <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
@@ -617,12 +742,12 @@
 
                     <!-- Action Button -->
                     <button onclick="logSet()" 
-                            class="w-full bg-gradient-to-r from-purple-500 to-pink-500 text-white font-bold py-5 rounded-2xl hover:shadow-2xl transition-all btn-glass pulse-glow mb-4">
+                            class="w-full bg-gradient-to-r from-purple-500 to-pink-500 text-white font-bold py-4 md:py-5 rounded-2xl hover:shadow-2xl transition-all btn-glass pulse-glow mb-4 text-lg">
                         Enregistrer Série ${completedSets + 1}
                     </button>
                     
                     <button onclick="addNewExercise()" class="w-full py-3 rounded-2xl border-2 border-dashed border-white/20 text-white/50 hover:text-white hover:border-white/40 hover:bg-white/5 transition-all text-sm font-semibold">
-                        + Ajouter un exercice après celui-ci
+                        + Ajouter un exercice
                     </button>
                 </div>
 
