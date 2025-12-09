@@ -106,46 +106,41 @@
             backdrop-filter: blur(5px);
         }
 
-        /* --- LIGHT MODE OVERRIDES --- */
-        body.light-mode {
-            background: linear-gradient(135deg, #fdfbfb 0%, #ebedee 100%);
-            color: #1f2937;
+        /* --- THEMES --- */
+
+        /* Dark Mode (Default) - Deep Mauve/Blue */
+        body {
+            background: linear-gradient(135deg, #1a1b2e 0%, #16213e 100%);
+            color: white;
+            /* Always white text for these deep themes */
+            min-height: 100vh;
+            overflow-x: hidden;
         }
 
+        /* Light Mode (Original Base) - Purple Gradient */
+        body.light-mode {
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            color: #1f2937;
+            /* Default text color for light mode */
+        }
+
+        /* Adjust glass transparency for readability on different backgrounds */
         body.light-mode .glass {
-            background: rgba(255, 255, 255, 0.75);
-            border: 1px solid rgba(0, 0, 0, 0.05);
-            box-shadow: 0 8px 32px 0 rgba(0, 0, 0, 0.05);
+            background: rgba(255, 255, 255, 0.1);
+            border: 1px solid rgba(255, 255, 255, 0.2);
+            /* Keep original border for light mode glass */
+            box-shadow: 0 8px 32px 0 rgba(31, 38, 135, 0.37);
+            /* Keep original shadow for light mode glass */
+        }
+
+        body .glass {
+            background: rgba(255, 255, 255, 0.05);
+            /* Slightly more transparent on dark */
         }
 
         body.light-mode .glass-dark {
             background: rgba(0, 0, 0, 0.05);
             border: 1px solid rgba(0, 0, 0, 0.05);
-        }
-
-        /* Text Color Inversions for Light Mode */
-        body.light-mode .text-white {
-            color: #111827 !important;
-        }
-
-        body.light-mode .text-white\/70 {
-            color: #4b5563 !important;
-        }
-
-        body.light-mode .text-white\/60 {
-            color: #6b7280 !important;
-        }
-
-        body.light-mode .text-white\/50 {
-            color: #9ca3af !important;
-        }
-
-        body.light-mode .text-white\/40 {
-            color: #d1d5db !important;
-        }
-
-        body.light-mode .text-white\/80 {
-            color: #374151 !important;
         }
 
         /* Specific element adjustments */
@@ -185,12 +180,12 @@
         .glass-dark,
         .text-white,
         button {
-            transition: background-color 0.3s ease, color 0.3s ease, border-color 0.3s ease;
+            transition: background-color 0.5s ease, color 0.3s ease;
         }
     </style>
 </head>
 
-<body class="pb-32 transition-colors duration-300">
+<body class="pb-32 transition-colors duration-500">
     <!-- Edit Modal -->
     <div id="edit-modal" class="fixed inset-0 z-[100] hidden items-center justify-center p-4 modal-overlay">
         <div class="glass glass-dark bg-black/80 rounded-3xl p-6 w-full max-w-sm space-y-4">
@@ -317,6 +312,16 @@
                     d="M16 7a4 4 0 11-8 0 4 4 0 018 0zM12 14a7 7 0 00-7 7h14a7 7 0 00-7-7z"></path>
             </svg>
             <span class="text-white/60 text-xs font-medium">Profil</span>
+        </button>
+        <button onclick="switchView('settings')" class="nav-item flex flex-col items-center gap-1 transition-all">
+            <svg class="w-6 h-6 text-white/60" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
+                    d="M10.325 4.317c.426-1.756 2.924-1.756 3.35 0a1.724 1.724 0 002.573 1.066c1.543-.94 3.31.826 2.37 2.37a1.724 1.724 0 001.065 2.572c1.756.426 1.756 2.924 0 3.35a1.724 1.724 0 00-1.066 2.573c.94 1.543-.826 3.31-2.37 2.37a1.724 1.724 0 00-2.572 1.065c-.426 1.756-2.924 1.756-3.35 0a1.724 1.724 0 00-2.573-1.066c-1.543.94-3.31-.826-2.37-2.37a1.724 1.724 0 00-1.065-2.572c-1.756-.426-1.756-2.924 0-3.35a1.724 1.724 0 001.066-2.573c-.94-1.543.826-3.31 2.37-2.37.996.608 2.296.07 2.572-1.065z">
+                </path>
+                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
+                    d="M15 12a3 3 0 11-6 0 3 3 0 016 0z"></path>
+            </svg>
+            <span class="text-white/60 text-xs font-medium">Paramètres</span>
         </button>
     </nav>
 
@@ -1323,18 +1328,50 @@
             document.getElementById('settings-view').innerHTML = `
                 <div class="glass rounded-3xl p-8">
                     <h2 class="text-2xl font-bold text-white mb-6">Paramètres</h2>
-                    <div class="space-y-4">
+                    <div class="space-y-6">
                         <div class="glass-dark rounded-2xl p-4">
-                            <p class="text-white font-semibold">Version</p>
-                            <p class="text-white/70 text-sm">1.0.0</p>
+                            <p class="text-white font-semibold mb-2">À propos</p>
+                            <p class="text-white/70 text-sm">On Air Tracking v1.1</p>
+                            <p class="text-white/50 text-xs">Développé pour l'excellence.</p>
                         </div>
-                        <div class="glass-dark rounded-2xl p-4">
-                            <p class="text-white font-semibold">Notifications</p>
-                            <p class="text-white/70 text-sm">À venir</p>
+                        
+                        <div class="glass-dark rounded-2xl p-4 border border-red-500/30">
+                            <p class="text-red-400 font-bold mb-4 flex items-center gap-2">
+                                <svg class="w-5 h-5" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 9v2m0 4h.01m-6.938 4h13.856c1.54 0 2.502-1.667 1.732-3L13.732 4c-.77-1.333-2.694-1.333-3.464 0L3.34 16c-.77 1.333.192 3 1.732 3z"/></svg>
+                                Zone de Danger
+                            </p>
+                            
+                            <button onclick="clearHistory()" class="w-full bg-red-500/10 hover:bg-red-500/20 text-red-200 text-sm font-semibold py-3 px-4 rounded-xl transition-all mb-3 text-left flex justify-between items-center group">
+                                Effacer l'historique des séances
+                                <svg class="w-4 h-4 opacity-50 group-hover:opacity-100" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16" /></svg>
+                            </button>
+                            
+                            <button onclick="resetApp()" class="w-full bg-red-600 hover:bg-red-700 text-white text-sm font-bold py-3 px-4 rounded-xl transition-all text-left flex justify-between items-center shadow-lg">
+                                Réinitialiser TOUTE l'application
+                                <svg class="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 4v5h.582m15.356 2A8.001 8.001 0 004.582 9m0 0H9m11 11v-5h-.581m0 0a8.003 8.003 0 01-15.357-2m15.357 2H15" /></svg>
+                            </button>
+                            <p class="text-white/40 text-xs mt-2">Attention: Réinitialiser supprime vos programmes personnalisés, vos PRs et tout l'historique.</p>
                         </div>
                     </div>
                 </div>
             `;
+        }
+
+        function clearHistory() {
+            if (confirm("Voulez-vous vraiment effacer l'historique de toutes vos séances passées ? Cette action est irréversible.")) {
+                localStorage.removeItem(STORAGE_KEY_SESSIONS);
+                alert("Historique effacé.");
+                renderSettings();
+            }
+        }
+
+        function resetApp() {
+            if (confirm("ATTENTION : Cela va tout effacer (Séances, Records, Programmes personnalisés). L'application repartira à zéro. Continuer ?")) {
+                if (confirm("Êtes-vous vraiment sûr ?")) {
+                    localStorage.clear();
+                    location.reload();
+                }
+            }
         }
 
         function setupScrollBehavior() {
