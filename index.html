@@ -704,16 +704,15 @@
                 const isSelected = currentDay === key;
 
                 daysHtml += `
-                daysHtml += `
-                    < button onclick = "changeDay('${key}')"
-                class="${isSelected ? 'bg-white/20 ring-2 ring-purple-400/50' : 'bg-white/5'} rounded-2xl py-3 px-2 text-white text-sm font-semibold transition-all btn-glass flex flex-col items-center justify-center relative group min-h-[60px] touch-manipulation" >
-                    <span>${displayKey} - ${prog.name}</span>
-                        ${ isSelected && dayKeys.length > 1 ? `<span onclick="event.stopPropagation(); deleteDay('${key}')" class="absolute -top-2 -right-2 bg-red-500 rounded-full w-6 h-6 text-xs flex items-center justify-center shadow-lg active:scale-90 transition-transform cursor-pointer z-10 font-bold">×</span>` : '' }
-                    </button >
+                    <button onclick="changeDay('${key}')"
+                        class="${isSelected ? 'bg-white/20 ring-2 ring-purple-400/50' : 'bg-white/5'} rounded-2xl py-3 px-2 text-white text-sm font-semibold transition-all btn-glass flex flex-col items-center justify-center relative group min-h-[60px] touch-manipulation">
+                        <span>${displayKey} - ${prog.name}</span>
+                        ${isSelected && dayKeys.length > 1 ? `<span onclick="event.stopPropagation(); deleteDay('${key}')" class="absolute -top-2 -right-2 bg-red-500 rounded-full w-6 h-6 text-xs flex items-center justify-center shadow-lg active:scale-90 transition-transform cursor-pointer z-10 font-bold">×</span>` : ''}
+                    </button>
                     `;
             });
             daysHtml += `
-                    < button onclick = "addNewDay()" class="bg-white/5 border border-dashed border-white/30 rounded-2xl py-3 text-white/50 text-sm font-semibold hover:bg-white/10 transition-all flex items-center justify-center gap-2" >
+                    <button onclick="addNewDay()" class="bg-white/5 border border-dashed border-white/30 rounded-2xl py-3 text-white/50 text-sm font-semibold hover:bg-white/10 transition-all flex items-center justify-center gap-2" >
                         <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 4v16m8-8H4"></path></svg>
                 </button >
             </div > `;
@@ -722,7 +721,7 @@
             sessionView.innerHTML = `
                     <!-- Day Selector -->
                     < div class="glass rounded-3xl p-4 space-y-3" >
-                        ${ daysHtml }
+                        ${daysHtml}
                     < !--Edit Program Name Btn-- >
                     <button onclick="renameCurrentDay()" class="w-full text-center text-xs text-white/40 hover:text-white/80 transition-colors">
                         Modifier le nom du programme (${programName})
@@ -808,8 +807,7 @@
                 </div>
 
                 <!--Completed Sets-- >
-                    ${
-                    completedSets > 0 ? `
+                    ${completedSets > 0 ? `
                 <div class="glass rounded-3xl p-6">
                     <h3 class="text-white font-semibold mb-4">Séries Complétées</h3>
                     <div class="space-y-3">
@@ -949,7 +947,7 @@
             const displayEl = document.getElementById('timer-display');
             const mins = Math.floor(timerRemaining / 60);
             const secs = timerRemaining % 60;
-            displayEl.textContent = `${ mins.toString().padStart(2, '0') }:${ secs.toString().padStart(2, '0') } `;
+            displayEl.textContent = `${mins.toString().padStart(2, '0')}:${secs.toString().padStart(2, '0')} `;
         }
 
         function updateTimerControls() {
@@ -1068,7 +1066,7 @@
                 alert("Vous devez garder au moins un jour.");
                 return;
             }
-            if (!confirm(`Supprimer le programme ${ programs[key].name } ?`)) return;
+            if (!confirm(`Supprimer le programme ${programs[key].name} ?`)) return;
 
             delete programs[key];
             savePrograms();
@@ -1261,22 +1259,22 @@
                     <p class="text-white/70 text-sm">${sessions.length} séance${sessions.length > 1 ? 's' : ''} enregistrée${sessions.length > 1 ? 's' : ''}</p>
                 </div >
 
-                    ${ prHtml }
+                    ${prHtml}
 
                 <div class="space-y-4">
                     ${sessions.map(session => {
-                        const startDate = new Date(session.startTime);
-                        const endDate = new Date(session.endTime);
-                        const duration = Math.floor((endDate - startDate) / 60000); // minutes
+                const startDate = new Date(session.startTime);
+                const endDate = new Date(session.endTime);
+                const duration = Math.floor((endDate - startDate) / 60000); // minutes
 
-                        // Get muscle groups based on program
-                        const muscleGroups = {
-                            'PUSH': '💪 Pectoraux / Épaules / Triceps',
-                            'PULL': '🏋️ Dorsaux / Biceps / Trapèzes',
-                            'LEGS': '🦵 Quadriceps / Ischio-jambiers / Mollets'
-                        };
+                // Get muscle groups based on program
+                const muscleGroups = {
+                    'PUSH': '💪 Pectoraux / Épaules / Triceps',
+                    'PULL': '🏋️ Dorsaux / Biceps / Trapèzes',
+                    'LEGS': '🦵 Quadriceps / Ischio-jambiers / Mollets'
+                };
 
-                        return `
+                return `
                                     <div class="glass rounded-3xl p-6 cursor-pointer hover:bg-white/5 transition-all" onclick="showSessionDetail('${session.id}')">
                                         <div class="flex justify-between items-start mb-4">
                                             <div>
@@ -1319,7 +1317,7 @@
                                         </div>
                                     </div>
                                 `;
-                    }).join('')}
+            }).join('')}
                 </div>
                 `;
         }
