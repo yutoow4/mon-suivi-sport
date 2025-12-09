@@ -8,9 +8,9 @@
     <title>Yutoow Fit Track</title>
     <link rel="icon" type="image/jpeg" href="logo.jpg">
     <script src="https://cdn.tailwindcss.com"></script>
-    <script src="https://cdnjs.cloudflare.com/ajax/libs/firebase/9.22.0/firebase-app-compat.min.js"></script>
-    <script src="https://cdnjs.cloudflare.com/ajax/libs/firebase/9.22.0/firebase-firestore-compat.min.js"></script>
-    <script src="https://cdnjs.cloudflare.com/ajax/libs/firebase/9.22.0/firebase-auth-compat.min.js"></script>
+    <script src="https://www.gstatic.com/firebasejs/9.22.0/firebase-app-compat.js"></script>
+    <script src="https://www.gstatic.com/firebasejs/9.22.0/firebase-firestore-compat.js"></script>
+    <script src="https://www.gstatic.com/firebasejs/9.22.0/firebase-auth-compat.js"></script>
     <style>
         * {
             font-family: 'Inter', system-ui, -apple-system, sans-serif;
@@ -1638,11 +1638,23 @@
                 btn.classList.add('opacity-50', 'cursor-not-allowed');
                 errorEl.classList.add('hidden');
 
-                await auth.signInWithEmailAndPassword(email, password);
+                // Persistence
+                await auth.setPersistence(firebase.auth.Auth.Persistence.LOCAL);
+
+                // Timeout Race
+                const timeout = new Promise((_, reject) => setTimeout(() => reject(new Error("Délai d'attente dépassé (15s). Vérifiez votre réseau.")), 15000));
+
+                await Promise.race([
+                    auth.signInWithEmailAndPassword(email, password),
+                    timeout
+                ]);
+
                 switchView('profile');
             } catch (error) {
                 errorEl.textContent = "Erreur: " + error.message;
                 errorEl.classList.remove('hidden');
+                alert("Erreur Connexion: " + error.message); // Explicit alert for mobile
+
                 // Reset Button
                 btn.innerText = "Se connecter";
                 btn.disabled = false;
@@ -1675,13 +1687,21 @@
                 btn.classList.add('opacity-50', 'cursor-not-allowed');
                 errorEl.classList.add('hidden');
 
-                await auth.createUserWithEmailAndPassword(email, password);
+                const timeout = new Promise((_, reject) => setTimeout(() => reject(new Error("Délai d'attente dépassé (15s).")), 15000));
+
+                await Promise.race([
+                    auth.createUserWithEmailAndPassword(email, password),
+                    timeout
+                ]);
+
                 // On signup, push local data to cloud immediately if cloud is empty
                 await saveToCloud(true);
                 switchView('profile');
             } catch (error) {
                 errorEl.textContent = "Erreur: " + error.message;
                 errorEl.classList.remove('hidden');
+                alert("Erreur Inscription: " + error.message);
+
                 // Reset Button
                 btn.innerText = "Créer un compte";
                 btn.disabled = false;
@@ -1800,6 +1820,25 @@
 
                 lastScrollTop = currentScrollTop <= 0 ? 0 : currentScrollTop;
             });
+        }
+        function resetApp() {
+            if (confirm("ATTENTION: Cela va effacer TOUTES vos données (programmes, historique, préférences). Cette action est irréversible. Continuer ?")) {
+                localStorage.clear();
+                location.reload();
+            }
+        }
+
+        function clearHistory() {
+            if (confirm("Voulez-vous vraiment effacer tout l'historique des séances et les records (PR) ? Vos programmes seront conservés.")) {
+                localStorage.removeItem(STORAGE_KEY_SESSIONS);
+                localStorage.removeItem(STORAGE_KEY_PRS);
+                sessionData = [];
+                alert("Historique effacé.");
+                loadSession();
+                switchView('settings'); // Refresh settings view is tricky without re-render needed
+                // Ideally reload or re-render
+                location.reload();
+            }
         }
     </script>
 </body>
