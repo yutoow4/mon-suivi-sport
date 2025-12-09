@@ -796,16 +796,14 @@
 
 
             sessionView.innerHTML = `
-                <!-- Day Selector -->
-                <div class="glass rounded-3xl p-4 space-y-3">
-                    ${daysHtml}
-                    <!-- Edit Program Name Btn -->
-                    <button onclick="renameCurrentDay()" class="w-full text-center text-xs text-white/40 hover:text-white/80 transition-colors">
-                        Modifier le nom du programme (${programName})
-                    </button>
-                </div>
+            sessionView.innerHTML = `
+                < div class="glass rounded-3xl p-4 space-y-3" >
+                    ${ daysHtml }
+            <button onclick="renameCurrentDay()" class="w-full text-center text-xs text-white/40 hover:text-white/80 transition-colors">
+                Modifier le nom du programme (${programName})
+            </button>
+                </div >
 
-                <!-- Progress -->
                 <div class="glass rounded-3xl p-6">
                     <div class="flex justify-between items-center mb-3">
                         <span class="text-white/70 text-sm">Progression</span>
@@ -817,9 +815,7 @@
                     </div>
                 </div>
 
-                <!-- Current Exercise -->
                 <div class="glass rounded-3xl p-6 md:p-8 relative group">
-                    <!-- Edit Button -->
                     <button onclick="openEditModal()" class="absolute top-3 right-3 p-3 rounded-full bg-white/10 hover:bg-white/20 text-white/70 hover:text-white transition-all active:scale-95 touch-manipulation">
                         <svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                             <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15.232 5.232l3.536 3.536m-2.036-5.036a2.5 2.5 0 113.536 3.536L6.5 21.036H3v-3.572L16.732 3.732z"></path>
@@ -884,7 +880,8 @@
                 </div>
 
                 <!--Completed Sets-- >
-                    ${completedSets > 0 ? `
+                ${
+                    completedSets > 0 ? `
                 <div class="glass rounded-3xl p-6">
                     <h3 class="text-white font-semibold mb-4">Séries Complétées</h3>
                     <div class="space-y-3">
@@ -897,8 +894,8 @@
                     </div>
                 </div>
                 ` : ''
-                }
-                `;
+            }
+            `;
         }
 
         function logSet() {
@@ -1025,7 +1022,7 @@
             const displayEl = document.getElementById('timer-display');
             const mins = Math.floor(timerRemaining / 60);
             const secs = timerRemaining % 60;
-            displayEl.textContent = `${mins.toString().padStart(2, '0')}:${secs.toString().padStart(2, '0')} `;
+            displayEl.textContent = `${ mins.toString().padStart(2, '0') }:${ secs.toString().padStart(2, '0') } `;
         }
 
         function updateTimerControls() {
@@ -1144,7 +1141,7 @@
                 alert("Vous devez garder au moins un jour.");
                 return;
             }
-            if (!confirm(`Supprimer le programme ${programs[key].name} ?`)) return;
+            if (!confirm(`Supprimer le programme ${ programs[key].name } ?`)) return;
 
             delete programs[key];
             savePrograms();
@@ -1238,7 +1235,7 @@
 
             const sessionView = document.getElementById('session-view');
             sessionView.innerHTML = `
-                    < div class="glass rounded-3xl p-12 text-center" >
+                < div class="glass rounded-3xl p-12 text-center" >
                     <div class="text-6xl mb-6">🎉</div>
                     <h2 class="text-3xl font-bold text-white mb-4">Séance Terminée !</h2>
                     <p class="text-white/70 mb-8">Excellent travail ! Tu as complété tous les exercices.</p>
@@ -1256,7 +1253,7 @@
                         </button>
                     </div>
                 </div >
-                    `;
+                `;
         }
 
         function resetSession() {
@@ -1311,7 +1308,7 @@
             let authHtml = '';
             if (!currentUser && firebaseConfig.apiKey !== "VOTRE_API_KEY") {
                 authHtml = `
-                    <div class="glass rounded-3xl p-6 mb-6 flex flex-col items-center text-center">
+                < div class="glass rounded-3xl p-6 mb-6 flex flex-col items-center text-center" >
                         <div class="w-16 h-16 bg-gradient-to-br from-purple-500 to-pink-500 rounded-full flex items-center justify-center mb-4 shadow-lg">
                             <svg class="w-8 h-8 text-white" fill="none" viewBox="0 0 24 24" stroke="currentColor">
                                 <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M16 7a4 4 0 11-8 0 4 4 0 018 0zM12 14a7 7 0 00-7 7h14a7 7 0 00-7-7z" />
@@ -1322,11 +1319,11 @@
                         <button onclick="switchView('auth')" class="w-full bg-white text-purple-900 font-bold py-3 rounded-xl hover:bg-white/90 transition-all">
                             Se connecter / S'inscrire
                         </button>
-                    </div>
-                 `;
+                    </div >
+                `;
             } else if (currentUser) {
                 authHtml = `
-                    <div class="glass rounded-3xl p-6 mb-6 flex items-center gap-4">
+                < div class="glass rounded-3xl p-6 mb-6 flex items-center gap-4" >
                         <div class="w-12 h-12 bg-green-500 rounded-full flex items-center justify-center shadow-lg">
                             <svg class="w-6 h-6 text-white" fill="none" viewBox="0 0 24 24" stroke="currentColor">
                                 <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 13l4 4L19 7" />
@@ -1336,7 +1333,7 @@
                             <p class="text-white/60 text-xs uppercase tracking-wider font-semibold">Connecté en tant que</p>
                             <p class="text-white font-bold truncate max-w-[200px]">${currentUser.email}</p>
                         </div>
-                    </div>
+                    </div >
                 `;
             }
 
@@ -1344,7 +1341,7 @@
             const prKeys = Object.keys(prs);
             if (prKeys.length > 0) {
                 prHtml = `
-                    < div class="glass rounded-3xl p-6 mb-6" >
+                < div class="glass rounded-3xl p-6 mb-6" >
                          <h2 class="text-xl font-bold text-white mb-4">🏆 Mes Records (PR)</h2>
                          <div class="space-y-3">
                             ${prKeys.map(key => `
@@ -1355,12 +1352,12 @@
                             `).join('')}
                          </div>
                     </div >
-                    `;
+                `;
             }
 
             if (sessions.length === 0) {
                 profileView.innerHTML = `
-                    < div class="glass rounded-3xl p-8 text-center" >
+                < div class="glass rounded-3xl p-8 text-center" >
                         <div class="w-24 h-24 mx-auto mb-4 glass-dark rounded-full flex items-center justify-center">
                             <svg class="w-12 h-12 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                                 <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M16 7a4 4 0 11-8 0 4 4 0 018 0zM12 14a7 7 0 00-7 7h14a7 7 0 00-7-7z"></path>
@@ -1372,32 +1369,32 @@
                             Commencer une séance
                         </button>
                     </div >
-                    `;
+                `;
                 return;
             }
 
             profileView.innerHTML = `
-                    < div class="glass rounded-3xl p-6 mb-6" >
+                < div class="glass rounded-3xl p-6 mb-6" >
                     <h2 class="text-2xl font-bold text-white mb-2">Mes Séances</h2>
                     <p class="text-white/70 text-sm">${sessions.length} séance${sessions.length > 1 ? 's' : ''} enregistrée${sessions.length > 1 ? 's' : ''}</p>
                 </div >
 
-                    ${prHtml}
+                ${ prHtml }
 
-                <div class="space-y-4">
-                    ${sessions.map(session => {
-                const startDate = new Date(session.startTime);
-                const endDate = new Date(session.endTime);
-                const duration = Math.floor((endDate - startDate) / 60000); // minutes
+            <div class="space-y-4">
+                ${sessions.map(session => {
+                    const startDate = new Date(session.startTime);
+                    const endDate = new Date(session.endTime);
+                    const duration = Math.floor((endDate - startDate) / 60000); // minutes
 
-                // Get muscle groups based on program
-                const muscleGroups = {
-                    'PUSH': '💪 Pectoraux / Épaules / Triceps',
-                    'PULL': '🏋️ Dorsaux / Biceps / Trapèzes',
-                    'LEGS': '🦵 Quadriceps / Ischio-jambiers / Mollets'
-                };
+                    // Get muscle groups based on program
+                    const muscleGroups = {
+                        'PUSH': '💪 Pectoraux / Épaules / Triceps',
+                        'PULL': '🏋️ Dorsaux / Biceps / Trapèzes',
+                        'LEGS': '🦵 Quadriceps / Ischio-jambiers / Mollets'
+                    };
 
-                return `
+                    return `
                                     <div class="glass rounded-3xl p-6 cursor-pointer hover:bg-white/5 transition-all" onclick="showSessionDetail('${session.id}')">
                                         <div class="flex justify-between items-start mb-4">
                                             <div>
@@ -1440,9 +1437,9 @@
                                         </div>
                                     </div>
                                 `;
-            }).join('')}
-                </div>
-                `;
+                }).join('')}
+            </div>
+            `;
         }
 
         function showSessionDetail(sessionId) {
@@ -1457,7 +1454,7 @@
 
             const profileView = document.getElementById('profile-view');
             profileView.innerHTML = `
-                    < div class="glass rounded-3xl p-6 mb-6" >
+                < div class="glass rounded-3xl p-6 mb-6" >
                     <div class="flex justify-between items-center mb-4">
                         <button onclick="renderProfile()" class="flex items-center gap-2 text-white/70 hover:text-white transition-all">
                             <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
@@ -1509,12 +1506,12 @@
                         `).join('')}
                     </div>
                 </div>
-                `;
+            `;
         }
 
         function renderSettings() {
             document.getElementById('settings-view').innerHTML = `
-                    < div class="glass rounded-3xl p-8" >
+                < div class="glass rounded-3xl p-8" >
                     <h2 class="text-2xl font-bold text-white mb-6">Paramètres</h2>
                     <div class="space-y-6">
                         ${currentUser ? `
@@ -1549,7 +1546,7 @@
                         </div>
                     </div>
                 </div >
-            `;
+                `;
         }
 
         function clearHistory() {
@@ -1573,7 +1570,7 @@
 
         function renderAuth() {
             document.getElementById('auth-view').innerHTML = `
-                <div class="glass rounded-3xl p-8 max-w-sm mx-auto">
+                < div class="glass rounded-3xl p-8 max-w-sm mx-auto" >
                     <h2 class="text-2xl font-bold text-white mb-6 text-center">Connexion</h2>
                     
                     <div class="space-y-4">
@@ -1601,7 +1598,7 @@
                     </button>
                     
                     <p id="auth-error" class="text-red-400 text-sm text-center mt-4 hidden"></p>
-                </div>
+                </div >
             `;
         }
 
@@ -1656,8 +1653,8 @@
                     console.log("Cloud data found:", data);
 
                     // Simple Strategy: Cloud overwrites Local on Login (prevents data loss if phone broke)
-                    // But if Cloud is old and Local is new? ideally merge. 
-                    // For MVP: We assume Cloud is Truth. 
+                    // But if Cloud is old and Local is new? ideally merge.
+                    // For MVP: We assume Cloud is Truth.
 
                     if (data.programs) {
                         programs = JSON.parse(data.programs);
