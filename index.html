@@ -16,6 +16,7 @@
             font-family: 'Inter', system-ui, -apple-system, sans-serif;
             -webkit-font-smoothing: antialiased;
             -moz-osx-font-smoothing: grayscale;
+            touch-action: manipulation;
         }
 
         @import url('https://fonts.googleapis.com/css2?family=Inter:wght@200;300;400;500;600;700&display=swap');
@@ -241,8 +242,10 @@
 
 <body class="pb-32 transition-colors duration-500">
     <!-- Edit Modal -->
-    <div id="edit-modal" class="fixed inset-0 z-[200] hidden items-center justify-center p-4 modal-overlay">
-        <div class="glass glass-dark bg-black/80 rounded-3xl p-6 w-full max-w-sm space-y-4">
+    <div id="edit-modal"
+        class="fixed inset-0 z-[300] hidden items-end md:items-center justify-center p-4 modal-overlay">
+        <div
+            class="glass glass-dark bg-[#0f172a] rounded-3xl p-6 w-full max-w-sm space-y-4 max-h-[85vh] overflow-y-auto shadow-2xl relative mb-4 md:mb-0">
             <h3 id="modal-title" class="text-xl font-bold text-white">Éditer l'exercice</h3>
 
             <div class="space-y-3">
@@ -1263,17 +1266,20 @@
             document.getElementById('profile-view').classList.add('hidden');
             document.getElementById('settings-view').classList.add('hidden');
 
+            // Ensure scroll to top when switching views
+            window.scrollTo(0, 0);
+
             if (view === 'session') {
                 document.getElementById('session-view').classList.remove('hidden');
             } else if (view === 'profile') {
                 document.getElementById('profile-view').classList.remove('hidden');
+                // Force re-render to ensure auth state is reflected
                 renderProfile();
             } else if (view === 'settings') {
                 document.getElementById('settings-view').classList.remove('hidden');
                 renderSettings();
             } else if (view === 'auth') {
                 document.getElementById('auth-view').classList.remove('hidden');
-                // renderAuth is static now, handled in HTML initially? no, we need to inject
                 renderAuth();
             }
 
@@ -1281,14 +1287,25 @@
             document.querySelectorAll('.nav-item').forEach((item, i) => {
                 const svg = item.querySelector('svg');
                 const span = item.querySelector('span');
+                const div = item.querySelector('div'); // Glow effect
+
+                // Reset basic state
+                if (span) span.classList.remove('text-white', 'text-white/50');
+                if (svg) svg.classList.remove('group-hover:text-white');
+                if (div) div.classList.remove('opacity-100');
+
                 const isActive = (view === 'session' && i === 0) ||
                     (view === 'profile' && i === 1) ||
                     (view === 'settings' && i === 2);
 
-                svg.classList.toggle('text-white', isActive);
-                svg.classList.toggle('text-white/60', !isActive);
-                span.classList.toggle('text-white', isActive);
-                span.classList.toggle('text-white/60', !isActive);
+                if (isActive) {
+                    if (span) span.classList.add('text-white');
+                    else if (item.querySelector('span')) item.querySelector('span').classList.add('text-white'); // Fallback
+
+                    if (div) div.classList.add('opacity-100');
+                } else {
+                    if (span) span.classList.add('text-white/50');
+                }
             });
         }
 
@@ -1592,32 +1609,72 @@
                     </button>
                     
                     <p id="auth-error" class="text-red-400 text-sm text-center mt-4 hidden"></p>
-                </div >
+                </div>
             `;
         }
 
         async function handleLogin() {
+            if (!auth) {
+                alert("Erreur: Firebase n'est pas initialisé (Probablement un problème de connexion internet).");
+                return;
+            }
+
             const email = document.getElementById('auth-email').value;
             const password = document.getElementById('auth-password').value;
             const errorEl = document.getElementById('auth-error');
+            const btn = document.querySelector('button[onclick="handleLogin()"]');
+
+            if (!email || !password) {
+                errorEl.textContent = "Veuillez remplir tous les champs.";
+                errorEl.classList.remove('hidden');
+                return;
+            }
 
             try {
+                // Loading State
+                const originalText = btn.innerText;
+                btn.innerText = "Connexion...";
+                btn.disabled = true;
+                btn.classList.add('opacity-50', 'cursor-not-allowed');
                 errorEl.classList.add('hidden');
+
                 await auth.signInWithEmailAndPassword(email, password);
                 switchView('profile');
             } catch (error) {
                 errorEl.textContent = "Erreur: " + error.message;
                 errorEl.classList.remove('hidden');
+                // Reset Button
+                btn.innerText = "Se connecter";
+                btn.disabled = false;
+                btn.classList.remove('opacity-50', 'cursor-not-allowed');
             }
         }
 
         async function handleSignup() {
+            if (!auth) {
+                alert("Erreur: Firebase n'est pas initialisé.");
+                return;
+            }
+
             const email = document.getElementById('auth-email').value;
             const password = document.getElementById('auth-password').value;
             const errorEl = document.getElementById('auth-error');
+            const btn = document.querySelector('button[onclick="handleSignup()"]');
+
+            if (!email || !password) {
+                errorEl.textContent = "Veuillez remplir tous les champs.";
+                errorEl.classList.remove('hidden');
+                return;
+            }
 
             try {
+                // Loading State
+                const originalText = btn.innerText;
+                btn.innerText = "Création...";
+                btn.disabled = true;
+                btn.classList.add('opacity-50', 'cursor-not-allowed');
                 errorEl.classList.add('hidden');
+
                 await auth.createUserWithEmailAndPassword(email, password);
                 // On signup, push local data to cloud immediately if cloud is empty
                 await saveToCloud(true);
@@ -1625,6 +1682,10 @@
             } catch (error) {
                 errorEl.textContent = "Erreur: " + error.message;
                 errorEl.classList.remove('hidden');
+                // Reset Button
+                btn.innerText = "Créer un compte";
+                btn.disabled = false;
+                btn.classList.remove('opacity-50', 'cursor-not-allowed');
             }
         }
 
