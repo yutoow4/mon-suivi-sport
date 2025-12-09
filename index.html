@@ -712,10 +712,20 @@
                         </svg>
                     </button>
 
-                    <div class="text-center mb-6">
-                        <p class="text-white/70 text-sm mb-2">${programName}</p>
-                        <h2 class="text-3xl font-bold text-white mb-2 leading-tight">${exercise.name}</h2>
-                        <p class="text-white/80 text-sm">${exercise.focus}</p>
+                    <div class="flex items-center justify-between mb-6">
+                        <button onclick="prevExercise()" class="p-3 rounded-full bg-white/5 hover:bg-white/10 text-white/70 hover:text-white transition-all active:scale-95 ${currentExerciseIndex === 0 ? 'opacity-0 pointer-events-none' : ''}">
+                            <svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 19l-7-7 7-7"></path></svg>
+                        </button>
+                        
+                        <div class="text-center flex-1 px-2">
+                            <p class="text-white/70 text-sm mb-1">${programName}</p>
+                            <h2 class="text-2xl md:text-3xl font-bold text-white mb-1 leading-tight">${exercise.name}</h2>
+                            <p class="text-white/80 text-sm">${exercise.focus}</p>
+                        </div>
+
+                        <button onclick="nextExercise()" class="p-3 rounded-full bg-white/5 hover:bg-white/10 text-white/70 hover:text-white transition-all active:scale-95 ${currentExerciseIndex === programs[currentDay].exercises.length - 1 ? 'opacity-0 pointer-events-none' : ''}">
+                            <svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 5l7 7-7 7"></path></svg>
+                        </button>
                     </div>
 
                     <!-- Exercise Info -->
@@ -761,7 +771,7 @@
 
                 <!--Completed Sets-- >
                     ${
-                        completedSets > 0 ? `
+                    completedSets > 0 ? `
                 <div class="glass rounded-3xl p-6">
                     <h3 class="text-white font-semibold mb-4">Séries Complétées</h3>
                     <div class="space-y-3">
@@ -1047,6 +1057,20 @@
             currentSessionId = null;
             sessionStartTime = null;
             loadSession();
+        }
+
+        function prevExercise() {
+            if (currentExerciseIndex > 0) {
+                currentExerciseIndex--;
+                loadSession();
+            }
+        }
+
+        function nextExercise() {
+            if (currentExerciseIndex < programs[currentDay].exercises.length - 1) {
+                currentExerciseIndex++;
+                loadSession();
+            }
         }
 
         function showSessionComplete() {
