@@ -715,20 +715,20 @@
                     <button onclick="addNewDay()" class="bg-white/5 border border-dashed border-white/30 rounded-2xl py-3 text-white/50 text-sm font-semibold hover:bg-white/10 transition-all flex items-center justify-center gap-2" >
                         <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 4v16m8-8H4"></path></svg>
                 </button >
-            </div > `;
+            </div>`;
 
 
             sessionView.innerHTML = `
-                    <!-- Day Selector -->
-                    < div class="glass rounded-3xl p-4 space-y-3" >
-                        ${daysHtml}
-                    < !--Edit Program Name Btn-- >
+                <!-- Day Selector -->
+                <div class="glass rounded-3xl p-4 space-y-3">
+                    ${daysHtml}
+                    <!-- Edit Program Name Btn -->
                     <button onclick="renameCurrentDay()" class="w-full text-center text-xs text-white/40 hover:text-white/80 transition-colors">
                         Modifier le nom du programme (${programName})
                     </button>
-                </div >
+                </div>
 
-                < !--Progress -->
+                <!-- Progress -->
                 <div class="glass rounded-3xl p-6">
                     <div class="flex justify-between items-center mb-3">
                         <span class="text-white/70 text-sm">Progression</span>
