@@ -368,25 +368,21 @@
         let currentUser = null;
 
         try {
-            if (firebaseConfig.apiKey !== "VOTRE_API_KEY") {
-                firebase.initializeApp(firebaseConfig);
-                auth = firebase.auth();
-                db = firebase.firestore();
+            firebase.initializeApp(firebaseConfig);
+            auth = firebase.auth();
+            db = firebase.firestore();
 
-                // Auth State Listener
-                auth.onAuthStateChanged(user => {
-                    currentUser = user;
-                    console.log("Auth State Changed:", user ? user.email : "No User");
-                    if (user) {
-                        syncData(); // Sync on login
-                    }
-                    renderHeader(); // Update Header (User info)
-                    renderProfile(); // Update Profile UI (Login btn vs User info)
-                    renderSettings(); // Update Settings UI (Logout btn)
-                });
-            } else {
-                console.warn("Firebase non configuré. Mode Offline uniquement.");
-            }
+            // Auth State Listener
+            auth.onAuthStateChanged(user => {
+                currentUser = user;
+                console.log("Auth State Changed:", user ? user.email : "No User");
+                if (user) {
+                    syncData(); // Sync on login
+                }
+                renderHeader(); // Update Header (User info)
+                renderProfile(); // Update Profile UI (Login btn vs User info)
+                renderSettings(); // Update Settings UI (Logout btn)
+            });
         } catch (e) {
             console.error("Erreur init Firebase:", e);
         }
