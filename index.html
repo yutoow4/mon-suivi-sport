@@ -10,6 +10,7 @@
     <script src="https://cdn.tailwindcss.com"></script>
     <script src="https://cdnjs.cloudflare.com/ajax/libs/firebase/9.22.0/firebase-app-compat.min.js"></script>
     <script src="https://cdnjs.cloudflare.com/ajax/libs/firebase/9.22.0/firebase-firestore-compat.min.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/firebase/9.22.0/firebase-auth-compat.min.js"></script>
     <style>
         * {
             font-family: -apple-system, BlinkMacSystemFont, 'SF Pro Display', 'SF Pro Text', 'Helvetica Neue', Arial, sans-serif;
@@ -296,6 +297,7 @@
         <div id="session-view" class="space-y-6"></div>
         <div id="profile-view" class="hidden space-y-6"></div>
         <div id="settings-view" class="hidden space-y-6"></div>
+        <div id="auth-view" class="hidden space-y-6"></div>
     </div>
 
     <!-- Rest Timer (Floating) -->
@@ -366,7 +368,45 @@
     </nav>
 
     <script>
-        // --- LOCAL STORAGE MANAGER ---
+        // --- FIREBASE CONFIGURATION ---
+        // 🔴 A REMPLACER PAR VOTRE CONFIGURATION FIREBASE (Voir console Firebase)
+        const firebaseConfig = {
+            apiKey: "VOTRE_API_KEY",
+            authDomain: "VOTRE_PROJECT_ID.firebaseapp.com",
+            projectId: "VOTRE_PROJECT_ID",
+            storageBucket: "VOTRE_PROJECT_ID.appspot.com",
+            messagingSenderId: "VOTRE_SENDER_ID",
+            appId: "VOTRE_APP_ID"
+        };
+
+        // Initialize Firebase
+        let auth, db;
+        let currentUser = null;
+
+        try {
+            if (firebaseConfig.apiKey !== "VOTRE_API_KEY") {
+                firebase.initializeApp(firebaseConfig);
+                auth = firebase.auth();
+                db = firebase.firestore();
+
+                // Auth State Listener
+                auth.onAuthStateChanged(user => {
+                    currentUser = user;
+                    console.log("Auth State Changed:", user ? user.email : "No User");
+                    if (user) {
+                        syncData(); // Sync on login
+                    }
+                    renderProfile(); // Update Profile UI (Login btn vs User info)
+                    renderSettings(); // Update Settings UI (Logout btn)
+                });
+            } else {
+                console.warn("Firebase non configuré. Mode Offline uniquement.");
+            }
+        } catch (e) {
+            console.error("Erreur init Firebase:", e);
+        }
+
+        // --- DATA STRUCTURES & STORAGE KEYS ---
         const STORAGE_KEY_SESSIONS = 'onair_sessions';
         const STORAGE_KEY_CURRENT_SESSION = 'onair_current_session';
         const STORAGE_KEY_PRS = 'onair_prs'; // Personal Records
@@ -385,6 +425,7 @@
             const sessions = getSessions();
             sessions.push(session);
             localStorage.setItem(STORAGE_KEY_SESSIONS, JSON.stringify(sessions));
+            saveToCloud();
         }
 
         function getPRs() {
@@ -399,6 +440,7 @@
             if (weight > currentPR.weight || (weight === currentPR.weight && reps > currentPR.reps)) {
                 prs[exerciseName] = { weight, reps, date: new Date().toISOString() };
                 localStorage.setItem(STORAGE_KEY_PRS, JSON.stringify(prs));
+                saveToCloud();
                 return true; // Is a new PR
             }
             return false;
@@ -546,6 +588,7 @@
 
         function savePrograms() {
             localStorage.setItem(STORAGE_KEY_PROGRAMS, JSON.stringify(programs));
+            saveToCloud();
         }
 
         // State
@@ -856,6 +899,7 @@
                 exerciseIndex: currentExerciseIndex,
                 set: currentSetNumber
             }));
+            saveToCloud();
 
             // Check for PR
             const isNewPr = updatePR(exercise.name, weight, reps);
@@ -1089,9 +1133,18 @@
             currentDay = day;
             currentExerciseIndex = 0;
             currentSetNumber = 1;
-            sessionData = [];
+            // Reset state
             currentSessionId = null;
             sessionStartTime = null;
+            sessionData = [];
+            currentExerciseIndex = 0;
+            currentSetNumber = 1;
+
+            // Sync to cloud
+            saveToCloud();
+
+            // Refresh view
+            switchView('session');
             loadSession();
         }
 
@@ -1194,6 +1247,9 @@
             } else if (view === 'settings') {
                 document.getElementById('settings-view').classList.remove('hidden');
                 renderSettings();
+            } else if (view === 'auth') {
+                document.getElementById('auth-view').classList.remove('hidden');
+                renderAuth();
             }
 
             // Update nav icons
@@ -1216,6 +1272,39 @@
             const prs = getPRs();
 
             const profileView = document.getElementById('profile-view');
+
+            // --- AUTH SECTION IN PROFILE ---
+            let authHtml = '';
+            if (!currentUser && firebaseConfig.apiKey !== "VOTRE_API_KEY") {
+                authHtml = `
+                    <div class="glass rounded-3xl p-6 mb-6 flex flex-col items-center text-center">
+                        <div class="w-16 h-16 bg-gradient-to-br from-purple-500 to-pink-500 rounded-full flex items-center justify-center mb-4 shadow-lg">
+                            <svg class="w-8 h-8 text-white" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M16 7a4 4 0 11-8 0 4 4 0 018 0zM12 14a7 7 0 00-7 7h14a7 7 0 00-7-7z" />
+                            </svg>
+                        </div>
+                        <h3 class="text-white font-bold text-lg mb-1">Sauvegardez votre progression</h3>
+                        <p class="text-white/60 text-sm mb-4">Créez un compte pour ne jamais perdre vos séances et y accéder partout.</p>
+                        <button onclick="switchView('auth')" class="w-full bg-white text-purple-900 font-bold py-3 rounded-xl hover:bg-white/90 transition-all">
+                            Se connecter / S'inscrire
+                        </button>
+                    </div>
+                 `;
+            } else if (currentUser) {
+                authHtml = `
+                    <div class="glass rounded-3xl p-6 mb-6 flex items-center gap-4">
+                        <div class="w-12 h-12 bg-green-500 rounded-full flex items-center justify-center shadow-lg">
+                            <svg class="w-6 h-6 text-white" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 13l4 4L19 7" />
+                            </svg>
+                        </div>
+                        <div>
+                            <p class="text-white/60 text-xs uppercase tracking-wider font-semibold">Connecté en tant que</p>
+                            <p class="text-white font-bold truncate max-w-[200px]">${currentUser.email}</p>
+                        </div>
+                    </div>
+                `;
+            }
 
             let prHtml = '';
             const prKeys = Object.keys(prs);
@@ -1394,6 +1483,13 @@
                     < div class="glass rounded-3xl p-8" >
                     <h2 class="text-2xl font-bold text-white mb-6">Paramètres</h2>
                     <div class="space-y-6">
+                        ${currentUser ? `
+                        <div class="glass-dark rounded-2xl p-4 border border-green-500/30">
+                             <p class="text-white font-bold mb-2">Compte</p>
+                             <p class="text-white/70 text-sm mb-3">${currentUser.email}</p>
+                             <button onclick="handleLogout()" class="text-red-400 text-sm font-semibold hover:text-white transition-colors">Déconnexion</button>
+                        </div>` : ''}
+
                         <div class="glass-dark rounded-2xl p-4">
                             <p class="text-white font-semibold mb-2">À propos</p>
                             <p class="text-white/70 text-sm">Yutoow Fit Track v1.1</p>
@@ -1438,6 +1534,157 @@
                 }
             }
         }
+
+        // --- AUTH FUNCTIONS ---
+
+        function renderAuth() {
+            document.getElementById('auth-view').innerHTML = `
+                <div class="glass rounded-3xl p-8 max-w-sm mx-auto">
+                    <h2 class="text-2xl font-bold text-white mb-6 text-center">Connexion</h2>
+                    
+                    <div class="space-y-4">
+                        <div>
+                            <label class="text-white/60 text-xs block mb-1">Email</label>
+                            <input type="email" id="auth-email" class="w-full bg-white/10 rounded-xl px-4 py-3 text-white border-0 outline-none focus:ring-2 focus:ring-purple-500">
+                        </div>
+                        <div>
+                            <label class="text-white/60 text-xs block mb-1">Mot de passe</label>
+                            <input type="password" id="auth-password" class="w-full bg-white/10 rounded-xl px-4 py-3 text-white border-0 outline-none focus:ring-2 focus:ring-purple-500">
+                        </div>
+                    </div>
+
+                    <div class="grid grid-cols-1 gap-3 mt-6">
+                        <button onclick="handleLogin()" class="w-full bg-gradient-to-r from-purple-500 to-pink-500 text-white font-bold py-3 rounded-xl btn-glass shadow-lg">
+                            Se connecter
+                        </button>
+                        <button onclick="handleSignup()" class="w-full bg-white/10 text-white font-semibold py-3 rounded-xl hover:bg-white/20 transition-all">
+                            Créer un compte
+                        </button>
+                    </div>
+
+                    <button onclick="switchView('profile')" class="w-full mt-4 text-white/50 text-sm hover:text-white transition-colors">
+                        Retour
+                    </button>
+                    
+                    <p id="auth-error" class="text-red-400 text-sm text-center mt-4 hidden"></p>
+                </div>
+            `;
+        }
+
+        async function handleLogin() {
+            const email = document.getElementById('auth-email').value;
+            const password = document.getElementById('auth-password').value;
+            const errorEl = document.getElementById('auth-error');
+
+            try {
+                errorEl.classList.add('hidden');
+                await auth.signInWithEmailAndPassword(email, password);
+                switchView('profile');
+            } catch (error) {
+                errorEl.textContent = "Erreur: " + error.message;
+                errorEl.classList.remove('hidden');
+            }
+        }
+
+        async function handleSignup() {
+            const email = document.getElementById('auth-email').value;
+            const password = document.getElementById('auth-password').value;
+            const errorEl = document.getElementById('auth-error');
+
+            try {
+                errorEl.classList.add('hidden');
+                await auth.createUserWithEmailAndPassword(email, password);
+                // On signup, push local data to cloud immediately if cloud is empty
+                await saveToCloud(true);
+                switchView('profile');
+            } catch (error) {
+                errorEl.textContent = "Erreur: " + error.message;
+                errorEl.classList.remove('hidden');
+            }
+        }
+
+        async function handleLogout() {
+            await auth.signOut();
+            switchView('profile');
+        }
+
+        // --- CLOUD SYNC FUNCTIONS ---
+
+        async function syncData() {
+            if (!currentUser || !db) return;
+
+            const docRef = db.collection('users').doc(currentUser.uid);
+
+            try {
+                const doc = await docRef.get();
+                if (doc.exists) {
+                    const data = doc.data();
+                    console.log("Cloud data found:", data);
+
+                    // Simple Strategy: Cloud overwrites Local on Login (prevents data loss if phone broke)
+                    // But if Cloud is old and Local is new? ideally merge. 
+                    // For MVP: We assume Cloud is Truth. 
+
+                    if (data.programs) {
+                        programs = JSON.parse(data.programs);
+                        savePrograms(); // saves to localStorage
+                    }
+
+                    if (data.sessions) {
+                        localStorage.setItem(STORAGE_KEY_SESSIONS, data.sessions);
+                    }
+
+                    if (data.prs) {
+                        localStorage.setItem(STORAGE_KEY_PRS, data.prs);
+                    }
+
+                    // Force UI refresh
+                    loadSession();
+                    console.log("Data synced from Cloud.");
+                } else {
+                    console.log("No cloud data. Uploading local.");
+                    await saveToCloud();
+                }
+            } catch (error) {
+                console.error("Sync error:", error);
+            }
+        }
+
+        async function saveToCloud(force = false) {
+            if (!currentUser || !db) return;
+
+            const dataToSave = {
+                programs: JSON.stringify(programs),
+                sessions: localStorage.getItem(STORAGE_KEY_SESSIONS) || "[]",
+                prs: localStorage.getItem(STORAGE_KEY_PRS) || "{}",
+                lastUpdate: new Date().toISOString()
+            };
+
+            try {
+                await db.collection('users').doc(currentUser.uid).set(dataToSave, { merge: true });
+                console.log("Data saved to Cloud.");
+            } catch (error) {
+                console.error("Save to cloud error:", error);
+            }
+        }
+
+        // Hook saveData to also push to cloud
+        const originalSavePrograms = savePrograms;
+        savePrograms = function () {
+            originalSavePrograms(); // original local save
+            saveToCloud();
+        };
+
+        const originalUpdatePR = updatePR;
+        updatePR = function (exerciseName, weight, reps) {
+            originalUpdatePR(exerciseName, weight, reps);
+            saveToCloud();
+        };
+
+        // Note: saveSession() calls regular localStorage save. We should hook that too.
+        // But saveSession isn't a global function to easily hook in this scope structure without refactor.
+        // Instead, we will search for where sessions are saved.
+        // It happens in showSessionComplete -> we can add a call there.
 
         function setupScrollBehavior() {
             let scrollTimeout;
