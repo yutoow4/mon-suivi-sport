@@ -24,6 +24,8 @@
         body {
             background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
             min-height: 100vh;
+            min-height: 100dvh;
+            /* Support for mobile browsers */
             overflow-x: hidden;
         }
 
@@ -96,6 +98,7 @@
 
         input[type="number"] {
             -moz-appearance: textfield;
+            appearance: textfield;
         }
 
         .btn-glass {
@@ -440,7 +443,11 @@
             const sessions = getSessions();
             sessions.push(session);
             localStorage.setItem(STORAGE_KEY_SESSIONS, JSON.stringify(sessions));
-            saveToCloud();
+            // Synchronisation immédiate avec le cloud
+            const autoSync = localStorage.getItem('onair_autosync') !== 'false';
+            if (currentUser && autoSync) {
+                saveToCloud();
+            }
         }
 
         function getPRs() {
@@ -455,7 +462,11 @@
             if (weight > currentPR.weight || (weight === currentPR.weight && reps > currentPR.reps)) {
                 prs[exerciseName] = { weight, reps, date: new Date().toISOString() };
                 localStorage.setItem(STORAGE_KEY_PRS, JSON.stringify(prs));
-                saveToCloud();
+                // Synchronisation immédiate avec le cloud
+                const autoSync = localStorage.getItem('onair_autosync') !== 'false';
+                if (currentUser && autoSync) {
+                    saveToCloud();
+                }
                 return true; // Is a new PR
             }
             return false;
@@ -603,7 +614,10 @@
 
         function savePrograms() {
             localStorage.setItem(STORAGE_KEY_PROGRAMS, JSON.stringify(programs));
-            saveToCloud();
+            const autoSync = localStorage.getItem('onair_autosync') !== 'false';
+            if (currentUser && autoSync) {
+                saveToCloud();
+            }
         }
 
         // State
@@ -926,7 +940,11 @@
                 exerciseIndex: currentExerciseIndex,
                 set: currentSetNumber
             }));
-            saveToCloud();
+            // Synchronisation immédiate avec le cloud
+            const autoSync = localStorage.getItem('onair_autosync') !== 'false';
+            if (currentUser && autoSync) {
+                saveToCloud();
+            }
 
             // Check for PR
             const isNewPr = updatePR(exercise.name, weight, reps);
@@ -1168,7 +1186,10 @@
             currentSetNumber = 1;
 
             // Sync to cloud
-            saveToCloud();
+            const autoSync = localStorage.getItem('onair_autosync') !== 'false';
+            if (currentUser && autoSync) {
+                saveToCloud();
+            }
 
             // Refresh view
             switchView('session');
@@ -1265,6 +1286,7 @@
             document.getElementById('session-view').classList.add('hidden');
             document.getElementById('profile-view').classList.add('hidden');
             document.getElementById('settings-view').classList.add('hidden');
+            document.getElementById('auth-view').classList.add('hidden');
 
             // Ensure scroll to top when switching views
             window.scrollTo(0, 0);
@@ -1532,12 +1554,37 @@
                         <div class="glass-dark rounded-2xl p-6 border border-green-500/30">
                              <p class="text-white font-medium mb-1">Compte Connecté</p>
                              <p class="text-white/60 text-sm font-light mb-4">${currentUser.email}</p>
-                             <button onclick="handleLogout()" class="w-full py-3 bg-red-500/10 hover:bg-red-500/20 text-red-300 rounded-xl text-sm font-medium transition-colors">Se déconnecter</button>
+                             <div class="space-y-3">
+                                <button onclick="syncData()" class="w-full py-3 bg-blue-500/20 hover:bg-blue-500/30 text-blue-300 rounded-xl text-sm font-medium transition-colors flex items-center justify-center gap-2">
+                                    <svg class="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 4v5h.582m15.356 2A8.001 8.001 0 004.582 9m0 0H9m11 11v-5h-.581m0 0a8.003 8.003 0 01-15.357-2m15.357 2H15" /></svg>
+                                    Synchroniser maintenant
+                                </button>
+                                <button onclick="handleLogout()" class="w-full py-3 bg-red-500/10 hover:bg-red-500/20 text-red-300 rounded-xl text-sm font-medium transition-colors">Se déconnecter</button>
+                             </div>
                         </div>` : ''}
 
                         <div class="glass-dark rounded-2xl p-6">
+                            <p class="text-white font-medium mb-3">Préférences</p>
+                            
+                            <div class="flex items-center justify-between mb-2">
+                                <span class="text-white/70 text-sm">Mode Clair/Sombre</span>
+                                <!-- Toggle handled by top button, just info here or move toggle here? Let's keep top button -->
+                                <button onclick="toggleTheme()" class="text-xs bg-white/10 px-3 py-1 rounded-full">Basculer</button>
+                            </div>
+
+                            <div class="flex items-center justify-between">
+                                <span class="text-white/70 text-sm">Auto-Synchronisation</span>
+                                <button id="btn-toggle-sync" onclick="toggleAutoSync()" class="relative inline-flex h-6 w-11 items-center rounded-full transition-colors focus:outline-none ${localStorage.getItem('onair_autosync') !== 'false' ? 'bg-green-500' : 'bg-gray-600'}">
+                                    <span class="sr-only">Activer Auto-Sync</span>
+                                    <span class="inline-block h-4 w-4 transform rounded-full bg-white transition duration-200 ease-in-out ${localStorage.getItem('onair_autosync') !== 'false' ? 'translate-x-6' : 'translate-x-1'}" />
+                                </button>
+                            </div>
+                            <p class="text-white/40 text-[10px] mt-2 font-light">Si activé, vos données sont sauvegardées en ligne à chaque changement.</p>
+                        </div>
+
+                        <div class="glass-dark rounded-2xl p-6">
                             <p class="text-white font-medium mb-1">À propos</p>
-                            <p class="text-white/60 text-sm font-light">Yutoow Fit Track v2.0</p>
+                            <p class="text-white/60 text-sm font-light">Yutoow Fit Track v2.1</p>
                             <p class="text-white/40 text-[10px] mt-2 font-light">Développé avec ❤️ pour la performance.</p>
                         </div>
 
@@ -1581,13 +1628,13 @@
 
         function renderAuth() {
             document.getElementById('auth-view').innerHTML = `
-                <div class="glass rounded-3xl p-8 max-w-sm mx-auto">
+                <div class="glass rounded-3xl p-8 max-w-sm mx-auto flex flex-col justify-center min-h-[50vh]">
                     <h2 class="text-2xl font-bold text-white mb-6 text-center">Connexion</h2>
                     
                     <div class="space-y-4">
                         <div>
                             <label class="text-white/60 text-xs block mb-1">Email</label>
-                            <input type="email" id="auth-email" class="w-full bg-white/10 rounded-xl px-4 py-3 text-white border-0 outline-none focus:ring-2 focus:ring-purple-500">
+                            <input type="email" id="auth-email" class="w-full bg-white/10 rounded-xl px-4 py-3 text-white border-0 outline-none focus:ring-2 focus:ring-purple-500" inputmode="email">
                         </div>
                         <div>
                             <label class="text-white/60 text-xs block mb-1">Mot de passe</label>
@@ -1611,6 +1658,11 @@
                     <p id="auth-error" class="text-red-400 text-sm text-center mt-4 hidden"></p>
                 </div>
             `;
+
+            // Fix for viewport stuck issue
+            requestAnimationFrame(() => {
+                window.scrollTo(0, 0);
+            });
         }
 
         async function handleLogin() {
@@ -1648,6 +1700,9 @@
                     auth.signInWithEmailAndPassword(email, password),
                     timeout
                 ]);
+
+                // Auto-sync on login
+                await syncData();
 
                 switchView('profile');
             } catch (error) {
@@ -1730,32 +1785,80 @@
                     const data = doc.data();
                     console.log("Cloud data found:", data);
 
-                    // Simple Strategy: Cloud overwrites Local on Login (prevents data loss if phone broke)
-                    // But if Cloud is old and Local is new? ideally merge.
-                    // For MVP: We assume Cloud is Truth.
+                    // MERGE STRATEGY: Combine local and cloud data intelligently
 
+                    // 1. Programs: Use cloud if it has lastUpdate, otherwise keep local
                     if (data.programs) {
-                        programs = JSON.parse(data.programs);
-                        savePrograms(); // saves to localStorage
+                        const cloudPrograms = JSON.parse(data.programs);
+                        const localPrograms = programs;
+
+                        // Simple strategy: cloud wins if it has data
+                        if (Object.keys(cloudPrograms).length > 0) {
+                            programs = cloudPrograms;
+                            localStorage.setItem(STORAGE_KEY_PROGRAMS, JSON.stringify(programs));
+                        }
                     }
 
+                    // 2. Sessions: Merge by ID (keep unique sessions from both)
                     if (data.sessions) {
-                        localStorage.setItem(STORAGE_KEY_SESSIONS, data.sessions);
+                        const cloudSessions = JSON.parse(data.sessions);
+                        const localSessions = getSessions();
+
+                        // Create a map by session ID
+                        const sessionMap = new Map();
+
+                        // Add local sessions
+                        localSessions.forEach(s => sessionMap.set(s.id, s));
+
+                        // Add cloud sessions (will overwrite if same ID)
+                        cloudSessions.forEach(s => sessionMap.set(s.id, s));
+
+                        // Convert back to array and sort by date
+                        const mergedSessions = Array.from(sessionMap.values())
+                            .sort((a, b) => new Date(a.startTime) - new Date(b.startTime));
+
+                        localStorage.setItem(STORAGE_KEY_SESSIONS, JSON.stringify(mergedSessions));
                     }
 
+                    // 3. PRs: Keep the best PR for each exercise
                     if (data.prs) {
-                        localStorage.setItem(STORAGE_KEY_PRS, data.prs);
+                        const cloudPRs = JSON.parse(data.prs);
+                        const localPRs = getPRs();
+
+                        const mergedPRs = { ...localPRs };
+
+                        // For each cloud PR, keep it if it's better than local
+                        Object.keys(cloudPRs).forEach(exercise => {
+                            const cloudPR = cloudPRs[exercise];
+                            const localPR = localPRs[exercise];
+
+                            if (!localPR ||
+                                cloudPR.weight > localPR.weight ||
+                                (cloudPR.weight === localPR.weight && cloudPR.reps > localPR.reps)) {
+                                mergedPRs[exercise] = cloudPR;
+                            }
+                        });
+
+                        localStorage.setItem(STORAGE_KEY_PRS, JSON.stringify(mergedPRs));
                     }
 
                     // Force UI refresh
                     loadSession();
-                    console.log("Data synced from Cloud.");
+                    console.log("✅ Données synchronisées depuis le cloud (merge intelligent)");
+
+                    // Save merged data back to cloud
+                    await saveToCloud();
+
+                    // Notify user
+                    showSyncNotification("✅ Données synchronisées");
                 } else {
                     console.log("No cloud data. Uploading local.");
                     await saveToCloud();
+                    showSyncNotification("✅ Données sauvegardées");
                 }
             } catch (error) {
                 console.error("Sync error:", error);
+                showSyncNotification("❌ Erreur de synchronisation", true);
             }
         }
 
@@ -1772,28 +1875,40 @@
             try {
                 await db.collection('users').doc(currentUser.uid).set(dataToSave, { merge: true });
                 console.log("Data saved to Cloud.");
+                showSyncNotification("✅ Synchronisé");
             } catch (error) {
                 console.error("Save to cloud error:", error);
+                showSyncNotification("❌ Erreur sync", true);
             }
         }
 
-        // Hook saveData to also push to cloud
-        const originalSavePrograms = savePrograms;
-        savePrograms = function () {
-            originalSavePrograms(); // original local save
-            saveToCloud();
-        };
+        // Show sync notification
+        function showSyncNotification(message, isError = false) {
+            // Remove existing notification if any
+            const existing = document.getElementById('sync-notification');
+            if (existing) existing.remove();
 
-        const originalUpdatePR = updatePR;
-        updatePR = function (exerciseName, weight, reps) {
-            originalUpdatePR(exerciseName, weight, reps);
-            saveToCloud();
-        };
+            const notification = document.createElement('div');
+            notification.id = 'sync-notification';
+            notification.className = `fixed top-24 right-6 z-[70] glass rounded-2xl px-4 py-3 text-white text-sm font-medium shadow-2xl transition-all duration-300 ${isError ? 'bg-red-500/20 border-red-500/50' : 'bg-green-500/20 border-green-500/50'} border`;
+            notification.style.transform = 'translateX(400px)';
+            notification.textContent = message;
 
-        // Note: saveSession() calls regular localStorage save. We should hook that too.
-        // But saveSession isn't a global function to easily hook in this scope structure without refactor.
-        // Instead, we will search for where sessions are saved.
-        // It happens in showSessionComplete -> we can add a call there.
+            document.body.appendChild(notification);
+
+            // Slide in
+            setTimeout(() => {
+                notification.style.transform = 'translateX(0)';
+            }, 10);
+
+            // Slide out and remove
+            setTimeout(() => {
+                notification.style.transform = 'translateX(400px)';
+                setTimeout(() => notification.remove(), 300);
+            }, 2000);
+        }
+
+        // Note: Hooks removed as core logic now handles auto-sync.
 
         function setupScrollBehavior() {
             let scrollTimeout;
@@ -1821,24 +1936,37 @@
                 lastScrollTop = currentScrollTop <= 0 ? 0 : currentScrollTop;
             });
         }
-        function resetApp() {
-            if (confirm("ATTENTION: Cela va effacer TOUTES vos données (programmes, historique, préférences). Cette action est irréversible. Continuer ?")) {
-                localStorage.clear();
-                location.reload();
-            }
+
+        function toggleAutoSync() {
+            const current = localStorage.getItem('onair_autosync') !== 'false';
+            localStorage.setItem('onair_autosync', (!current).toString());
+            renderSettings(); // Re-render to update toggle visual
         }
 
-        function clearHistory() {
-            if (confirm("Voulez-vous vraiment effacer tout l'historique des séances et les records (PR) ? Vos programmes seront conservés.")) {
-                localStorage.removeItem(STORAGE_KEY_SESSIONS);
-                localStorage.removeItem(STORAGE_KEY_PRS);
-                sessionData = [];
-                alert("Historique effacé.");
-                loadSession();
-                switchView('settings'); // Refresh settings view is tricky without re-render needed
-                // Ideally reload or re-render
-                location.reload();
+        // --- VIEWPORT FIX SCRIPT ---
+        // Handles the "stuck" view on mobile keyboards
+
+        // 1. Reset scroll on blur
+        document.addEventListener('focusout', function (e) {
+            if (['INPUT', 'TEXTAREA'].includes(e.target.tagName)) {
+                // Slight delay to allow keyboard to close
+                setTimeout(() => {
+                    window.scrollTo(0, 0);
+                    // Force redraw if needed
+                    document.body.style.height = window.innerHeight + 'px';
+                    setTimeout(() => document.body.style.height = '', 50);
+                }, 100);
             }
+        });
+
+        // 2. Visual Viewport API if available
+        if (window.visualViewport) {
+            window.visualViewport.addEventListener('resize', () => {
+                // If viewport expands (keyboard closed), scroll to top
+                if (window.visualViewport.height >= window.innerHeight - 50) {
+                    window.scrollTo(0, 0);
+                }
+            });
         }
     </script>
 </body>
