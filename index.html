@@ -492,9 +492,8 @@
             const sessions = getSessions();
             sessions.push(session);
             localStorage.setItem(STORAGE_KEY_SESSIONS, JSON.stringify(sessions));
-            // Synchronisation immédiate avec le cloud
-            const autoSync = localStorage.getItem('onair_autosync') !== 'false';
-            if (currentUser && autoSync) {
+            // Synchronisation automatique avec le cloud
+            if (currentUser) {
                 saveToCloud();
             }
         }
@@ -511,9 +510,8 @@
             if (weight > currentPR.weight || (weight === currentPR.weight && reps > currentPR.reps)) {
                 prs[exerciseName] = { weight, reps, date: new Date().toISOString() };
                 localStorage.setItem(STORAGE_KEY_PRS, JSON.stringify(prs));
-                // Synchronisation immédiate avec le cloud
-                const autoSync = localStorage.getItem('onair_autosync') !== 'false';
-                if (currentUser && autoSync) {
+                // Synchronisation automatique avec le cloud
+                if (currentUser) {
                     saveToCloud();
                 }
                 return true; // Is a new PR
@@ -689,8 +687,8 @@
 
         function savePrograms() {
             localStorage.setItem(STORAGE_KEY_PROGRAMS, JSON.stringify(programs));
-            const autoSync = localStorage.getItem('onair_autosync') !== 'false';
-            if (currentUser && autoSync) {
+            // Synchronisation automatique avec le cloud
+            if (currentUser) {
                 saveToCloud();
             }
         }
@@ -1015,9 +1013,8 @@
                 exerciseIndex: currentExerciseIndex,
                 set: currentSetNumber
             }));
-            // Synchronisation immédiate avec le cloud
-            const autoSync = localStorage.getItem('onair_autosync') !== 'false';
-            if (currentUser && autoSync) {
+            // Synchronisation automatique avec le cloud
+            if (currentUser) {
                 saveToCloud();
             }
 
@@ -1260,9 +1257,8 @@
             currentExerciseIndex = 0;
             currentSetNumber = 1;
 
-            // Sync to cloud
-            const autoSync = localStorage.getItem('onair_autosync') !== 'false';
-            if (currentUser && autoSync) {
+            // Synchronisation automatique avec le cloud
+            if (currentUser) {
                 saveToCloud();
             }
 
