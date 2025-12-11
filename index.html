@@ -417,6 +417,7 @@
             measurementId: "G-4EVLB9KY2L"
         };
 
+        let hasShownOfflineWarning = false;
         // Global Error Handler for Mobile Debugging
         window.onerror = function (msg, url, line, col, error) {
             // Ignore benign resizing errors
@@ -424,8 +425,9 @@
 
             console.error("Global Error:", msg);
             // Show toast only for critical errors that might stop interaction
-            if (msg.includes("firebase") || msg.includes("ReferenceError")) {
-                showSyncNotification("⚠️ Mode Hors Ligne (Firebase bloqué)", true);
+            if ((msg.includes("firebase") || msg.includes("ReferenceError")) && !hasShownOfflineWarning) {
+                showSyncNotification("⚠️ Mode Hors Ligne (Probable Blocage)", true);
+                hasShownOfflineWarning = true;
             }
         };
 
@@ -1642,9 +1644,10 @@
 
         function renderProfile() {
             const sessions = getSessions().sort((a, b) => new Date(b.startTime) - new Date(a.startTime));
-            const prs = getPRs();
+            // const prs = getPRs(); // PRs moved to stats view
 
             const profileView = document.getElementById('profile-view');
+
 
             // --- AUTH SECTION IN PROFILE ---
             let authHtml = '';
