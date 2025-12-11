@@ -313,6 +313,16 @@
             <span
                 class="text-[10px] uppercase tracking-widest font-bold text-white/50 group-hover:text-white transition-colors">Profil</span>
         </button>
+        <button onclick="switchView('stats')" class="nav-item flex flex-col items-center gap-1 group relative">
+            <svg class="w-6 h-6 text-white/50 group-hover:text-white transition-colors" fill="none"
+                stroke="currentColor" viewBox="0 0 24 24">
+                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
+                    d="M9 19v-6a2 2 0 00-2-2H5a2 2 0 00-2 2v6a2 2 0 002 2h2a2 2 0 002-2zm0 0V9a2 2 0 012-2h2a2 2 0 012 2v10m-6 0a2 2 0 002 2h2a2 2 0 002-2m0 0V5a2 2 0 012-2h2a2 2 0 012 2v14a2 2 0 002 2h2a2 2 0 002-2z">
+                </path>
+            </svg>
+            <span
+                class="text-[10px] uppercase tracking-widest font-bold text-white/50 group-hover:text-white transition-colors">Stats</span>
+        </button>
         <button onclick="switchView('settings')" class="nav-item flex flex-col items-center gap-1 group relative">
             <svg class="w-6 h-6 text-white/50 group-hover:text-white transition-colors" fill="none"
                 stroke="currentColor" viewBox="0 0 24 24">
@@ -344,6 +354,7 @@
         <!-- Main Content -->
         <div id="session-view" class="space-y-8 fade-in"></div>
         <div id="profile-view" class="hidden space-y-8 fade-in"></div>
+        <div id="stats-view" class="hidden space-y-8 fade-in"></div>
         <div id="settings-view" class="hidden space-y-8 fade-in"></div>
         <div id="auth-view" class="hidden space-y-8 fade-in"></div>
     </div>
@@ -1288,6 +1299,7 @@
         function switchView(view) {
             document.getElementById('session-view').classList.add('hidden');
             document.getElementById('profile-view').classList.add('hidden');
+            document.getElementById('stats-view').classList.add('hidden');
             document.getElementById('settings-view').classList.add('hidden');
             document.getElementById('auth-view').classList.add('hidden');
 
@@ -1300,6 +1312,9 @@
                 document.getElementById('profile-view').classList.remove('hidden');
                 // Force re-render to ensure auth state is reflected
                 renderProfile();
+            } else if (view === 'stats') {
+                document.getElementById('stats-view').classList.remove('hidden');
+                renderStats();
             } else if (view === 'settings') {
                 document.getElementById('settings-view').classList.remove('hidden');
                 renderSettings();
@@ -1321,7 +1336,8 @@
 
                 const isActive = (view === 'session' && i === 0) ||
                     (view === 'profile' && i === 1) ||
-                    (view === 'settings' && i === 2);
+                    (view === 'stats' && i === 2) ||
+                    (view === 'settings' && i === 3);
 
                 if (isActive) {
                     if (span) span.classList.add('text-white');
@@ -1332,6 +1348,203 @@
                     if (span) span.classList.add('text-white/50');
                 }
             });
+        }
+
+        function renderStats() {
+            const sessions = getSessions();
+            const statsView = document.getElementById('stats-view');
+
+            // 1. Group sets by Exercise Name
+            // Structure: { "Bench Press": { count: 5, maxWeight: 100, focus: "Pecs" } }
+            const stats = {};
+
+            sessions.forEach(session => {
+                if (session.details) {
+                    session.details.forEach(set => {
+                        const name = set.exercise;
+                        // Attempt to find metadata from programs (for focus)
+                        let focus = "Autre";
+
+                        // Search in all days
+                        for (const day in programs) {
+                            const ex = programs[day].exercises.find(e => e.name === name);
+                            if (ex) {
+                                focus = ex.focus;
+                                break;
+                            }
+                        }
+
+                        if (!stats[name]) {
+                            stats[name] = { count: 0, maxWeight: 0, totalReps: 0, focus: focus, history: [] };
+                        }
+
+                        stats[name].count++;
+                        stats[name].totalReps += set.reps;
+                        if (set.weight > stats[name].maxWeight) stats[name].maxWeight = set.weight;
+                        stats[name].history.push({ date: session.endTime, weight: set.weight, reps: set.reps });
+                    });
+                }
+            });
+
+            // 2. Group by Focus/Muscle Area
+            const groupedByFocus = {};
+            Object.keys(stats).forEach(name => {
+                const item = stats[name];
+                const focus = item.focus || "Autre";
+                if (!groupedByFocus[focus]) groupedByFocus[focus] = [];
+                groupedByFocus[focus].push({ name, ...item });
+            });
+
+            let html = `
+                <div class="glass rounded-3xl p-8 mb-6">
+                    <h2 class="text-3xl font-bold text-white mb-2">Statistiques</h2>
+                    <p class="text-white/60 text-sm">Analyse par zone musculaire</p>
+                </div>
+                
+                <div class="glass glass-dark rounded-3xl p-6 mb-8 border border-white/10">
+                    <h3 class="text-xl font-bold text-white mb-4 flex items-center gap-2">
+                        <svg class="w-6 h-6 text-purple-400" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 13h6m-3-3v6m5 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z"/></svg>
+                        Importation Intelligente
+                    </h3>
+                    <p class="text-white/60 text-sm mb-4">Copiez-collez vos notes de séance ici (Format libre, ex: "Bench 80kg 10reps"). L'IA tentera de structurer les données.</p>
+                    <textarea id="import-text" class="w-full bg-black/30 rounded-xl p-4 text-white text-sm font-mono h-32 border border-white/10 focus:ring-2 focus:ring-purple-500 outline-none resize-none mb-3" placeholder="Ex:&#10;Lundi Push&#10;Bench Press: 100kg x 8, 100kg x 8&#10;Pec Fly: 15kg x 12"></textarea>
+                    <button onclick="handleImport()" class="w-full py-3 bg-purple-600 hover:bg-purple-700 text-white font-bold rounded-xl transition-all shadow-lg">Analyser et Importer</button>
+                    <p id="import-status" class="text-center text-xs mt-2 text-white/50 hidden"></p>
+                </div>
+            `;
+
+            if (Object.keys(groupedByFocus).length === 0) {
+                html += `<div class="text-center py-12 text-white/40">Pas encore assez de données.</div>`;
+            } else {
+                Object.keys(groupedByFocus).sort().forEach(focus => {
+                    html += `<div class="mb-8"><h3 class="text-xl font-bold text-white mb-4 pl-2 border-l-4 border-purple-500">${focus}</h3><div class="space-y-3">`;
+
+                    groupedByFocus[focus].forEach(ex => {
+                        html += `
+                            <div class="glass-dark rounded-xl p-4 flex justify-between items-center">
+                                <div>
+                                    <p class="text-white font-semibold">${ex.name}</p>
+                                    <p class="text-white/50 text-xs">${ex.count} séries totales</p>
+                                </div>
+                                <div class="text-right">
+                                    <p class="text-2xl font-bold text-white">${ex.maxWeight}<span class="text-sm font-normal text-white/50">kg</span></p>
+                                    <p class="text-green-400 text-xs font-semibold">Max PR</p>
+                                </div>
+                            </div>
+                        `;
+                    });
+
+                    html += `</div></div>`;
+                });
+            }
+
+            statsView.innerHTML = html;
+        }
+
+        function handleImport() {
+            const text = document.getElementById('import-text').value;
+            const statusEl = document.getElementById('import-status');
+
+            if (!text.trim()) {
+                alert("Veuillez coller du texte.");
+                return;
+            }
+
+            statusEl.textContent = "Analyse en cours...";
+            statusEl.classList.remove('hidden', 'text-green-400', 'text-red-400');
+
+            setTimeout(() => {
+                const result = parseImportText(text);
+                if (result.sets > 0) {
+                    saveSessionToHistory(result.session);
+                    statusEl.textContent = `Succès ! ${result.sets} séries importées dans "${result.session.programName}".`;
+                    statusEl.classList.add('text-green-400');
+                    document.getElementById('import-text').value = '';
+
+                    // Refresh view after short delay to show success message
+                    setTimeout(() => renderStats(), 1500);
+                } else {
+                    statusEl.textContent = "Aucune donnée valide trouvée. Vérifiez le format (Exercice: Poids kg x Reps).";
+                    statusEl.classList.add('text-red-400');
+                }
+            }, 500);
+        }
+
+        function parseImportText(text) {
+            // Very basic heuristic parser
+            const lines = text.split('\n');
+            const sessionData = [];
+            let currentExercise = "Exercice Inconnu";
+
+            // Try to extract a program name from first line
+            let programName = "Séance Importée";
+            if (lines.length > 0 && lines[0].length < 50) {
+                programName = lines[0].trim();
+            }
+
+            const weightRegex = /(\d+(?:[.,]\d+)?)\s*(?:kg|kgs)/i;
+            const repsRegex = /(\d+)\s*(?:reps|rep|r)/i;
+            // Catch simple format: "100x8" or "100 x 8"
+            const simpleRegex = /(\d+(?:[.,]\d+)?)\s*x\s*(\d+)/i;
+
+            lines.forEach(line => {
+                line = line.trim();
+                if (!line) return;
+
+                // Detect if line is likely an exercise name (no numbers or ends with colon)
+                if (!line.match(/\d/) || line.endsWith(':')) {
+                    currentExercise = line.replace(':', '').trim();
+                } else {
+                    // Try to parse set data
+                    let weight = 0;
+                    let reps = 0;
+
+                    // Strategy 1: Explicit "kg" and "reps"
+                    const wMatch = line.match(weightRegex);
+                    const rMatch = line.match(repsRegex);
+
+                    // Strategy 2: Simple "100x8"
+                    const sMatch = line.match(simpleRegex);
+
+                    if (sMatch) {
+                        weight = parseFloat(sMatch[1].replace(',', '.'));
+                        reps = parseInt(sMatch[2]);
+                    } else if (wMatch) { // At least weight found
+                        weight = parseFloat(wMatch[1].replace(',', '.'));
+                        if (rMatch) reps = parseInt(rMatch[1]);
+                        else {
+                            // Try finding other number for reps
+                            const otherNums = line.replace(wMatch[0], '').match(/(\d+)/);
+                            if (otherNums) reps = parseInt(otherNums[1]);
+                        }
+                    }
+
+                    if (weight > 0 && reps > 0) {
+                        sessionData.push({
+                            exercise: currentExercise,
+                            weight: weight,
+                            reps: reps,
+                            timestamp: new Date().toISOString()
+                        });
+
+                        // Update PRs seamlessly
+                        updatePR(currentExercise, weight, reps);
+                    }
+                }
+            });
+
+            const session = {
+                id: 'import_' + Date.now(),
+                programName: programName,
+                startTime: new Date().toISOString(),
+                endTime: new Date().toISOString(),
+                totalExercises: [...new Set(sessionData.map(s => s.exercise))].length,
+                totalSets: sessionData.length,
+                details: sessionData, // Important for stats
+                exercises: {} // Dummy for old Summary view compatibility if needed
+            };
+
+            return { sets: sessionData.length, session: session };
         }
 
         function renderProfile() {
