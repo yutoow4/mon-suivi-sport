@@ -424,6 +424,7 @@
             });
         } catch (e) {
             console.error("Erreur init Firebase:", e);
+            alert("Erreur Fatale: Impossible de charger Firebase.\n\nSi vous utilisez BRAVE ou un BLOQUEUR DE PUB, veuillez désactiver le bouclier (Shield) pour ce site. Firebase est nécessaire pour le compte.");
         }
 
         // --- DATA STRUCTURES & STORAGE KEYS ---
@@ -1685,6 +1686,14 @@
             }
 
             try {
+                // FORCE PERSISTENCE: This is critical for mobile browsers especially Brave
+                await auth.setPersistence(firebase.auth.Auth.Persistence.LOCAL);
+            } catch (pError) {
+                console.error("Persistence Warning:", pError);
+                // Continue anyway, it might work for session only
+            }
+
+            try {
                 // Loading State
                 const originalText = btn.innerText;
                 btn.innerText = "Connexion...";
@@ -1692,11 +1701,7 @@
                 btn.classList.add('opacity-50', 'cursor-not-allowed');
                 errorEl.classList.add('hidden');
 
-                // Persistence
-                await auth.setPersistence(firebase.auth.Auth.Persistence.LOCAL);
-
-                // Timeout Race
-                const timeout = new Promise((_, reject) => setTimeout(() => reject(new Error("Délai d'attente dépassé (15s). Vérifiez votre réseau.")), 15000));
+                const timeout = new Promise((_, reject) => setTimeout(() => reject(new Error("Délai d'attente dépassé (20s). Vérifiez votre connexion.")), 20000));
 
                 await Promise.race([
                     auth.signInWithEmailAndPassword(email, password),
@@ -1797,9 +1802,9 @@
                         // Compare strings to avoid unnecessary parsing/renders
                         const currentLocalStr = localStorage.getItem(STORAGE_KEY_PROGRAMS);
                         if (data.programs !== currentLocalStr) {
-                             const cloudPrograms = JSON.parse(data.programs);
-                             // Server wins policy for simplicity in real-time, or check timestamps if available
-                             if (Object.keys(cloudPrograms).length > 0) {
+                            const cloudPrograms = JSON.parse(data.programs);
+                            // Server wins policy for simplicity in real-time, or check timestamps if available
+                            if (Object.keys(cloudPrograms).length > 0) {
                                 programs = cloudPrograms;
                                 localStorage.setItem(STORAGE_KEY_PROGRAMS, data.programs); // Save exact string
                                 hasChanges = true;
@@ -1809,25 +1814,25 @@
 
                     // 2. Sessions (History)
                     if (data.sessions) {
-                         const currentLocalStr = localStorage.getItem(STORAGE_KEY_SESSIONS);
-                         // optimize: only parse if string different
-                         if (data.sessions !== currentLocalStr) {
+                        const currentLocalStr = localStorage.getItem(STORAGE_KEY_SESSIONS);
+                        // optimize: only parse if string different
+                        if (data.sessions !== currentLocalStr) {
                             const cloudSessions = JSON.parse(data.sessions);
                             const localSessions = getSessions();
                             const sessionMap = new Map();
-                            
+
                             localSessions.forEach(s => sessionMap.set(s.id, s));
                             cloudSessions.forEach(s => sessionMap.set(s.id, s));
-                            
+
                             const mergedSessions = Array.from(sessionMap.values())
                                 .sort((a, b) => new Date(a.startTime) - new Date(b.startTime));
-                            
+
                             const mergedStr = JSON.stringify(mergedSessions);
                             if (mergedStr !== currentLocalStr) {
                                 localStorage.setItem(STORAGE_KEY_SESSIONS, mergedStr);
                                 hasChanges = true;
                             }
-                         }
+                        }
                     }
 
                     // 3. PRs
@@ -1850,7 +1855,7 @@
                                     prChanged = true;
                                 }
                             });
-                            
+
                             if (prChanged) {
                                 localStorage.setItem(STORAGE_KEY_PRS, JSON.stringify(mergedPRs));
                                 hasChanges = true;
@@ -1862,7 +1867,7 @@
                         loadSession(); // Refresh UI
                         showSyncNotification("☁️ Données mises à jour");
                     }
-                    
+
                 } else {
                     console.log("No cloud data. Uploading local.");
                     saveToCloud(true);
