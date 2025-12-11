@@ -414,7 +414,9 @@
                 currentUser = user;
                 console.log("Auth State Changed:", user ? user.email : "No User");
                 if (user) {
-                    syncData(); // Sync on login
+                    setupRealtimeSync(); // Real-time sync on login
+                } else {
+                    if (unsubscribeSnapshot) unsubscribeSnapshot();
                 }
                 renderHeader(); // Update Header (User info)
                 renderProfile(); // Update Profile UI (Login btn vs User info)
@@ -1555,9 +1557,9 @@
                              <p class="text-white font-medium mb-1">Compte Connecté</p>
                              <p class="text-white/60 text-sm font-light mb-4">${currentUser.email}</p>
                              <div class="space-y-3">
-                                <button onclick="syncData()" class="w-full py-3 bg-blue-500/20 hover:bg-blue-500/30 text-blue-300 rounded-xl text-sm font-medium transition-colors flex items-center justify-center gap-2">
+                                <button onclick="saveToCloud()" class="w-full py-3 bg-blue-500/20 hover:bg-blue-500/30 text-blue-300 rounded-xl text-sm font-medium transition-colors flex items-center justify-center gap-2">
                                     <svg class="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 4v5h.582m15.356 2A8.001 8.001 0 004.582 9m0 0H9m11 11v-5h-.581m0 0a8.003 8.003 0 01-15.357-2m15.357 2H15" /></svg>
-                                    Synchroniser maintenant
+                                    Forcer la sauvegarde (Cloud)
                                 </button>
                                 <button onclick="handleLogout()" class="w-full py-3 bg-red-500/10 hover:bg-red-500/20 text-red-300 rounded-xl text-sm font-medium transition-colors">Se déconnecter</button>
                              </div>
@@ -1701,8 +1703,8 @@
                     timeout
                 ]);
 
-                // Auto-sync on login
-                await syncData();
+                // Real-time sync handled by onAuthStateChanged
+                // await syncData();
 
                 switchView('profile');
             } catch (error) {
@@ -1774,92 +1776,101 @@
 
         // --- CLOUD SYNC FUNCTIONS ---
 
-        async function syncData() {
+        let unsubscribeSnapshot = null;
+
+        function setupRealtimeSync() {
             if (!currentUser || !db) return;
+            if (unsubscribeSnapshot) unsubscribeSnapshot();
 
             const docRef = db.collection('users').doc(currentUser.uid);
 
-            try {
-                const doc = await docRef.get();
+            unsubscribeSnapshot = docRef.onSnapshot((doc) => {
                 if (doc.exists) {
                     const data = doc.data();
-                    console.log("Cloud data found:", data);
+                    console.log("☁️ Real-time update received:", data);
 
                     // MERGE STRATEGY: Combine local and cloud data intelligently
+                    let hasChanges = false;
 
-                    // 1. Programs: Use cloud if it has lastUpdate, otherwise keep local
+                    // 1. Programs
                     if (data.programs) {
-                        const cloudPrograms = JSON.parse(data.programs);
-                        const localPrograms = programs;
-
-                        // Simple strategy: cloud wins if it has data
-                        if (Object.keys(cloudPrograms).length > 0) {
-                            programs = cloudPrograms;
-                            localStorage.setItem(STORAGE_KEY_PROGRAMS, JSON.stringify(programs));
+                        // Compare strings to avoid unnecessary parsing/renders
+                        const currentLocalStr = localStorage.getItem(STORAGE_KEY_PROGRAMS);
+                        if (data.programs !== currentLocalStr) {
+                             const cloudPrograms = JSON.parse(data.programs);
+                             // Server wins policy for simplicity in real-time, or check timestamps if available
+                             if (Object.keys(cloudPrograms).length > 0) {
+                                programs = cloudPrograms;
+                                localStorage.setItem(STORAGE_KEY_PROGRAMS, data.programs); // Save exact string
+                                hasChanges = true;
+                            }
                         }
                     }
 
-                    // 2. Sessions: Merge by ID (keep unique sessions from both)
+                    // 2. Sessions (History)
                     if (data.sessions) {
-                        const cloudSessions = JSON.parse(data.sessions);
-                        const localSessions = getSessions();
-
-                        // Create a map by session ID
-                        const sessionMap = new Map();
-
-                        // Add local sessions
-                        localSessions.forEach(s => sessionMap.set(s.id, s));
-
-                        // Add cloud sessions (will overwrite if same ID)
-                        cloudSessions.forEach(s => sessionMap.set(s.id, s));
-
-                        // Convert back to array and sort by date
-                        const mergedSessions = Array.from(sessionMap.values())
-                            .sort((a, b) => new Date(a.startTime) - new Date(b.startTime));
-
-                        localStorage.setItem(STORAGE_KEY_SESSIONS, JSON.stringify(mergedSessions));
-                    }
-
-                    // 3. PRs: Keep the best PR for each exercise
-                    if (data.prs) {
-                        const cloudPRs = JSON.parse(data.prs);
-                        const localPRs = getPRs();
-
-                        const mergedPRs = { ...localPRs };
-
-                        // For each cloud PR, keep it if it's better than local
-                        Object.keys(cloudPRs).forEach(exercise => {
-                            const cloudPR = cloudPRs[exercise];
-                            const localPR = localPRs[exercise];
-
-                            if (!localPR ||
-                                cloudPR.weight > localPR.weight ||
-                                (cloudPR.weight === localPR.weight && cloudPR.reps > localPR.reps)) {
-                                mergedPRs[exercise] = cloudPR;
+                         const currentLocalStr = localStorage.getItem(STORAGE_KEY_SESSIONS);
+                         // optimize: only parse if string different
+                         if (data.sessions !== currentLocalStr) {
+                            const cloudSessions = JSON.parse(data.sessions);
+                            const localSessions = getSessions();
+                            const sessionMap = new Map();
+                            
+                            localSessions.forEach(s => sessionMap.set(s.id, s));
+                            cloudSessions.forEach(s => sessionMap.set(s.id, s));
+                            
+                            const mergedSessions = Array.from(sessionMap.values())
+                                .sort((a, b) => new Date(a.startTime) - new Date(b.startTime));
+                            
+                            const mergedStr = JSON.stringify(mergedSessions);
+                            if (mergedStr !== currentLocalStr) {
+                                localStorage.setItem(STORAGE_KEY_SESSIONS, mergedStr);
+                                hasChanges = true;
                             }
-                        });
-
-                        localStorage.setItem(STORAGE_KEY_PRS, JSON.stringify(mergedPRs));
+                         }
                     }
 
-                    // Force UI refresh
-                    loadSession();
-                    console.log("✅ Données synchronisées depuis le cloud (merge intelligent)");
+                    // 3. PRs
+                    if (data.prs) {
+                        const currentLocalStr = localStorage.getItem(STORAGE_KEY_PRS);
+                        if (data.prs !== currentLocalStr) {
+                            const cloudPRs = JSON.parse(data.prs);
+                            const localPRs = getPRs();
+                            const mergedPRs = { ...localPRs };
+                            let prChanged = false;
 
-                    // Save merged data back to cloud
-                    await saveToCloud();
+                            Object.keys(cloudPRs).forEach(exercise => {
+                                const cloudPR = cloudPRs[exercise];
+                                const localPR = localPRs[exercise];
 
-                    // Notify user
-                    showSyncNotification("✅ Données synchronisées");
+                                if (!localPR ||
+                                    cloudPR.weight > localPR.weight ||
+                                    (cloudPR.weight === localPR.weight && cloudPR.reps > localPR.reps)) {
+                                    mergedPRs[exercise] = cloudPR;
+                                    prChanged = true;
+                                }
+                            });
+                            
+                            if (prChanged) {
+                                localStorage.setItem(STORAGE_KEY_PRS, JSON.stringify(mergedPRs));
+                                hasChanges = true;
+                            }
+                        }
+                    }
+
+                    if (hasChanges) {
+                        loadSession(); // Refresh UI
+                        showSyncNotification("☁️ Données mises à jour");
+                    }
+                    
                 } else {
                     console.log("No cloud data. Uploading local.");
-                    await saveToCloud();
-                    showSyncNotification("✅ Données sauvegardées");
+                    saveToCloud(true);
                 }
-            } catch (error) {
+            }, (error) => {
                 console.error("Sync error:", error);
-                showSyncNotification("❌ Erreur de synchronisation", true);
-            }
+                // showSyncNotification("❌ Erreur de synchronisation", true); // Avoid spamming error on disconnect
+            });
         }
 
         async function saveToCloud(force = false) {
@@ -1872,10 +1883,11 @@
                 lastUpdate: new Date().toISOString()
             };
 
+            // Debounce save? For now direct
             try {
                 await db.collection('users').doc(currentUser.uid).set(dataToSave, { merge: true });
-                console.log("Data saved to Cloud.");
-                showSyncNotification("✅ Synchronisé");
+                // console.log("Data saved to Cloud.");
+                showSyncNotification("✅ Sauvegardé");
             } catch (error) {
                 console.error("Save to cloud error:", error);
                 showSyncNotification("❌ Erreur sync", true);
