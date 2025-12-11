@@ -525,49 +525,75 @@
             const sessions = getSessions();
             const session = sessions.find(s => s.id === sessionId);
             if (!session) {
-                // If not found in history (rare case straight after save?), try to construct from args?
-                // But it should be there. Let's add an alert if it fails.
                 console.error("Session non trouvée pour l'export:", sessionId);
                 alert("Erreur: Impossible de générer le fichier de la séance.");
                 return;
             }
 
+            const prs = getPRs();
             const startDate = new Date(session.startTime);
             const endDate = new Date(session.endTime);
             const duration = Math.floor((endDate - startDate) / 60000);
 
-            let content = `ON AIR TRACKING - RÉSUMÉ DE SÉANCE\n`;
-            content += `--------------------------------\n`;
-            content += `Programme: ${session.programName}\n`;
-            content += `Date: ${startDate.toLocaleDateString('fr-FR')}\n`;
-            content += `Heure: ${startDate.toLocaleTimeString('fr-FR')}\n`;
-            content += `Durée: ${duration} minutes\n`;
-            content += `--------------------------------\n\n`;
+            let content = `═══════════════════════════════════════\n`;
+            content += `       YUTOOW FIT TRACK - SÉANCE\n`;
+            content += `═══════════════════════════════════════\n\n`;
+            content += `📋 Programme: ${session.programName}\n`;
+            content += `📅 Date: ${startDate.toLocaleDateString('fr-FR', { weekday: 'long', day: 'numeric', month: 'long', year: 'numeric' })}\n`;
+            content += `🕐 Début: ${startDate.toLocaleTimeString('fr-FR', { hour: '2-digit', minute: '2-digit' })}\n`;
+            content += `🕐 Fin: ${endDate.toLocaleTimeString('fr-FR', { hour: '2-digit', minute: '2-digit' })}\n`;
+            content += `⏱️ Durée totale: ${duration} min\n\n`;
+            content += `───────────────────────────────────────\n`;
+            content += `              EXERCICES\n`;
+            content += `───────────────────────────────────────\n\n`;
 
-            if (session.details) {
-                // Group by exercise to preserve order
+            if (session.details && session.details.length > 0) {
+                // Group by exercise
                 const setsByExercise = session.details.reduce((acc, set) => {
                     if (!acc[set.exercise]) acc[set.exercise] = [];
                     acc[set.exercise].push(set);
                     return acc;
                 }, {});
 
+                let exerciseNum = 1;
                 for (const [exercise, sets] of Object.entries(setsByExercise)) {
-                    content += `### ${exercise}\n`;
+                    const maxWeightInSession = Math.max(...sets.map(s => s.weight));
+                    const currentPR = prs[exercise];
+                    const isPRExercise = currentPR && currentPR.weight === maxWeightInSession;
+
+                    content += `${exerciseNum}. ${exercise.toUpperCase()}`;
+                    if (isPRExercise) content += ` 🏆 PR!`;
+                    content += `\n`;
+
                     sets.forEach((set, index) => {
-                        content += `   Série ${index + 1}: ${set.weight}kg x ${set.reps}\n`;
+                        const isPRSet = currentPR && set.weight === currentPR.weight && set.reps === currentPR.reps;
+                        content += `   └ Série ${index + 1}: ${set.weight} kg × ${set.reps} reps`;
+                        if (isPRSet) content += ` ⭐`;
+                        content += `\n`;
                     });
                     content += `\n`;
+                    exerciseNum++;
                 }
-            } else {
-                // Fallback
+            } else if (session.exercises) {
+                // Fallback for old format
+                let exerciseNum = 1;
                 for (const [exercise, data] of Object.entries(session.exercises)) {
-                    content += `### ${exercise}\n`;
-                    content += `   ${data.sets} séries | Total: ${data.totalWeight}kg | Total Reps: ${data.totalReps}\n\n`;
+                    content += `${exerciseNum}. ${exercise.toUpperCase()}\n`;
+                    content += `   └ ${data.sets} séries | Volume: ${data.totalWeight} kg\n\n`;
+                    exerciseNum++;
                 }
             }
 
-            const blob = new Blob([content], { type: 'text/plain' });
+            content += `───────────────────────────────────────\n`;
+            content += `              RÉSUMÉ\n`;
+            content += `───────────────────────────────────────\n`;
+            content += `• Exercices: ${session.totalExercises || Object.keys(session.exercises || {}).length}\n`;
+            content += `• Séries totales: ${session.totalSets || '—'}\n`;
+            content += `\n═══════════════════════════════════════\n`;
+            content += `   Exporté depuis Yutoow Fit Track\n`;
+            content += `═══════════════════════════════════════\n`;
+
+            const blob = new Blob([content], { type: 'text/plain;charset=utf-8' });
             const url = window.URL.createObjectURL(blob);
             const a = document.createElement('a');
             a.href = url;
