@@ -17,6 +17,12 @@
             -webkit-font-smoothing: antialiased;
             -moz-osx-font-smoothing: grayscale;
             touch-action: manipulation;
+            -webkit-tap-highlight-color: transparent;
+        }
+
+        button {
+            cursor: pointer;
+            touch-action: manipulation;
         }
 
         @import url('https://fonts.googleapis.com/css2?family=Inter:wght@200;300;400;500;600;700&display=swap');
@@ -411,28 +417,46 @@
             measurementId: "G-4EVLB9KY2L"
         };
 
-        // Initialize Firebase
-        let auth, db;
+        // Global Error Handler for Mobile Debugging
+        window.onerror = function (msg, url, line, col, error) {
+            // Ignore benign resizing errors
+            if (msg.includes("ResizeObserver")) return;
+
+            console.error("Global Error:", msg);
+            // Show toast only for critical errors that might stop interaction
+            if (msg.includes("firebase") || msg.includes("ReferenceError")) {
+                showSyncNotification("⚠️ Mode Hors Ligne (Firebase bloqué)", true);
+            }
+        };
+
+        // Initialize Firebase safely
+        let auth = null;
+        let db = null;
         let currentUser = null;
+        let firebaseAvailable = false;
 
         try {
-            firebase.initializeApp(firebaseConfig);
-            auth = firebase.auth();
-            db = firebase.firestore();
+            if (typeof firebase !== 'undefined') {
+                firebase.initializeApp(firebaseConfig);
+                auth = firebase.auth();
+                db = firebase.firestore();
+                firebaseAvailable = true;
 
-            // Auth State Listener
-            auth.onAuthStateChanged(user => {
-                currentUser = user;
-                console.log("Auth State Changed:", user ? user.email : "No User");
-                if (user) {
-                    setupRealtimeSync(); // Real-time sync on login
-                } else {
-                    if (unsubscribeSnapshot) unsubscribeSnapshot();
-                }
-                renderHeader(); // Update Header (User info)
-                renderProfile(); // Update Profile UI (Login btn vs User info)
-                renderSettings(); // Update Settings UI (Logout btn)
-            });
+                // Auth State Listener
+                auth.onAuthStateChanged(user => {
+                    currentUser = user;
+                    console.log("Auth State Changed:", user ? user.email : "No User");
+                    if (user) {
+                        syncData(); // Sync on login
+                    }
+                    renderHeader(); // Update Header (User info)
+                    renderProfile(); // Update Profile UI (Login btn vs User info)
+                    renderSettings(); // Update Settings UI (Logout btn)
+                });
+            } else {
+                console.warn("Firebase SDK not loaded (likely blocked by browser/Brave). App running in Offline Mode.");
+                setTimeout(() => showSyncNotification("⚠️ Mode Hors Ligne (Bloqueur détecté)", true), 2000);
+            }
         } catch (e) {
             console.error("Erreur init Firebase:", e);
             alert("Erreur Fatale: Impossible de charger Firebase.\n\nSi vous utilisez BRAVE ou un BLOQUEUR DE PUB, veuillez désactiver le bouclier (Shield) pour ce site. Firebase est nécessaire pour le compte.");
@@ -1928,7 +1952,7 @@
 
         async function handleLogin() {
             if (!auth) {
-                alert("Erreur: Firebase n'est pas initialisé (Probablement un problème de connexion internet).");
+                alert("Erreur: Le service de connexion est bloqué par votre navigateur (Brave Shield ?). Désactivez les protections pour ce site.");
                 return;
             }
 
@@ -1984,7 +2008,7 @@
 
         async function handleSignup() {
             if (!auth) {
-                alert("Erreur: Firebase n'est pas initialisé.");
+                alert("Erreur: Le service d'inscription est bloqué par votre navigateur. Vérifiez vos extensions/bloqueurs.");
                 return;
             }
 
