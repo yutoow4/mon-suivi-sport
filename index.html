@@ -23,6 +23,11 @@
         button {
             cursor: pointer;
             touch-action: manipulation;
+            transition: transform 0.1s ease-out;
+        }
+
+        button:active {
+            transform: scale(0.95);
         }
 
         @import url('https://fonts.googleapis.com/css2?family=Inter:wght@200;300;400;500;600;700&display=swap');
@@ -297,10 +302,11 @@
                 exercice</button>
         </div>
     </div>
-    <!-- Top Navigation (Moved from bottom) -->
+    <!-- Top Navigation -->
     <nav id="top-nav"
-        class="fixed top-6 left-1/2 transform -translate-x-1/2 glass rounded-full px-8 py-4 flex items-center gap-10 transition-all duration-500 nav-visible z-50 shadow-2xl border border-white/10">
-        <button onclick="switchView('session')" class="nav-item flex flex-col items-center gap-1 group relative">
+        class="fixed top-6 left-1/2 transform -translate-x-1/2 glass rounded-full px-6 py-3 flex items-center gap-6 sm:gap-10 sm:px-8 sm:py-4 transition-all duration-500 nav-visible z-50 shadow-2xl border border-white/20">
+        <button onclick="switchView('session')"
+            class="nav-item flex flex-col items-center gap-1 group relative active:scale-90 transition-transform">
             <div
                 class="absolute -inset-4 bg-purple-500/20 blur-xl rounded-full opacity-0 group-hover:opacity-100 transition-opacity duration-500">
             </div>
@@ -310,7 +316,8 @@
             </svg>
             <span class="text-[10px] uppercase tracking-widest font-bold text-white/80 relative z-10">Séance</span>
         </button>
-        <button onclick="switchView('profile')" class="nav-item flex flex-col items-center gap-1 group relative">
+        <button onclick="switchView('profile')"
+            class="nav-item flex flex-col items-center gap-1 group relative active:scale-90 transition-transform">
             <svg class="w-6 h-6 text-white/50 group-hover:text-white transition-colors" fill="none"
                 stroke="currentColor" viewBox="0 0 24 24">
                 <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
@@ -319,7 +326,8 @@
             <span
                 class="text-[10px] uppercase tracking-widest font-bold text-white/50 group-hover:text-white transition-colors">Profil</span>
         </button>
-        <button onclick="switchView('stats')" class="nav-item flex flex-col items-center gap-1 group relative">
+        <button onclick="switchView('stats')"
+            class="nav-item flex flex-col items-center gap-1 group relative active:scale-90 transition-transform">
             <svg class="w-6 h-6 text-white/50 group-hover:text-white transition-colors" fill="none"
                 stroke="currentColor" viewBox="0 0 24 24">
                 <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
@@ -329,7 +337,8 @@
             <span
                 class="text-[10px] uppercase tracking-widest font-bold text-white/50 group-hover:text-white transition-colors">Stats</span>
         </button>
-        <button onclick="switchView('settings')" class="nav-item flex flex-col items-center gap-1 group relative">
+        <button onclick="switchView('settings')"
+            class="nav-item flex flex-col items-center gap-1 group relative active:scale-90 transition-transform">
             <svg class="w-6 h-6 text-white/50 group-hover:text-white transition-colors" fill="none"
                 stroke="currentColor" viewBox="0 0 24 24">
                 <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
