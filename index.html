@@ -780,7 +780,10 @@
         }
 
 
-        function loadSession() {
+        function loadSession(preserveScroll = false) {
+            // Preserve scroll position if requested
+            const scrollY = preserveScroll ? window.scrollY : 0;
+
             // Load fresh programs data
             loadPrograms();
 
@@ -979,6 +982,13 @@
                 ` : ''
                 }
             `;
+
+            // Restore scroll position if preserved
+            if (preserveScroll && scrollY > 0) {
+                requestAnimationFrame(() => {
+                    window.scrollTo(0, scrollY);
+                });
+            }
         }
 
         function logSet() {
@@ -1041,14 +1051,14 @@
                 if (currentExerciseIndex < programs[currentDay].exercises.length - 1) {
                     currentExerciseIndex++;
                     currentSetNumber = 1;
-                    loadSession();
+                    loadSession(true);
                 } else {
                     // Session complete
                     showSessionComplete();
                 }
             } else {
                 currentSetNumber++;
-                loadSession();
+                loadSession(true);
             }
 
             // Start rest timer
@@ -1270,14 +1280,14 @@
         function prevExercise() {
             if (currentExerciseIndex > 0) {
                 currentExerciseIndex--;
-                loadSession();
+                loadSession(true);
             }
         }
 
         function nextExercise() {
             if (currentExerciseIndex < programs[currentDay].exercises.length - 1) {
                 currentExerciseIndex++;
-                loadSession();
+                loadSession(true);
             }
         }
 
