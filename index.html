@@ -458,7 +458,7 @@
                     currentUser = user;
                     console.log("Auth State Changed:", user ? user.email : "No User");
                     if (user) {
-                        syncData(); // Sync on login
+                        setupRealtimeSync(); // Start real-time sync on login
                     }
                     renderHeader(); // Update Header (User info)
                     renderProfile(); // Update Profile UI (Login btn vs User info)
@@ -818,6 +818,7 @@
             // Initialize session if first exercise
             if (currentExerciseIndex === 0 && sessionData.length === 0) {
                 currentSessionId = Date.now().toString();
+                sessionStartTime = new Date(); // Track session start
                 exerciseStartTime = Date.now();
                 setStartTime = Date.now();
             }
@@ -1813,7 +1814,7 @@
                                             </div>
                                             <div class="glass-dark rounded-xl p-3 text-center">
                                                 <p class="text-white/60 text-xs mb-1">Volume</p>
-                                                <p class="text-white font-bold">${Object.values(session.exercises).reduce((sum, ex) => sum + ex.totalWeight, 0).toFixed(0)}kg</p>
+                                                <p class="text-white font-bold">${session.exercises ? Object.values(session.exercises).reduce((sum, ex) => sum + (ex.totalWeight || 0), 0).toFixed(0) : '—'}kg</p>
                                             </div>
                                         </div>
                                     </div>
@@ -1873,18 +1874,43 @@
                 <div class="glass rounded-3xl p-6">
                     <h3 class="text-white font-semibold mb-4">Détails des Exercices</h3>
                     <div class="space-y-3">
-                        ${Object.entries(session.exercises).map(([exerciseName, data]) => `
-                            <div class="glass-dark rounded-2xl p-4">
-                                <p class="text-white font-semibold mb-2">${exerciseName}</p>
-                                <div class="flex gap-4 text-sm text-white/70">
-                                    <span>${data.sets} séries</span>
-                                    <span>•</span>
-                                    <span>${data.totalReps} reps total</span>
-                                    <span>•</span>
-                                    <span>${data.totalWeight.toFixed(1)}kg total</span>
-                                </div>
-                            </div>
-                        `).join('')}
+                        ${session.details && session.details.length > 0
+                    ? (() => {
+                        // Group details by exercise name
+                        const grouped = session.details.reduce((acc, set) => {
+                            if (!acc[set.exercise]) acc[set.exercise] = [];
+                            acc[set.exercise].push(set);
+                            return acc;
+                        }, {});
+                        return Object.entries(grouped).map(([exerciseName, sets]) => `
+                                    <div class="glass-dark rounded-2xl p-4">
+                                        <p class="text-white font-semibold mb-2">${exerciseName}</p>
+                                        <div class="space-y-2">
+                                            ${sets.map((set, i) => `
+                                                <div class="flex justify-between text-sm text-white/70">
+                                                    <span>Série ${i + 1}</span>
+                                                    <span class="text-white">${set.weight}kg × ${set.reps} reps</span>
+                                                </div>
+                                            `).join('')}
+                                        </div>
+                                    </div>
+                                `).join('');
+                    })()
+                    : session.exercises
+                        ? Object.entries(session.exercises).map(([exerciseName, data]) => `
+                                    <div class="glass-dark rounded-2xl p-4">
+                                        <p class="text-white font-semibold mb-2">${exerciseName}</p>
+                                        <div class="flex gap-4 text-sm text-white/70">
+                                            <span>${data.sets} séries</span>
+                                            <span>•</span>
+                                            <span>${data.totalReps} reps total</span>
+                                            <span>•</span>
+                                            <span>${(data.totalWeight || 0).toFixed(1)}kg total</span>
+                                        </div>
+                                    </div>
+                                `).join('')
+                        : '<p class="text-white/50 text-sm">Aucun détail disponible</p>'
+                }
                     </div>
                 </div>
             `;
