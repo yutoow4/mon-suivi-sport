@@ -1382,11 +1382,11 @@
                 renderProfile();
             } else if (view === 'stats') {
                 document.getElementById('stats-view').classList.remove('hidden');
-                // Force refresh from cloud if connected
+                // Always render immediately with local data
+                renderStats();
+                // Then refresh from cloud if connected (will re-render after)
                 if (currentUser && db) {
-                    refreshFromCloud().then(() => renderStats());
-                } else {
-                    renderStats();
+                    refreshFromCloud().then(() => renderStats()).catch(e => console.error("Cloud refresh failed:", e));
                 }
             } else if (view === 'settings') {
                 document.getElementById('settings-view').classList.remove('hidden');
