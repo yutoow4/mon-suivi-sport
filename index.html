@@ -1371,7 +1371,12 @@
                 renderProfile();
             } else if (view === 'stats') {
                 document.getElementById('stats-view').classList.remove('hidden');
-                renderStats();
+                // Force refresh from cloud if connected
+                if (currentUser && db) {
+                    refreshFromCloud().then(() => renderStats());
+                } else {
+                    renderStats();
+                }
             } else if (view === 'settings') {
                 document.getElementById('settings-view').classList.remove('hidden');
                 renderSettings();
@@ -2192,18 +2197,86 @@
                     }
 
                     if (hasChanges) {
-                        loadSession(); // Refresh UI
-                        showSyncNotification("☁️ Données mises à jour");
+                        loadSession(); // Refresh session UI
+                        // Also refresh Stats view if it's currently visible
+                        const statsView = document.getElementById('stats-view');
+                        if (statsView && !statsView.classList.contains('hidden')) {
+                            renderStats();
+                        }
+                        // Also refresh Profile view if visible
+                        const profileView = document.getElementById('profile-view');
+                        if (profileView && !profileView.classList.contains('hidden')) {
+                            renderProfile();
+                        }
+                        showSyncNotification("☁️ Données synchronisées");
                     }
 
                 } else {
+                    // First time - no cloud data, upload local data
                     console.log("No cloud data. Uploading local.");
                     saveToCloud(true);
                 }
             }, (error) => {
                 console.error("Sync error:", error);
-                // showSyncNotification("❌ Erreur de synchronisation", true); // Avoid spamming error on disconnect
             });
+        }
+
+        // Force refresh data from cloud (one-time fetch)
+        async function refreshFromCloud() {
+            if (!currentUser || !db) return;
+
+            try {
+                const doc = await db.collection('users').doc(currentUser.uid).get();
+                if (doc.exists) {
+                    const data = doc.data();
+
+                    // Merge sessions
+                    if (data.sessions) {
+                        const cloudSessions = JSON.parse(data.sessions);
+                        const localSessions = getSessions();
+                        const sessionMap = new Map();
+
+                        localSessions.forEach(s => sessionMap.set(s.id, s));
+                        cloudSessions.forEach(s => sessionMap.set(s.id, s));
+
+                        const mergedSessions = Array.from(sessionMap.values())
+                            .sort((a, b) => new Date(a.startTime) - new Date(b.startTime));
+                        localStorage.setItem(STORAGE_KEY_SESSIONS, JSON.stringify(mergedSessions));
+                    }
+
+                    // Merge PRs (keep best)
+                    if (data.prs) {
+                        const cloudPRs = JSON.parse(data.prs);
+                        const localPRs = getPRs();
+                        const mergedPRs = { ...localPRs };
+
+                        Object.keys(cloudPRs).forEach(exercise => {
+                            const cloudPR = cloudPRs[exercise];
+                            const localPR = localPRs[exercise];
+
+                            if (!localPR ||
+                                cloudPR.weight > localPR.weight ||
+                                (cloudPR.weight === localPR.weight && cloudPR.reps > localPR.reps)) {
+                                mergedPRs[exercise] = cloudPR;
+                            }
+                        });
+
+                        localStorage.setItem(STORAGE_KEY_PRS, JSON.stringify(mergedPRs));
+                    }
+
+                    // Merge programs
+                    if (data.programs) {
+                        const cloudPrograms = JSON.parse(data.programs);
+                        // Just use cloud programs if they exist (they're usually the source of truth)
+                        programs = { ...programs, ...cloudPrograms };
+                        localStorage.setItem(STORAGE_KEY_PROGRAMS, JSON.stringify(programs));
+                    }
+
+                    console.log("Data refreshed from cloud");
+                }
+            } catch (error) {
+                console.error("Refresh from cloud error:", error);
+            }
         }
 
         async function saveToCloud(force = false) {
