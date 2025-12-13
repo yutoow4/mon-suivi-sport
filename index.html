@@ -1798,32 +1798,35 @@
         }
 
         function renderProfile() {
-            const sessions = getSessions().sort((a, b) => new Date(b.startTime) - new Date(a.startTime));
-            // const prs = getPRs(); // PRs moved to stats view
+            try {
+                const sessions = getSessions().sort((a, b) => new Date(b.startTime) - new Date(a.startTime));
+                const profileView = document.getElementById('profile-view');
 
-            const profileView = document.getElementById('profile-view');
+                if (!profileView) {
+                    console.error("profile-view element not found");
+                    return;
+                }
 
-
-            // --- AUTH SECTION IN PROFILE ---
-            let authHtml = '';
-            if (!currentUser) {
-                authHtml = `
-                <div class="glass rounded-3xl p-6 mb-6 flex flex-col items-center text-center">
+                // --- AUTH SECTION ---
+                let authHtml = '';
+                if (!currentUser) {
+                    authHtml = `
+                    <div class="glass rounded-3xl p-6 mb-6 flex flex-col items-center text-center">
                         <div class="w-16 h-16 bg-gradient-to-br from-red-600 to-red-900 rounded-full flex items-center justify-center mb-4 shadow-lg">
                             <svg class="w-8 h-8 text-white" fill="none" viewBox="0 0 24 24" stroke="currentColor">
                                 <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M16 7a4 4 0 11-8 0 4 4 0 018 0zM12 14a7 7 0 00-7 7h14a7 7 0 00-7-7z" />
                             </svg>
                         </div>
                         <h3 class="text-white font-bold text-lg mb-1">Sauvegardez votre progression</h3>
-                        <p class="text-white/60 text-sm mb-4">Créez un compte pour ne jamais perdre vos séances et y accéder partout.</p>
-                        <button onclick="switchView('auth')" class="w-full bg-white text-purple-900 font-bold py-3 rounded-xl hover:bg-white/90 transition-all">
+                        <p class="text-white/60 text-sm mb-4">Créez un compte pour ne jamais perdre vos séances.</p>
+                        <button onclick="switchView('auth')" class="w-full bg-white text-black font-bold py-3 rounded-xl hover:bg-white/90 transition-all">
                             Se connecter / S'inscrire
                         </button>
-                    </div >
-                `;
-            } else {
-                authHtml = `
-                <div class="glass rounded-3xl p-6 mb-6">
+                    </div>
+                    `;
+                } else {
+                    authHtml = `
+                    <div class="glass rounded-3xl p-6 mb-6">
                         <div class="flex items-center gap-4 mb-4">
                             <div class="w-12 h-12 bg-green-500 rounded-full flex items-center justify-center shadow-lg">
                                 <svg class="w-6 h-6 text-white" fill="none" viewBox="0 0 24 24" stroke="currentColor">
@@ -1831,129 +1834,72 @@
                                 </svg>
                             </div>
                             <div>
-                                <p class="text-white/60 text-xs uppercase tracking-wider font-semibold">Connecté en tant que</p>
+                                <p class="text-white/60 text-xs uppercase tracking-wider font-semibold">Connecté</p>
                                 <p class="text-white font-bold truncate max-w-[200px]">${currentUser.email}</p>
                             </div>
                         </div>
-                        <button onclick="saveToCloud(true)" class="w-full py-3 bg-white/10 hover:bg-white/20 text-white rounded-xl text-sm font-medium transition-all flex items-center justify-center gap-2 border border-white/10">
-                            <svg class="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 4v5h.582m15.356 2A8.001 8.001 0 004.582 9m0 0H9m11 11v-5h-.581m0 0a8.003 8.003 0 01-15.357-2m15.357 2H15" />
-                            </svg>
-                            Forcer la synchronisation
+                    </div>
+                    `;
+                }
+
+                // --- PRs SECTION ---
+                let prsHtml = '';
+                try {
+                    prsHtml = renderPRsSection();
+                } catch (e) {
+                    console.error("Error rendering PRs:", e);
+                    prsHtml = '<p class="text-white/40 text-sm">Erreur de chargement.</p>';
+                }
+
+                // --- SESSIONS LIST ---
+                let sessionsHtml = '';
+                if (sessions.length === 0) {
+                    sessionsHtml = `
+                    <div class="glass rounded-3xl p-8 text-center">
+                        <h2 class="text-2xl font-bold text-white mb-2">Mes Séances</h2>
+                        <p class="text-white/70 mb-6">Aucune séance enregistrée</p>
+                        <button onclick="switchView('session')" class="bg-gradient-to-r from-red-600 to-red-900 text-white font-bold py-3 px-6 rounded-2xl">
+                            Commencer
                         </button>
                     </div>
-                `;
-            }
+                    `;
+                } else {
+                    sessionsHtml = `
+                    <div class="glass rounded-3xl p-6 mb-6">
+                        <h2 class="text-2xl font-bold text-white mb-2">Mes Séances</h2>
+                        <p class="text-white/70 text-sm">${sessions.length} séance(s)</p>
+                    </div>
+                    <div class="space-y-4">
+                    ${sessions.map(s => {
+                        const d = new Date(s.startTime);
+                        const dur = Math.floor((new Date(s.endTime) - d) / 60000);
+                        return `<div class="glass rounded-3xl p-6 cursor-pointer hover:bg-white/5" onclick="showSessionDetail('${s.id}')">
+                            <h3 class="text-xl font-bold text-white">${s.programName}</h3>
+                            <p class="text-white/60 text-sm">${d.toLocaleDateString('fr-FR')} - ${dur} min</p>
+                        </div>`;
+                    }).join('')}
+                    </div>
+                    `;
+                }
 
-            // --- STATS SECTIONS (PRs and Import) ---
-            let statsHtml = `
-                <div class="glass glass-dark rounded-3xl p-6 mb-6 border border-white/10">
-                    <h3 class="text-xl font-bold text-white mb-4 flex items-center gap-2">
-                         <svg class="w-6 h-6 text-yellow-400" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 3v4M3 5h4M6 17v4m-2-2h4m5-16l2.286 6.857L21 12l-5.714 2.143L13 21l-2.286-6.857L5 12l5.714-2.143L13 3z"/></svg>
-                        Mes Records (PR)
-                    </h3>
-                    ${renderPRsSection()}
-                </div>
-                
-                <div class="glass glass-dark rounded-3xl p-6 mb-6 border border-white/10">
-                    <h3 class="text-xl font-bold text-white mb-4 flex items-center gap-2">
-                        <svg class="w-6 h-6 text-red-500" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 13h6m-3-3v6m5 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z"/></svg>
-                        Importation Intelligente
-                    </h3>
-                    <p class="text-white/60 text-sm mb-4">Copiez-collez vos notes de séance ici. L'IA classera automatiquement les exercices.</p>
-                    <textarea id="import-text" class="w-full bg-black/30 rounded-xl p-4 text-white text-sm font-mono h-32 border border-white/10 focus:ring-2 focus:ring-red-600 outline-none resize-none mb-3" placeholder="Ex:&#10;Bench Press: 100kg x 8&#10;Curl Biceps: 15kg x 12"></textarea>
-                    <button onclick="handleImport()" class="w-full py-3 bg-red-700 hover:bg-red-800 text-white font-bold rounded-xl transition-all shadow-lg">Analyser et Importer</button>
-                    <p id="import-status" class="text-center text-xs mt-2 text-white/50 hidden"></p>
-                </div>
-            `;
-
-            if (sessions.length === 0) {
                 profileView.innerHTML = `
                     ${authHtml}
-                    ${statsHtml}
-            <div class="glass rounded-3xl p-8 text-center">
-                <div class="w-24 h-24 mx-auto mb-4 glass-dark rounded-full flex items-center justify-center">
-                    <svg class="w-12 h-12 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M16 7a4 4 0 11-8 0 4 4 0 018 0zM12 14a7 7 0 00-7 7h14a7 7 0 00-7-7z"></path>
-                    </svg>
-                </div>
-                <h2 class="text-2xl font-bold text-white mb-2">Mes Séances</h2>
-                <p class="text-white/70 mb-6">Aucune séance enregistrée pour le moment</p>
-                <button onclick="switchView('session')" class="bg-gradient-to-r from-red-600 to-red-900 text-white font-bold py-3 px-6 rounded-2xl btn-glass">
-                    Commencer une séance
-                </button>
-            </div>
-            `;
-                return;
+                    <div class="glass glass-dark rounded-3xl p-6 mb-6 border border-white/10">
+                        <h3 class="text-xl font-bold text-white mb-4">🏆 Mes Records</h3>
+                        ${prsHtml}
+                    </div>
+                    <div class="glass glass-dark rounded-3xl p-6 mb-6 border border-white/10">
+                        <h3 class="text-xl font-bold text-white mb-4">📄 Import</h3>
+                        <textarea id="import-text" class="w-full bg-black/30 rounded-xl p-4 text-white text-sm h-24 border border-white/10 outline-none resize-none mb-3" placeholder="Bench: 100kg x 8"></textarea>
+                        <button onclick="handleImport()" class="w-full py-3 bg-red-700 text-white font-bold rounded-xl">Importer</button>
+                        <p id="import-status" class="text-xs mt-2 text-white/50 hidden"></p>
+                    </div>
+                    ${sessionsHtml}
+                `;
+            } catch (error) {
+                console.error("renderProfile error:", error);
+                document.getElementById('profile-view').innerHTML = '<div class="glass p-8 text-white text-center">Erreur. Voir console.</div>';
             }
-
-            profileView.innerHTML = `
-                ${authHtml}
-                ${statsHtml}
-                <div class="glass rounded-3xl p-6 mb-6">
-                    <h2 class="text-2xl font-bold text-white mb-2">Mes Séances</h2>
-                    <p class="text-white/70 text-sm">${sessions.length} séance${sessions.length > 1 ? 's' : ''} enregistrée${sessions.length > 1 ? 's' : ''}</p>
-                </div>
-
-                <div class="space-y-4">
-                ${sessions.map(session => {
-                const startDate = new Date(session.startTime);
-                const endDate = new Date(session.endTime);
-                const duration = Math.floor((endDate - startDate) / 60000); // minutes
-
-                // Get muscle groups based on program
-                const muscleGroups = {
-                    'PUSH': '💪 Pectoraux / Épaules / Triceps',
-                    'PULL': '🏋️ Dorsaux / Biceps / Trapèzes',
-                    'LEGS': '🦵 Quadriceps / Ischio-jambiers / Mollets'
-                };
-
-                return `
-                                    <div class="glass rounded-3xl p-6 cursor-pointer hover:bg-white/5 transition-all" onclick="showSessionDetail('${session.id}')">
-                                        <div class="flex justify-between items-start mb-4">
-                                            <div>
-                                                <h3 class="text-xl font-bold text-white mb-1">${session.programName}</h3>
-                                                <p class="text-white/60 text-sm">${muscleGroups[session.programName] || session.programName}</p>
-                                            </div>
-                                            <span class="glass-dark px-3 py-1 rounded-full text-white text-xs font-semibold">
-                                                ${duration} min
-                                            </span>
-                                        </div>
-                                        
-                                        <div class="flex items-center gap-4 mb-4 text-white/70 text-sm">
-                                            <div class="flex items-center gap-2">
-                                                <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                                                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M8 7V3m8 4V3m-9 8h10M5 21h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v12a2 2 0 002 2z"></path>
-                                                </svg>
-                                                ${startDate.toLocaleDateString('fr-FR')}
-                                            </div>
-                                            <div class="flex items-center gap-2">
-                                                <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                                                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 8v4l3 3m6-3a9 9 0 11-18 0 9 9 0 0118 0z"></path>
-                                                </svg>
-                                                ${startDate.toLocaleTimeString('fr-FR', { hour: '2-digit', minute: '2-digit' })}
-                                            </div>
-                                        </div>
-                                        
-                                        <div class="grid grid-cols-3 gap-3">
-                                            <div class="glass-dark rounded-xl p-3 text-center">
-                                                <p class="text-white/60 text-xs mb-1">Exercices</p>
-                                                <p class="text-white font-bold">${session.totalExercises}</p>
-                                            </div>
-                                            <div class="glass-dark rounded-xl p-3 text-center">
-                                                <p class="text-white/60 text-xs mb-1">Séries</p>
-                                                <p class="text-white font-bold">${session.totalSets}</p>
-                                            </div>
-                                            <div class="glass-dark rounded-xl p-3 text-center">
-                                                <p class="text-white/60 text-xs mb-1">Volume</p>
-                                                <p class="text-white font-bold">${session.exercises ? Object.values(session.exercises).reduce((sum, ex) => sum + (ex.totalWeight || 0), 0).toFixed(0) : '—'}kg</p>
-                                            </div>
-                                        </div>
-                                    </div>
-                                `;
-            }).join('')}
-            </div>
-            `;
         }
 
         function showSessionDetail(sessionId) {
