@@ -306,6 +306,164 @@
             backdrop-filter: blur(25px);
             -webkit-backdrop-filter: blur(25px);
         }
+
+        /* --- LIGHT MODE COMPREHENSIVE OVERRIDES --- */
+        body.light-mode {
+            --text-primary: #111827;
+            --text-secondary: #4b5563;
+            --border-color: rgba(0, 0, 0, 0.1);
+            --bg-glass: rgba(255, 255, 255, 0.9);
+        }
+
+        /* Force text colors in light mode */
+        body.light-mode .text-white {
+            color: #111827 !important;
+        }
+
+        /* EXCEPTION: Keep white text on gradients/filled buttons */
+        body.light-mode .bg-gradient-to-r .text-white,
+        body.light-mode .bg-red-600 .text-white,
+        body.light-mode .group:hover .group-hover\:text-white {
+            color: white !important;
+        }
+
+        body.light-mode .text-white\/70 {
+            color: #374151 !important;
+        }
+
+        body.light-mode .text-white\/60 {
+            color: #4b5563 !important;
+        }
+
+        body.light-mode .text-white\/50 {
+            color: #6b7280 !important;
+        }
+
+        body.light-mode .text-white\/40 {
+            color: #9ca3af !important;
+        }
+
+        body.light-mode .text-white\/30 {
+            color: #d1d5db !important;
+        }
+
+        /* Force input styles in light mode */
+        body.light-mode input,
+        body.light-mode textarea {
+            color: #000000 !important;
+            border-color: rgba(0, 0, 0, 0.2) !important;
+        }
+
+        body.light-mode .hero-input {
+            color: #000000 !important;
+        }
+
+        body.light-mode ::placeholder {
+            color: #6b7280 !important;
+        }
+
+        /* Border adjustments */
+        body.light-mode .border-white\/10,
+        body.light-mode .border-white\/20,
+        body.light-mode .border-white\/5 {
+            border-color: rgba(0, 0, 0, 0.1) !important;
+        }
+
+        /* Background adjustments */
+        body.light-mode .bg-white\/5,
+        body.light-mode .bg-white\/10 {
+            background-color: rgba(0, 0, 0, 0.05) !important;
+        }
+
+        body.light-mode .bg-black\/20,
+        body.light-mode .bg-black\/30 {
+            background-color: rgba(0, 0, 0, 0.03) !important;
+        }
+
+        /* Icons in nav */
+        body.light-mode .nav-item svg {
+            color: #4b5563 !important;
+        }
+
+        body.light-mode .nav-item:hover svg {
+            color: #dc2626 !important;
+            /* Red highlight */
+        }
+
+        body.light-mode .nav-item span {
+            color: #4b5563 !important;
+        }
+
+        body.light-mode .nav-item:hover span {
+            color: #dc2626 !important;
+        }
+
+        /* --- DESKTOP LAYOUT (LARGE SCREENS) --- */
+        @media (min-width: 1024px) {
+
+            /* Transform Top Nav into Side Nav */
+            #top-nav {
+                top: 50% !important;
+                left: 40px !important;
+                transform: translateY(-50%) !important;
+                flex-direction: column !important;
+                width: 80px;
+                height: auto;
+                padding: 40px 0 !important;
+                border-radius: 40px !important;
+                gap: 40px !important;
+            }
+
+            /* Adjust container to the right */
+            #app {
+                padding-left: 140px;
+                /* Space for sidebar */
+                padding-top: 60px;
+                max-width: 1400px;
+            }
+
+            /* Grid Layouts for Views */
+
+            /* SESSION VIEW GRID */
+            #session-view {
+                display: grid;
+                grid-template-columns: 350px 1fr;
+                gap: 32px;
+                align-items: start;
+            }
+
+            /* Make the exercise list (first child usually) specific */
+            #session-view>.glass:first-child {
+                /* This is the date/days selector */
+                grid-column: 1 / -1;
+            }
+
+            /* The main exercise card */
+            #session-view>.glass:nth-child(3) {
+                grid-column: 2;
+                grid-row: 2;
+            }
+
+            /* The progress bar */
+            #session-view>.glass:nth-child(2) {
+                grid-column: 1 / -1;
+            }
+
+            /* Hack: Since content is dynamic, we use generic selectors to force grid */
+            /* Better approach: Use Masonry or Flex wrap for stats */
+
+            #stats-view {
+                display: grid;
+                grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
+                gap: 24px;
+            }
+
+            #stats-view>.glass:first-child {
+                grid-column: 1 / -1;
+            }
+
+            /* Header */
+        }
     </style>
 </head>
 
@@ -420,7 +578,8 @@
         </svg>
     </button>
 
-    <div id="app" class="container mx-auto px-4 pt-32 pb-12 max-w-xl transition-all duration-500">
+    <div id="app"
+        class="container mx-auto px-4 pt-32 pb-12 w-full md:max-w-7xl transition-all duration-500 md:pl-32 lg:pl-0">
         <!-- Main Content -->
         <div id="session-view" class="space-y-8 fade-in"></div>
         <div id="profile-view" class="hidden space-y-8 fade-in"></div>
