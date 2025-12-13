@@ -471,18 +471,13 @@
             */
 
 
-            /* --- STATS VIEW GRID --- */
+            /* --- STATS VIEW (Simple Column Layout) --- */
             #stats-view {
-                display: grid;
-                grid-template-columns: repeat(auto-fill, minmax(350px, 1fr));
-                gap: 32px;
-            }
-
-            /* Stats Header spans all */
-            #stats-view>.glass:first-child {
-                grid-column: 1 / -1;
-                text-align: center;
-                padding: 40px;
+                max-width: 900px;
+                margin: 0 auto;
+                display: flex;
+                flex-direction: column;
+                gap: 24px;
             }
 
             /* --- SETTINGS & PROFILE (Centered & Constrained) --- */
