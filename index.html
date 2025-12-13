@@ -435,7 +435,8 @@
 
             /* --- SESSION VIEW GRID --- */
             /* 2 Columns: Playlist/Controls (Left) vs Main Exercise (Right) */
-            #session-view {
+            /* Only apply grid when NOT hidden */
+            #session-view:not(.hidden) {
                 display: grid;
                 grid-template-columns: minmax(320px, 400px) 1fr;
                 grid-template-rows: auto 1fr;
