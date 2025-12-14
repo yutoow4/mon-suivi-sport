@@ -4,159 +4,199 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
-    <meta name="theme-color" content="#dc2626">
+    <meta name="theme-color" content="#0a0a0a">
     <title>Yutoow Fit Track</title>
     <link rel="icon" type="image/jpeg" href="logo.jpg">
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800&display=swap"
+        rel="stylesheet">
     <script src="https://cdn.tailwindcss.com"></script>
     <script src="https://www.gstatic.com/firebasejs/9.22.0/firebase-app-compat.js"></script>
     <script src="https://www.gstatic.com/firebasejs/9.22.0/firebase-firestore-compat.js"></script>
     <script src="https://www.gstatic.com/firebasejs/9.22.0/firebase-auth-compat.js"></script>
     <style>
+        :root {
+            --bg-primary: #0a0a0a;
+            --bg-secondary: #1a1a1a;
+            --bg-card: #1f1f1f;
+            --bg-card-hover: #2a2a2a;
+            --accent: #dc2626;
+            --accent-light: #ef4444;
+            --text-primary: #ffffff;
+            --text-secondary: rgba(255, 255, 255, 0.6);
+            --text-muted: rgba(255, 255, 255, 0.4);
+            --border: rgba(255, 255, 255, 0.1);
+        }
+
         * {
             font-family: 'Inter', system-ui, -apple-system, sans-serif;
             -webkit-font-smoothing: antialiased;
-            -moz-osx-font-smoothing: grayscale;
-            touch-action: manipulation;
-            -webkit-tap-highlight-color: transparent;
+            box-sizing: border-box;
+            margin: 0;
+            padding: 0;
         }
-
-        button {
-            cursor: pointer;
-            touch-action: manipulation;
-            transition: transform 0.1s ease-out;
-        }
-
-        button:active {
-            transform: scale(0.95);
-        }
-
-        @import url('https://fonts.googleapis.com/css2?family=Inter:wght@200;300;400;500;600;700&display=swap');
 
         body {
-            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            background: var(--bg-primary);
+            color: var(--text-primary);
             min-height: 100vh;
             min-height: 100dvh;
-            /* Support for mobile browsers */
             overflow-x: hidden;
+            padding-bottom: 100px;
         }
 
-        .glass {
-            background: rgba(255, 255, 255, 0.05);
-            backdrop-filter: blur(24px);
-            -webkit-backdrop-filter: blur(24px);
-            border: 1px solid rgba(255, 255, 255, 0.08);
-            box-shadow: 0 4px 24px -1px rgba(0, 0, 0, 0.2);
-            border-radius: 24px;
+        /* Cards */
+        .card {
+            background: var(--bg-card);
+            border-radius: 20px;
+            padding: 20px;
+            border: 1px solid var(--border);
         }
 
-        .hero-input-wrapper {
-            position: relative;
-            background: rgba(255, 255, 255, 0.03);
+        .card-dark {
+            background: var(--bg-secondary);
             border-radius: 16px;
-            padding: 12px 16px;
-            transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
-            border: 2px solid transparent;
+            padding: 16px;
         }
 
-        .hero-input-wrapper:focus-within {
-            background: rgba(255, 255, 255, 0.08);
-            border-color: rgba(168, 85, 247, 0.5);
-            /* Purple-500 */
-            transform: translateY(-1px);
-            box-shadow: 0 4px 12px rgba(168, 85, 247, 0.2);
-        }
-
-        .hero-input {
-            width: 100%;
-            background: transparent;
+        /* Buttons */
+        .btn-primary {
+            background: var(--accent);
             color: white;
-            font-size: 2rem;
-            font-weight: 300;
-            text-align: center;
+            font-weight: 600;
+            padding: 16px 24px;
+            border-radius: 16px;
             border: none;
-            outline: none;
-            padding: 4px 0;
+            cursor: pointer;
+            transition: all 0.2s ease;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            gap: 8px;
         }
 
-        .hero-input::placeholder {
-            color: rgba(255, 255, 255, 0.1);
+        .btn-primary:active {
+            transform: scale(0.98);
+            opacity: 0.9;
         }
 
-        .hero-label {
-            display: block;
-            font-size: 0.75rem;
-            color: rgba(255, 255, 255, 0.5);
+        .btn-secondary {
+            background: var(--bg-secondary);
+            color: white;
             font-weight: 500;
-            text-transform: uppercase;
-            letter-spacing: 0.05em;
-            margin-bottom: 4px;
-            text-align: center;
-            transition: color 0.3s ease;
-        }
-
-        .hero-input-wrapper:focus-within .hero-label {
-            color: rgba(255, 255, 255, 0.9);
-        }
-
-        .glass-dark {
-            background: rgba(0, 0, 0, 0.15);
-            backdrop-filter: blur(12px);
-            -webkit-backdrop-filter: blur(12px);
-            border: 1px solid rgba(255, 255, 255, 0.05);
+            padding: 12px 20px;
+            border-radius: 12px;
+            border: 1px solid var(--border);
+            cursor: pointer;
             transition: all 0.2s ease;
         }
 
-        .glass-dark:active {
-            background: rgba(0, 0, 0, 0.25);
-            transform: scale(0.995);
+        .btn-icon {
+            width: 44px;
+            height: 44px;
+            border-radius: 12px;
+            background: var(--bg-secondary);
+            border: none;
+            color: var(--text-secondary);
+            cursor: pointer;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            transition: all 0.2s ease;
         }
 
-        .nav-hidden {
-            transform: translateX(-50%) translateY(-150%);
-            /* Move UP to hide */
-            opacity: 0;
+        .btn-icon:hover {
+            background: var(--bg-card-hover);
+            color: white;
         }
 
-        .nav-visible {
-            transform: translateX(-50%) translateY(0) scale(1);
-            opacity: 1;
+        /* Tag/Chip */
+        .tag {
+            display: inline-flex;
+            align-items: center;
+            gap: 6px;
+            padding: 10px 16px;
+            border-radius: 20px;
+            font-size: 13px;
+            font-weight: 500;
+            background: var(--bg-secondary);
+            color: var(--text-secondary);
+            border: 1px solid var(--border);
+            cursor: pointer;
+            transition: all 0.2s ease;
         }
 
-        .nav-shrunk {
-            transform: translateX(-50%) translateY(-20%) scale(0.8);
-            /* Shrink slightly upwards */
-            opacity: 0.9;
-            pointer-events: auto;
-            /* Allow clicking even when shrunk */
-            padding: 8px 16px;
-            /* Compact mode */
+        .tag.active {
+            background: var(--accent);
+            color: white;
+            border-color: var(--accent);
         }
 
-        .timer-float {
-            position: fixed;
-            bottom: 30px;
-            /* Moved timer to bottom since nav is top */
-            left: 50%;
-            transform: translateX(-50%);
-            z-index: 40;
+        /* Day selector */
+        .day-chip {
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            padding: 12px 16px;
+            border-radius: 16px;
+            background: var(--bg-secondary);
+            border: 2px solid transparent;
+            cursor: pointer;
+            transition: all 0.2s ease;
+            min-width: 60px;
         }
 
-        @keyframes pulse-glow {
-
-            0%,
-            100% {
-                box-shadow: 0 0 20px rgba(255, 255, 255, 0.3);
-            }
-
-            50% {
-                box-shadow: 0 0 40px rgba(255, 255, 255, 0.5);
-            }
+        .day-chip.active {
+            border-color: var(--accent);
+            background: rgba(220, 38, 38, 0.15);
         }
 
-        .pulse-glow {
-            animation: pulse-glow 2s ease-in-out infinite;
+        .day-chip .day-name {
+            font-size: 11px;
+            color: var(--text-muted);
+            text-transform: uppercase;
+            letter-spacing: 0.5px;
         }
 
+        .day-chip .day-number {
+            font-size: 20px;
+            font-weight: 700;
+            color: white;
+            margin-top: 4px;
+        }
+
+        /* Input */
+        .input-group {
+            background: var(--bg-secondary);
+            border-radius: 16px;
+            padding: 16px;
+            border: 1px solid var(--border);
+        }
+
+        .input-group label {
+            display: block;
+            font-size: 11px;
+            color: var(--text-muted);
+            text-transform: uppercase;
+            letter-spacing: 0.5px;
+            margin-bottom: 8px;
+        }
+
+        .input-group input {
+            width: 100%;
+            background: transparent;
+            border: none;
+            outline: none;
+            color: white;
+            font-size: 28px;
+            font-weight: 600;
+            text-align: center;
+        }
+
+        .input-group input::placeholder {
+            color: var(--text-muted);
+        }
+
+        /* Hide number spinners */
         input[type="number"]::-webkit-inner-spin-button,
         input[type="number"]::-webkit-outer-spin-button {
             -webkit-appearance: none;
@@ -165,520 +205,356 @@
 
         input[type="number"] {
             -moz-appearance: textfield;
-            appearance: textfield;
         }
 
-        .btn-glass {
-            transition: all 0.4s cubic-bezier(0.4, 0, 0.2, 1);
+        /* Stats Card */
+        .stat-card {
+            background: var(--bg-secondary);
+            border-radius: 16px;
+            padding: 16px;
+            display: flex;
+            flex-direction: column;
         }
 
-        .btn-glass:hover {
-            background: rgba(255, 255, 255, 0.2);
-            transform: translateY(-2px);
-            filter: brightness(1.1);
+        .stat-card .stat-label {
+            font-size: 12px;
+            color: var(--text-muted);
+            margin-bottom: 4px;
         }
 
-        .btn-glass:active {
-            transform: translateY(0) scale(0.98);
-            filter: brightness(0.95);
+        .stat-card .stat-value {
+            font-size: 24px;
+            font-weight: 700;
+            color: white;
         }
 
-        /* Smooth page transitions */
-        .fade-in {
-            animation: fadeIn 0.5s cubic-bezier(0.4, 0, 0.2, 1);
+        /* Progress Bar */
+        .progress-bar {
+            height: 6px;
+            background: var(--bg-secondary);
+            border-radius: 3px;
+            overflow: hidden;
         }
 
+        .progress-bar .progress-fill {
+            height: 100%;
+            background: var(--accent);
+            border-radius: 3px;
+            transition: width 0.3s ease;
+        }
+
+        /* Bottom Navigation */
+        .bottom-nav {
+            position: fixed;
+            bottom: 0;
+            left: 0;
+            right: 0;
+            background: var(--bg-primary);
+            border-top: 1px solid var(--border);
+            padding: 12px 0;
+            padding-bottom: calc(12px + env(safe-area-inset-bottom));
+            z-index: 100;
+        }
+
+        .bottom-nav .nav-items {
+            display: flex;
+            justify-content: space-around;
+            max-width: 400px;
+            margin: 0 auto;
+        }
+
+        .nav-item {
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            gap: 4px;
+            padding: 8px 16px;
+            border-radius: 16px;
+            cursor: pointer;
+            transition: all 0.2s ease;
+            background: transparent;
+            border: none;
+            color: var(--text-muted);
+        }
+
+        .nav-item.active {
+            background: var(--accent);
+            color: white;
+        }
+
+        .nav-item svg {
+            width: 24px;
+            height: 24px;
+        }
+
+        .nav-item span {
+            font-size: 10px;
+            font-weight: 500;
+        }
+
+        /* Header */
+        .header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            padding: 16px 20px;
+            padding-top: calc(16px + env(safe-area-inset-top));
+        }
+
+        /* Workout Card */
+        .workout-card {
+            background: var(--bg-card);
+            border-radius: 20px;
+            padding: 20px;
+            border: 1px solid var(--border);
+        }
+
+        .workout-card .workout-meta {
+            display: flex;
+            gap: 8px;
+            margin-bottom: 12px;
+        }
+
+        .workout-card .workout-title {
+            font-size: 13px;
+            color: var(--text-muted);
+            margin-bottom: 4px;
+        }
+
+        .workout-card .workout-name {
+            font-size: 20px;
+            font-weight: 700;
+            margin-bottom: 8px;
+        }
+
+        .workout-card .workout-focus {
+            display: inline-block;
+            padding: 6px 12px;
+            background: var(--bg-secondary);
+            border-radius: 8px;
+            font-size: 12px;
+            color: var(--text-secondary);
+        }
+
+        /* Timer Floating */
+        .timer-float {
+            position: fixed;
+            bottom: 100px;
+            left: 50%;
+            transform: translateX(-50%);
+            z-index: 90;
+            background: var(--bg-card);
+            border-radius: 24px;
+            padding: 20px 28px;
+            border: 1px solid var(--border);
+            box-shadow: 0 10px 40px rgba(0, 0, 0, 0.5);
+        }
+
+        /* Modal */
+        .modal-overlay {
+            position: fixed;
+            inset: 0;
+            background: rgba(0, 0, 0, 0.8);
+            backdrop-filter: blur(8px);
+            z-index: 200;
+            display: flex;
+            align-items: flex-end;
+            justify-content: center;
+            padding: 20px;
+        }
+
+        .modal-content {
+            background: var(--bg-card);
+            border-radius: 24px;
+            padding: 24px;
+            width: 100%;
+            max-width: 400px;
+            max-height: 85vh;
+            overflow-y: auto;
+        }
+
+        /* Animations */
         @keyframes fadeIn {
             from {
                 opacity: 0;
                 transform: translateY(10px);
-                filter: blur(5px);
             }
 
             to {
                 opacity: 1;
                 transform: translateY(0);
-                filter: blur(0);
             }
         }
 
-        /* Smooth blur transitions */
-        .blur-transition {
-            transition: filter 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+        .fade-in {
+            animation: fadeIn 0.3s ease;
         }
 
-        /* Modal Styles */
-        .modal-overlay {
-            background: rgba(0, 0, 0, 0.7);
-            backdrop-filter: blur(5px);
+        /* Scrollbar */
+        ::-webkit-scrollbar {
+            width: 4px;
         }
 
-        /* --- THEMES --- */
-
-        /* Dark Mode (Default) - Deep Mauve/Blue */
-        /* Dark Mode (Default) - Deep Mauve/Blue with smoother gradient */
-        /* Dark Mode (Default) - Black & Red */
-        body {
-            background: linear-gradient(135deg, #000000 0%, #1a0505 100%);
-            color: white;
-            min-height: 100vh;
-            overflow-x: hidden;
-            font-size: 16px;
+        ::-webkit-scrollbar-track {
+            background: transparent;
         }
 
-        /* Light Mode (Original Base) - Purple Gradient */
-        /* Light Mode - White & Red */
+        ::-webkit-scrollbar-thumb {
+            background: var(--border);
+            border-radius: 2px;
+        }
+
+        /* Light Mode */
         body.light-mode {
-            background: #ffffff;
-            color: #000000;
+            --bg-primary: #f5f5f5;
+            --bg-secondary: #e5e5e5;
+            --bg-card: #ffffff;
+            --bg-card-hover: #f0f0f0;
+            --text-primary: #0a0a0a;
+            --text-secondary: rgba(0, 0, 0, 0.6);
+            --text-muted: rgba(0, 0, 0, 0.4);
+            --border: rgba(0, 0, 0, 0.1);
         }
 
-        /* Adjust glass transparency for readability on different backgrounds */
-        body .glass {
-            background: rgba(255, 255, 255, 0.1);
-            backdrop-filter: blur(20px);
-            -webkit-backdrop-filter: blur(20px);
-            border: 1px solid rgba(255, 255, 255, 0.15);
-            box-shadow: 0 8px 32px 0 rgba(0, 0, 0, 0.25);
+        /* Utility */
+        .hidden {
+            display: none !important;
         }
 
-        body.light-mode .glass {
-            background: rgba(255, 255, 255, 0.8);
-            border: 1px solid rgba(0, 0, 0, 0.05);
-            backdrop-filter: blur(24px);
-            box-shadow: 0 4px 20px rgba(0, 0, 0, 0.08);
-            color: #000000;
-        }
-
-        body.light-mode .glass-dark {
-            background: rgba(0, 0, 0, 0.05);
-            border: 1px solid rgba(0, 0, 0, 0.05);
-        }
-
-        /* Specific element adjustments */
-        body.light-mode .bg-white\/5 {
-            background-color: rgba(0, 0, 0, 0.05) !important;
-        }
-
-        body.light-mode .bg-white\/10 {
-            background-color: rgba(0, 0, 0, 0.1) !important;
-        }
-
-        body.light-mode .bg-white\/20 {
-            background-color: rgba(0, 0, 0, 0.15) !important;
-        }
-
-        body.light-mode .border-white\/20 {
-            border-color: rgba(0, 0, 0, 0.1) !important;
-        }
-
-        body.light-mode input {
-            color: #111827 !important;
-        }
-
-        /* Nav Icons in Light Mode */
-        body.light-mode .nav-item svg.text-white {
-            color: #7c3aed !important;
-        }
-
-        /* Active Purple */
-        body.light-mode .nav-item span.text-white {
-            color: #7c3aed !important;
-        }
-
-        /* Smooth transition for theme switch */
-        body,
-        .glass,
-        .glass-dark,
-        .text-white,
-        button {
-            transition: background-color 0.6s cubic-bezier(0.4, 0, 0.2, 1),
-                color 0.4s cubic-bezier(0.4, 0, 0.2, 1),
-                filter 0.3s cubic-bezier(0.4, 0, 0.2, 1);
-        }
-
-        /* Enhanced glass effect */
-        .glass {
-            transition: all 0.4s cubic-bezier(0.4, 0, 0.2, 1);
-        }
-
-        .glass:hover {
-            backdrop-filter: blur(25px);
-            -webkit-backdrop-filter: blur(25px);
-        }
-
-        /* --- LIGHT MODE COMPREHENSIVE OVERRIDES --- */
-        body.light-mode {
-            --text-primary: #111827;
-            --text-secondary: #4b5563;
-            --border-color: rgba(0, 0, 0, 0.1);
-            --bg-glass: rgba(255, 255, 255, 0.9);
-        }
-
-        /* Force text colors in light mode */
-        body.light-mode .text-white {
-            color: #111827 !important;
-        }
-
-        /* EXCEPTION: Keep white text on gradients/filled buttons */
-        body.light-mode .bg-gradient-to-r .text-white,
-        body.light-mode .bg-red-600 .text-white,
-        body.light-mode .group:hover .group-hover\:text-white {
-            color: white !important;
-        }
-
-        body.light-mode .text-white\/70 {
-            color: #374151 !important;
-        }
-
-        body.light-mode .text-white\/60 {
-            color: #4b5563 !important;
-        }
-
-        body.light-mode .text-white\/50 {
-            color: #6b7280 !important;
-        }
-
-        body.light-mode .text-white\/40 {
-            color: #9ca3af !important;
-        }
-
-        body.light-mode .text-white\/30 {
-            color: #d1d5db !important;
-        }
-
-        /* Force input styles in light mode */
-        body.light-mode input,
-        body.light-mode textarea {
-            color: #000000 !important;
-            border-color: rgba(0, 0, 0, 0.2) !important;
-        }
-
-        body.light-mode .hero-input {
-            color: #000000 !important;
-        }
-
-        body.light-mode ::placeholder {
-            color: #6b7280 !important;
-        }
-
-        /* Border adjustments */
-        body.light-mode .border-white\/10,
-        body.light-mode .border-white\/20,
-        body.light-mode .border-white\/5 {
-            border-color: rgba(0, 0, 0, 0.1) !important;
-        }
-
-        /* Background adjustments */
-        body.light-mode .bg-white\/5,
-        body.light-mode .bg-white\/10 {
-            background-color: rgba(0, 0, 0, 0.05) !important;
-        }
-
-        body.light-mode .bg-black\/20,
-        body.light-mode .bg-black\/30 {
-            background-color: rgba(0, 0, 0, 0.03) !important;
-        }
-
-        /* Icons in nav */
-        body.light-mode .nav-item svg {
-            color: #4b5563 !important;
-        }
-
-        body.light-mode .nav-item:hover svg {
-            color: #dc2626 !important;
-            /* Red highlight */
-        }
-
-        body.light-mode .nav-item span {
-            color: #4b5563 !important;
-        }
-
-        body.light-mode .nav-item:hover span {
-            color: #dc2626 !important;
-        }
-
-        /* --- DESKTOP LAYOUT (LARGE SCREENS) --- */
-        @media (min-width: 1024px) {
-
-            /* Transform Top Nav into Side Nav */
-            #top-nav {
-                top: 50% !important;
-                left: 32px !important;
-                transform: translateY(-50%) !important;
-                flex-direction: column !important;
-                width: 90px;
-                height: auto;
-                min-height: 400px;
-                padding: 48px 0 !important;
-                border-radius: 45px !important;
-                gap: 48px !important;
-                justify-content: center;
-                background: rgba(255, 255, 255, 0.03);
-                /* Subtle backdrop */
-            }
-
-            /* Main Container Adjustment */
-            #app {
-                padding-left: 160px;
-                /* Space for sidebar + gap */
-                padding-right: 40px;
-                padding-top: 60px;
-                width: 100%;
-                max-width: 1600px;
-                /* Limit max width on ultrawide */
-                margin: 0 auto;
-                box-sizing: border-box;
-                position: relative;
-                z-index: 1;
-            }
-
-            /* --- SESSION VIEW GRID --- */
-            /* 2 Columns: Playlist/Controls (Left) vs Main Exercise (Right) */
-            /* Only apply grid when NOT hidden */
-            #session-view:not(.hidden) {
-                display: grid;
-                grid-template-columns: minmax(320px, 400px) 1fr;
-                grid-template-rows: auto 1fr;
-                gap: 40px;
-                align-items: start;
-            }
-
-            /* The Date/Day Selector (Header) spans full width */
-            #session-view>.glass:first-child {
-                grid-column: 1 / -1;
-                margin-bottom: 20px;
-            }
-
-            /* The Progress Bar spans full width */
-            #session-view>.glass:nth-child(2) {
-                grid-column: 1 / -1;
-                margin-bottom: 20px;
-            }
-
-            /* The Main Exercise Card (Active Content) */
-            /* Assuming it's the 3rd large element usually */
-            #session-view>.glass:nth-child(3) {
-                grid-column: 2;
-                grid-row: 3 / span 2;
-                height: 100%;
-                /* Fill height */
-            }
-
-            /* The exercise list/days container (Left) */
-            /* This targets the container with days usually. 
-               Since HTML structure changes dynamically, let's target via order if possible
-               or rely on the fact that the exercise card is the biggest chunk 
-            */
-
-
-
-            /* --- SETTINGS & PROFILE (Centered & Constrained) --- */
-            #settings-view,
-            #profile-view,
-            #auth-view {
-                max-width: 800px;
-                margin: 0 auto;
-                display: flex;
-                flex-direction: column;
-                gap: 32px;
-            }
-
-            /* Make inputs and buttons bigger/more clickable */
-            button {
-                transition: transform 0.2s cubic-bezier(0.34, 1.56, 0.64, 1);
-            }
-
-            button:hover {
-                transform: translateY(-2px);
-            }
-
-            button:active {
-                transform: translateY(0) scale(0.98);
-            }
+        .flex {
+            display: flex;
         }
     </style>
 </head>
 
-<body class="pb-32 transition-colors duration-500">
+<body>
     <!-- Edit Modal -->
-    <div id="edit-modal"
-        class="fixed inset-0 z-[300] hidden items-end md:items-center justify-center p-4 modal-overlay">
-        <div
-            class="glass glass-dark bg-[#0f172a] rounded-3xl p-6 w-full max-w-sm space-y-4 max-h-[85vh] overflow-y-auto shadow-2xl relative mb-4 md:mb-0">
-            <h3 id="modal-title" class="text-xl font-bold text-white">Éditer l'exercice</h3>
-
-            <div class="space-y-3">
-                <div>
-                    <label class="text-white/60 text-xs block mb-1">Nom</label>
-                    <input type="text" id="edit-name"
-                        class="w-full bg-white/10 rounded-xl px-4 py-2 text-white border-0 outline-none focus:ring-2 focus:ring-red-600">
+    <div id="edit-modal" class="modal-overlay hidden">
+        <div class="modal-content">
+            <h3 id="modal-title" class="text-xl font-bold mb-6">Éditer l'exercice</h3>
+            <div class="space-y-4">
+                <div class="input-group">
+                    <label>Nom</label>
+                    <input type="text" id="edit-name" class="!text-base !font-normal !text-left">
                 </div>
-                <div>
-                    <label class="text-white/60 text-xs block mb-1">Focus / Muscle</label>
-                    <input type="text" id="edit-focus"
-                        class="w-full bg-white/10 rounded-xl px-4 py-2 text-white border-0 outline-none focus:ring-2 focus:ring-red-600">
+                <div class="input-group">
+                    <label>Focus / Muscle</label>
+                    <input type="text" id="edit-focus" class="!text-base !font-normal !text-left">
                 </div>
                 <div class="grid grid-cols-2 gap-3">
-                    <div>
-                        <label class="text-white/60 text-xs block mb-1">Séries</label>
-                        <input type="number" id="edit-sets"
-                            class="w-full bg-white/10 rounded-xl px-4 py-2 text-white border-0 outline-none focus:ring-2 focus:ring-red-600">
+                    <div class="input-group">
+                        <label>Séries</label>
+                        <input type="number" id="edit-sets">
                     </div>
-                    <div>
-                        <label class="text-white/60 text-xs block mb-1">Reps Cibles</label>
-                        <input type="text" id="edit-reps"
-                            class="w-full bg-white/10 rounded-xl px-4 py-2 text-white border-0 outline-none focus:ring-2 focus:ring-red-600">
+                    <div class="input-group">
+                        <label>Reps</label>
+                        <input type="text" id="edit-reps" class="!text-base !font-normal">
                     </div>
                 </div>
-                <div>
-                    <label class="text-white/60 text-xs block mb-1">Repos (secondes)</label>
-                    <input type="number" id="edit-rest"
-                        class="w-full bg-white/10 rounded-xl px-4 py-2 text-white border-0 outline-none focus:ring-2 focus:ring-red-600">
+                <div class="input-group">
+                    <label>Repos (sec)</label>
+                    <input type="number" id="edit-rest">
                 </div>
             </div>
-
-            <div class="flex gap-3 pt-2">
-                <button onclick="closeEditModal()"
-                    class="flex-1 py-3 rounded-xl bg-white/10 text-white font-semibold">Annuler</button>
-                <button onclick="saveExerciseChanges()"
-                    class="flex-1 py-3 rounded-xl bg-gradient-to-r from-red-600 to-red-900 text-white font-semibold shadow-lg">Sauvegarder</button>
+            <div class="flex gap-3 mt-6">
+                <button onclick="closeEditModal()" class="btn-secondary flex-1">Annuler</button>
+                <button onclick="saveExerciseChanges()" class="btn-primary flex-1">Sauvegarder</button>
             </div>
-            <button onclick="deleteCurrentExercise()" class="w-full py-2 text-red-400 text-sm font-medium">Supprimer cet
-                exercice</button>
+            <button onclick="deleteCurrentExercise()"
+                class="w-full mt-4 text-red-500 text-sm font-medium py-2">Supprimer</button>
         </div>
     </div>
-    <!-- Top Navigation -->
-    <nav id="top-nav"
-        class="fixed top-6 left-1/2 transform -translate-x-1/2 glass rounded-full px-6 py-3 flex items-center gap-6 sm:gap-10 sm:px-8 sm:py-4 transition-all duration-500 nav-visible z-50 shadow-2xl border border-white/20">
-        <button onclick="switchView('session')"
-            class="nav-item flex flex-col items-center gap-1 group relative active:scale-90 transition-transform">
-            <div
-                class="absolute -inset-4 bg-red-600/20 blur-xl rounded-full opacity-0 group-hover:opacity-100 transition-opacity duration-500">
-            </div>
-            <svg class="w-6 h-6 text-white relative z-10" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13 10V3L4 14h7v7l9-11h-7z">
-                </path>
-            </svg>
-            <span class="text-[10px] uppercase tracking-widest font-bold text-white/80 relative z-10">Séance</span>
-        </button>
-        <button onclick="switchView('profile')"
-            class="nav-item flex flex-col items-center gap-1 group relative active:scale-90 transition-transform">
-            <svg class="w-6 h-6 text-white/50 group-hover:text-white transition-colors" fill="none"
-                stroke="currentColor" viewBox="0 0 24 24">
-                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
-                    d="M16 7a4 4 0 11-8 0 4 4 0 018 0zM12 14a7 7 0 00-7 7h14a7 7 0 00-7-7z"></path>
-            </svg>
-            <span
-                class="text-[10px] uppercase tracking-widest font-bold text-white/50 group-hover:text-white transition-colors">Profil</span>
-        </button>
-        <button onclick="switchView('settings')"
-            class="nav-item flex flex-col items-center gap-1 group relative active:scale-90 transition-transform">
-            <svg class="w-6 h-6 text-white/50 group-hover:text-white transition-colors" fill="none"
-                stroke="currentColor" viewBox="0 0 24 24">
-                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
-                    d="M10.325 4.317c.426-1.756 2.924-1.756 3.35 0a1.724 1.724 0 002.573 1.066c1.543-.94 3.31.826 2.37 2.37a1.724 1.724 0 001.065 2.572c1.756.426 1.756 2.924 0 3.35a1.724 1.724 0 00-1.066 2.573c.94 1.543-.826 3.31-2.37 2.37a1.724 1.724 0 00-2.572 1.065c-.426 1.756-2.924 1.756-3.35 0a1.724 1.724 0 00-2.573-1.066c-1.543.94-3.31-.826-2.37-2.37a1.724 1.724 0 00-1.065-2.572c-1.756-.426-1.756-2.924 0-3.35a1.724 1.724 0 001.066-2.573c-.94-1.543.826-3.31 2.37-2.37.996.608 2.296.07 2.572-1.065z">
-                </path>
-                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
-                    d="M15 12a3 3 0 11-6 0 3 3 0 016 0z"></path>
-            </svg>
-            <span
-                class="text-[10px] uppercase tracking-widest font-bold text-white/50 group-hover:text-white transition-colors">Réglages</span>
-        </button>
-    </nav>
 
-    <!-- Theme Toggle (Floating Top Right) -->
-    <button onclick="toggleTheme()"
-        class="fixed top-6 right-6 z-[60] p-3 rounded-full glass hover:bg-white/20 transition-all text-white active:scale-95">
-        <svg id="theme-icon-sun" class="w-6 h-6 hidden" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
-                d="M12 3v1m0 16v1m9-9h-1M4 12H3m15.364 6.364l-.707-.707M6.343 6.343l-.707-.707m12.728 0l-.707.707M6.343 17.657l-.707.707M16 12a4 4 0 11-8 0 4 4 0 018 0z" />
-        </svg>
-        <svg id="theme-icon-moon" class="w-6 h-6" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
-                d="M20.354 15.354A9 9 0 018.646 3.646 9.003 9.003 0 0012 21a9.003 9.003 0 008.354-5.646z" />
-        </svg>
-    </button>
+    <!-- Header -->
+    <header class="header">
+        <button class="btn-icon" onclick="toggleMenu()">
+            <svg fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 6h16M4 12h16M4 18h16" />
+            </svg>
+        </button>
+        <button class="btn-icon" onclick="toggleTheme()">
+            <svg id="theme-icon" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
+                    d="M20.354 15.354A9 9 0 018.646 3.646 9.003 9.003 0 0012 21a9.003 9.003 0 008.354-5.646z" />
+            </svg>
+        </button>
+    </header>
 
-    <div id="app" class="container mx-auto px-4 pt-32 pb-12 w-full transition-all duration-500">
-        <!-- Main Content -->
-        <div id="session-view" class="space-y-8 fade-in"></div>
-        <div id="profile-view" class="hidden space-y-8 fade-in"></div>
-        <div id="settings-view" class="hidden space-y-8 fade-in"></div>
-        <div id="auth-view" class="hidden space-y-8 fade-in"></div>
-    </div>
+    <!-- Main Content -->
+    <main id="app" class="px-5 pb-24">
+        <div id="session-view" class="space-y-5 fade-in"></div>
+        <div id="profile-view" class="hidden space-y-5 fade-in"></div>
+        <div id="settings-view" class="hidden space-y-5 fade-in"></div>
+        <div id="auth-view" class="hidden space-y-5 fade-in"></div>
+    </main>
 
-    <!-- Rest Timer (Floating) -->
-    <div id="rest-timer"
-        class="timer-float glass rounded-3xl px-6 py-4 hidden flex flex-col items-center gap-3 min-w-[200px]">
-        <div class="text-center">
-            <p class="text-white/70 text-xs mb-1">Repos</p>
-            <p class="text-white text-4xl font-bold font-mono tracking-wider" id="timer-display">00:00</p>
+    <!-- Rest Timer -->
+    <div id="rest-timer" class="timer-float hidden">
+        <div class="text-center mb-4">
+            <p class="text-xs text-[var(--text-muted)] mb-2">REPOS</p>
+            <p id="timer-display" class="text-4xl font-bold font-mono">00:00</p>
         </div>
-        <div class="flex gap-4 w-full justify-center">
-            <button onclick="toggleTimer()" id="timer-toggle-btn"
-                class="p-2 rounded-full bg-white/10 hover:bg-white/20 transition-all">
-                <svg id="timer-icon-pause" class="w-6 h-6 text-white" fill="none" viewBox="0 0 24 24"
-                    stroke="currentColor">
+        <div class="flex gap-3 justify-center mb-3">
+            <button onclick="toggleTimer()" class="btn-icon" id="timer-toggle-btn">
+                <svg id="timer-icon-pause" class="w-6 h-6" fill="none" viewBox="0 0 24 24" stroke="currentColor">
                     <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
                         d="M10 9v6m4-6v6m7-3a9 9 0 11-18 0 9 9 0 0118 0z" />
                 </svg>
-                <svg id="timer-icon-play" class="w-6 h-6 text-white hidden" fill="none" viewBox="0 0 24 24"
-                    stroke="currentColor">
+                <svg id="timer-icon-play" class="w-6 h-6 hidden" fill="none" viewBox="0 0 24 24" stroke="currentColor">
                     <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
                         d="M14.752 11.168l-3.197-2.132A1 1 0 0010 9.87v4.263a1 1 0 001.555.832l3.197-2.132a1 1 0 000-1.664z" />
                     <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
                         d="M21 12a9 9 0 11-18 0 9 9 0 0118 0z" />
                 </svg>
             </button>
-            <button onclick="stopRestTimer()"
-                class="p-2 rounded-full bg-red-500/20 hover:bg-red-500/40 transition-all text-red-500">
+            <button onclick="stopRestTimer()" class="btn-icon !bg-red-500/20 !text-red-500">
                 <svg class="w-6 h-6" fill="none" viewBox="0 0 24 24" stroke="currentColor">
                     <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12" />
                 </svg>
             </button>
         </div>
-        <div class="flex gap-2 w-full">
-            <button onclick="adjustTimer(-10)"
-                class="flex-1 py-3 rounded-xl bg-white/5 hover:bg-white/10 text-white font-semibold text-sm active:bg-white/20 touch-manipulation">-10s</button>
-            <button onclick="adjustTimer(10)"
-                class="flex-1 py-3 rounded-xl bg-white/5 hover:bg-white/10 text-white font-semibold text-sm active:bg-white/20 touch-manipulation">+10s</button>
+        <div class="flex gap-2">
+            <button onclick="adjustTimer(-10)" class="btn-secondary flex-1 text-sm">-10s</button>
+            <button onclick="adjustTimer(10)" class="btn-secondary flex-1 text-sm">+10s</button>
         </div>
     </div>
 
-    <!-- Old Bottom Nav Removed -->
+    <!-- Bottom Navigation -->
+    <nav class="bottom-nav">
+        <div class="nav-items">
+            <button onclick="switchView('session')" class="nav-item active" id="nav-session">
+                <svg fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
+                        d="M13 10V3L4 14h7v7l9-11h-7z" />
+                </svg>
+            </button>
+            <button onclick="switchView('profile')" class="nav-item" id="nav-profile">
+                <svg fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
+                        d="M9 19v-6a2 2 0 00-2-2H5a2 2 0 00-2 2v6a2 2 0 002 2h2a2 2 0 002-2zm0 0V9a2 2 0 012-2h2a2 2 0 012 2v10m-6 0a2 2 0 002 2h2a2 2 0 002-2m0 0V5a2 2 0 012-2h2a2 2 0 012 2v14a2 2 0 01-2 2h-2a2 2 0 01-2-2z" />
+                </svg>
+            </button>
+            <button onclick="switchView('settings')" class="nav-item" id="nav-settings">
+                <svg fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
+                        d="M16 7a4 4 0 11-8 0 4 4 0 018 0zM12 14a7 7 0 00-7 7h14a7 7 0 00-7-7z" />
+                </svg>
+            </button>
+        </div>
+    </nav>
 
     <script>
-        // --- FIREBASE CONFIGURATION ---
+        // Firebase Config
         const firebaseConfig = {
             apiKey: "AIzaSyB5uqBRZFJRHILeLhYbizGYYfEvEOqTbHc",
             authDomain: "yutoow-fit.firebaseapp.com",
             projectId: "yutoow-fit",
             storageBucket: "yutoow-fit.firebasestorage.app",
             messagingSenderId: "139731145452",
-            appId: "1:139731145452:web:9a139e7ec8c8acd42d4bc9",
-            measurementId: "G-4EVLB9KY2L"
+            appId: "1:139731145452:web:9a139e7ec8c8acd42d4bc9"
         };
 
-        let hasShownOfflineWarning = false;
-        // Global Error Handler for Mobile Debugging
-        window.onerror = function (msg, url, line, col, error) {
-            // Ignore benign resizing errors
-            if (msg.includes("ResizeObserver")) return;
-
-            console.error("Global Error:", msg);
-            // Show toast only for critical errors that might stop interaction
-            if ((msg.includes("firebase") || msg.includes("ReferenceError")) && !hasShownOfflineWarning) {
-                showSyncNotification("⚠️ Mode Hors Ligne (Probable Blocage)", true);
-                hasShownOfflineWarning = true;
-            }
-        };
-
-        // Initialize Firebase safely
-        let auth = null;
-        let db = null;
-        let currentUser = null;
-        let firebaseAvailable = false;
+        let auth = null, db = null, currentUser = null, firebaseAvailable = false;
 
         try {
             if (typeof firebase !== 'undefined') {
@@ -686,232 +562,86 @@
                 auth = firebase.auth();
                 db = firebase.firestore();
                 firebaseAvailable = true;
-
-                // Auth State Listener
                 auth.onAuthStateChanged(user => {
                     currentUser = user;
-                    console.log("Auth State Changed:", user ? user.email : "No User");
-                    if (user) {
-                        setupRealtimeSync(); // Start real-time sync on login
-                    }
-                    renderHeader(); // Update Header (User info)
-                    renderProfile(); // Update Profile UI (Login btn vs User info)
-                    renderSettings(); // Update Settings UI (Logout btn)
+                    if (user) setupRealtimeSync();
+                    renderProfile();
+                    renderSettings();
                 });
-            } else {
-                console.warn("Firebase SDK not loaded (likely blocked by browser/Brave). App running in Offline Mode.");
-                setTimeout(() => showSyncNotification("⚠️ Mode Hors Ligne (Bloqueur détecté)", true), 2000);
             }
-        } catch (e) {
-            console.error("Erreur init Firebase:", e);
-            alert("Erreur Fatale: Impossible de charger Firebase.\n\nSi vous utilisez BRAVE ou un BLOQUEUR DE PUB, veuillez désactiver le bouclier (Shield) pour ce site. Firebase est nécessaire pour le compte.");
-        }
+        } catch (e) { console.error("Firebase init error:", e); }
 
-        // --- DATA STRUCTURES & STORAGE KEYS ---
+        // Storage Keys
         const STORAGE_KEY_SESSIONS = 'onair_sessions';
         const STORAGE_KEY_CURRENT_SESSION = 'onair_current_session';
-        const STORAGE_KEY_PRS = 'onair_prs'; // Personal Records
+        const STORAGE_KEY_PRS = 'onair_prs';
+        const STORAGE_KEY_PROGRAMS = 'onair_programs';
 
-        // Helper to get data
-        function countSessions() {
-            const sessions = JSON.parse(localStorage.getItem(STORAGE_KEY_SESSIONS) || '[]');
-            return sessions.length;
-        }
+        // Default Programs
+        const defaultPrograms = {
+            lundi: {
+                id: 'lundi', name: "PUSH", exercises: [
+                    { name: "Développé Couché", focus: "Pectoraux", sets: 4, reps: "8-10", rest: 120 },
+                    { name: "Développé Incliné", focus: "Pecs Supérieurs", sets: 4, reps: "10-12", rest: 90 },
+                    { name: "Écarté Poulie", focus: "Pectoraux", sets: 3, reps: "12-15", rest: 60 },
+                    { name: "Développé Militaire", focus: "Épaules", sets: 4, reps: "8-10", rest: 120 },
+                    { name: "Élévations Latérales", focus: "Deltoïdes", sets: 4, reps: "12-15", rest: 60 }
+                ]
+            },
+            mardi: {
+                id: 'mardi', name: "PULL", exercises: [
+                    { name: "Tirage Vertical", focus: "Dos", sets: 4, reps: "8-12", rest: 105 },
+                    { name: "Rowing", focus: "Épaisseur", sets: 3, reps: "10-12", rest: 90 },
+                    { name: "Curl Biceps", focus: "Biceps", sets: 3, reps: "10-12", rest: 75 }
+                ]
+            },
+            mercredi: {
+                id: 'mercredi', name: "LEGS", exercises: [
+                    { name: "Leg Extension", focus: "Quadriceps", sets: 3, reps: "12-15", rest: 90 },
+                    { name: "Presse", focus: "Jambes", sets: 4, reps: "6-8", rest: 150 },
+                    { name: "Leg Curl", focus: "Ischio-jambiers", sets: 3, reps: "10-12", rest: 75 }
+                ]
+            }
+        };
 
-        function getSessions() {
-            return JSON.parse(localStorage.getItem(STORAGE_KEY_SESSIONS) || '[]');
-        }
+        let programs = {};
+        let currentDay = 'lundi';
+        let currentExerciseIndex = 0;
+        let sessionData = [];
+        let currentSessionId = null;
+        let sessionStartTime = null;
+        let timerInterval = null;
+        let timerRemaining = 0;
+        let isTimerPaused = false;
+
+        // Helpers
+        function getSessions() { return JSON.parse(localStorage.getItem(STORAGE_KEY_SESSIONS) || '[]'); }
+        function getPRs() { return JSON.parse(localStorage.getItem(STORAGE_KEY_PRS) || '{}'); }
 
         function saveSessionToHistory(session) {
             const sessions = getSessions();
             sessions.push(session);
             localStorage.setItem(STORAGE_KEY_SESSIONS, JSON.stringify(sessions));
-            // Synchronisation automatique avec le cloud
-            if (currentUser) {
-                saveToCloud();
-            }
-        }
-
-        function getPRs() {
-            return JSON.parse(localStorage.getItem(STORAGE_KEY_PRS) || '{}');
+            if (currentUser) saveToCloud();
         }
 
         function updatePR(exerciseName, weight, reps) {
             const prs = getPRs();
             const currentPR = prs[exerciseName] || { weight: 0, reps: 0 };
-
-            // Simple logic: Heavier weight OR same weight with more reps = New PR
             if (weight > currentPR.weight || (weight === currentPR.weight && reps > currentPR.reps)) {
                 prs[exerciseName] = { weight, reps, date: new Date().toISOString() };
                 localStorage.setItem(STORAGE_KEY_PRS, JSON.stringify(prs));
-                // Synchronisation automatique avec le cloud
-                if (currentUser) {
-                    saveToCloud();
-                }
-                return true; // Is a new PR
+                if (currentUser) saveToCloud();
+                return true;
             }
             return false;
         }
-
-        function exportSessionToTxt(sessionId) {
-            const sessions = getSessions();
-            const session = sessions.find(s => s.id === sessionId);
-            if (!session) {
-                console.error("Session non trouvée pour l'export:", sessionId);
-                alert("Erreur: Impossible de générer le fichier de la séance.");
-                return;
-            }
-
-            const prs = getPRs();
-            const startDate = new Date(session.startTime);
-            const endDate = new Date(session.endTime);
-            const duration = Math.floor((endDate - startDate) / 60000);
-
-            let content = `═══════════════════════════════════════\n`;
-            content += `       YUTOOW FIT TRACK - SÉANCE\n`;
-            content += `═══════════════════════════════════════\n\n`;
-            content += `📋 Programme: ${session.programName}\n`;
-            content += `📅 Date: ${startDate.toLocaleDateString('fr-FR', { weekday: 'long', day: 'numeric', month: 'long', year: 'numeric' })}\n`;
-            content += `🕐 Début: ${startDate.toLocaleTimeString('fr-FR', { hour: '2-digit', minute: '2-digit' })}\n`;
-            content += `🕐 Fin: ${endDate.toLocaleTimeString('fr-FR', { hour: '2-digit', minute: '2-digit' })}\n`;
-            content += `⏱️ Durée totale: ${duration} min\n\n`;
-            content += `───────────────────────────────────────\n`;
-            content += `              EXERCICES\n`;
-            content += `───────────────────────────────────────\n\n`;
-
-            if (session.details && session.details.length > 0) {
-                // Group by exercise
-                const setsByExercise = session.details.reduce((acc, set) => {
-                    if (!acc[set.exercise]) acc[set.exercise] = [];
-                    acc[set.exercise].push(set);
-                    return acc;
-                }, {});
-
-                let exerciseNum = 1;
-                for (const [exercise, sets] of Object.entries(setsByExercise)) {
-                    const maxWeightInSession = Math.max(...sets.map(s => s.weight));
-                    const currentPR = prs[exercise];
-                    const isPRExercise = currentPR && currentPR.weight === maxWeightInSession;
-
-                    content += `${exerciseNum}. ${exercise.toUpperCase()}`;
-                    if (isPRExercise) content += ` 🏆 PR!`;
-                    content += `\n`;
-
-                    sets.forEach((set, index) => {
-                        const isPRSet = currentPR && set.weight === currentPR.weight && set.reps === currentPR.reps;
-                        content += `   └ Série ${index + 1}: ${set.weight} kg × ${set.reps} reps`;
-                        if (isPRSet) content += ` ⭐`;
-                        content += `\n`;
-                    });
-                    content += `\n`;
-                    exerciseNum++;
-                }
-            } else if (session.exercises) {
-                // Fallback for old format
-                let exerciseNum = 1;
-                for (const [exercise, data] of Object.entries(session.exercises)) {
-                    content += `${exerciseNum}. ${exercise.toUpperCase()}\n`;
-                    content += `   └ ${data.sets} séries | Volume: ${data.totalWeight} kg\n\n`;
-                    exerciseNum++;
-                }
-            }
-
-            content += `───────────────────────────────────────\n`;
-            content += `              RÉSUMÉ\n`;
-            content += `───────────────────────────────────────\n`;
-            content += `• Exercices: ${session.totalExercises || Object.keys(session.exercises || {}).length}\n`;
-            content += `• Séries totales: ${session.totalSets || '—'}\n`;
-            content += `\n═══════════════════════════════════════\n`;
-            content += `   Exporté depuis Yutoow Fit Track\n`;
-            content += `═══════════════════════════════════════\n`;
-
-            const blob = new Blob([content], { type: 'text/plain;charset=utf-8' });
-            const url = window.URL.createObjectURL(blob);
-            const a = document.createElement('a');
-            a.href = url;
-            a.download = `Seance_${session.programName}_${startDate.toISOString().split('T')[0]}.txt`;
-            document.body.appendChild(a);
-            a.click();
-            document.body.removeChild(a);
-            window.URL.revokeObjectURL(url);
-        }
-
-        // --- APP LOGIC ---
-
-        const STORAGE_KEY_PROGRAMS = 'onair_programs';
-
-        let programs = {};
-
-        // Default Programs (Initialize if LocalStorage empty)
-        const defaultPrograms = {
-            lundi: {
-                id: 'lundi',
-                name: "PUSH",
-                exercises: [
-                    { name: "Développé Couché", focus: "Pectoraux", sets: 4, reps: "8-10", rest: 120 },
-                    { name: "Développé Incliné Haltères", focus: "Pectoraux Supérieurs", sets: 4, reps: "10-12", rest: 90 },
-                    { name: "Écarté Poulie Haute", focus: "Pectoraux", sets: 3, reps: "12-15", rest: 60 },
-                    { name: "Développé Militaire", focus: "Épaules", sets: 4, reps: "8-10", rest: 120 },
-                    { name: "Élévations Latérales", focus: "Deltoïdes Latéraux", sets: 4, reps: "12-15", rest: 60 },
-                    { name: "Extension Triceps Poulie", focus: "Triceps", sets: 3, reps: "12-15", rest: 60 },
-                    { name: "Dips", focus: "Triceps/Pectoraux", sets: 3, reps: "8-12", rest: 90 }
-                ]
-            },
-            mardi: {
-                id: 'mardi',
-                name: "PULL",
-                exercises: [
-                    { name: "Tirage Vertical Poulie Prise Neutre - Grand Dorsal", focus: "Largeur du dos", sets: 4, reps: "8-12", rest: 105 },
-                    { name: "Tirage Horizontale Prise Neutre - Trapèzes, Rhomboïdes", focus: "Épaisseur, milieu du dos", sets: 3, reps: "10-12", rest: 90 },
-                    { name: "Rowing Machine Unilatéral - Grand Dorsal et Bas du dos", focus: "Isolation et épaisseur", sets: 3, reps: "6-8 / bras", rest: 75 },
-                    { name: "Bucheron Haltère - Grand Dorsal, Lombaires, Core", focus: "Rotation", sets: 3, reps: "6-8 / bras", rest: 90 },
-                    { name: "Curl Marteau - Brachial et Longue Portion du Biceps", focus: "Épaisseur du bras", sets: 3, reps: "8-12", rest: 75 },
-                    { name: "Curl Incliné - Longue Portion du Biceps", focus: "Pic du biceps, étirement maximal", sets: 3, reps: "10-12", rest: 75 }
-                ]
-            },
-            mercredi: {
-                id: 'mercredi',
-                name: "LEGS",
-                exercises: [
-                    { name: "Leg Extension - Quadriceps", focus: "Isolation partie basse/externe", sets: 3, reps: "12-15", rest: 90 },
-                    { name: "Presse Incliné - Quadriceps, Fessiers, Ischio-jambiers", focus: "Travail global", sets: 4, reps: "6-8", rest: 150 },
-                    { name: "Hack Squat - Quadriceps", focus: "Accent vastes externes", sets: 3, reps: "10-12", rest: 105 },
-                    { name: "Leg Curl Allongé / Assis - Ischio-jambiers", focus: "Isolation", sets: 3, reps: "10-12", rest: 75 },
-                    { name: "Mollets Debout Haltères - Mollets", focus: "Gastrocnémien, Jumeaux", sets: 4, reps: "12-20", rest: 50 }
-                ]
-            },
-            vendredi: {
-                id: 'vendredi',
-                name: "PUSH",
-                exercises: [
-                    { name: "Chest Press Couché - Faisceau Sternal", focus: "Milieu du pec", sets: 4, reps: "6-8", rest: 105 },
-                    { name: "Développé Incliné Haltères - Faisceau Claviculaire", focus: "Haut du pec", sets: 3, reps: "8-12", rest: 90 },
-                    { name: "PecFly - Faisceau Sternal et Étirement", focus: "Isolation", sets: 3, reps: "12-15", rest: 60 },
-                    { name: "Développé Militaire Haltères - Faisceaux Antérieur et Moyen", focus: "Épaule", sets: 3, reps: "10-12", rest: 75 },
-                    { name: "Élévations Latérales - Faisceau Moyen", focus: "Donne la largeur", sets: 4, reps: "12-20", rest: 50 },
-                    { name: "Face Pulls - Faisceau Postérieur et Coiffe", focus: "Rotateurs", sets: 3, reps: "15-20", rest: 60 }
-                ]
-            },
-            samedi: {
-                id: 'samedi',
-                name: "PULL",
-                exercises: [
-                    { name: "Tirage Vertical Prise Large - Grand Dorsal", focus: "Largeur du dos", sets: 4, reps: "8-12", rest: 105 },
-                    { name: "Tirage Horizontal Prise Serrée - Trapèzes, Rhomboïdes, Grand Dorsal", focus: "Épaisseur", sets: 3, reps: "10-12", rest: 90 },
-                    { name: "Curl Marteau - Brachial et Longue Portion du Biceps", focus: "Épaisseur bras", sets: 3, reps: "8-12", rest: 75 },
-                    { name: "Curl Poulie Basse - Biceps", focus: "Tension continue, pic de contraction", sets: 3, reps: "12-15", rest: 60 }
-                ]
-            }
-        };
 
         function loadPrograms() {
             const saved = localStorage.getItem(STORAGE_KEY_PROGRAMS);
             if (saved) {
                 programs = JSON.parse(saved);
-                // Ensure IDs exist (migration check)
-                Object.keys(programs).forEach(key => {
-                    if (!programs[key].id) programs[key].id = key;
-                });
+                Object.keys(programs).forEach(key => { if (!programs[key].id) programs[key].id = key; });
             } else {
                 programs = defaultPrograms;
                 savePrograms();
@@ -920,620 +650,244 @@
 
         function savePrograms() {
             localStorage.setItem(STORAGE_KEY_PROGRAMS, JSON.stringify(programs));
-            // Synchronisation automatique avec le cloud
-            if (currentUser) {
-                saveToCloud();
-            }
-        }
-
-        // State
-        let currentDay = 'lundi';
-        let currentExerciseIndex = 0;
-        let currentSetNumber = 1;
-        let sessionData = [];
-        let currentSessionId = null;
-        let sessionStartTime = null;
-        let timerInterval = null;
-        let exerciseTimerInterval = null;
-        let setTimerInterval = null;
-        let timerRemaining = 0;
-        let isTimerPaused = false;
-
-
-        // Audio Context for sound effects
-        const audioContext = new (window.AudioContext || window.webkitAudioContext)();
-
-        function playCompletionSound() {
-            const oscillator = audioContext.createOscillator();
-            const gainNode = audioContext.createGain();
-
-            oscillator.connect(gainNode);
-            gainNode.connect(audioContext.destination);
-
-            // Gentle notification sound (C major chord arpeggio)
-            oscillator.frequency.setValueAtTime(523.25, audioContext.currentTime); // C5
-            oscillator.frequency.setValueAtTime(659.25, audioContext.currentTime + 0.1); // E5
-            oscillator.frequency.setValueAtTime(783.99, audioContext.currentTime + 0.2); // G5
-
-            oscillator.type = 'sine';
-            gainNode.gain.setValueAtTime(0.3, audioContext.currentTime);
-            gainNode.gain.exponentialRampToValueAtTime(0.01, audioContext.currentTime + 0.5);
-
-            oscillator.start(audioContext.currentTime);
-            oscillator.stop(audioContext.currentTime + 0.5);
+            if (currentUser) saveToCloud();
         }
 
         // Initialize
-        loadSession();
-        setupScrollBehavior();
+        loadPrograms();
         loadTheme();
+        loadSession();
 
-        // --- HEADER RENDERER (Wrapper for Theme) ---
-        function renderHeader() {
-            // Deprecated for the new "Top Nav" Airy Design
-            // The content is now implicitly handled by the top nav and the views
-        }
-
-        // Hook theme toggle to re-render header icons properly
-        const originalToggleTheme = toggleTheme;
-        toggleTheme = function () {
-            document.body.classList.toggle('light-mode');
-            const isLight = document.body.classList.contains('light-mode');
-            localStorage.setItem(STORAGE_KEY_THEME, isLight ? 'light' : 'dark');
-            renderHeader(); // Refresh icons
-        };
-
-        function loadTheme() {
-            const theme = localStorage.getItem('onair_theme');
-            if (theme === 'light') {
-                document.body.classList.add('light-mode');
-            }
-            updateThemeIcon();
-        }
-
-        function toggleTheme() {
-            document.body.classList.toggle('light-mode');
-            const isLight = document.body.classList.contains('light-mode');
-            localStorage.setItem('onair_theme', isLight ? 'light' : 'dark');
-            updateThemeIcon();
-        }
-
-        function updateThemeIcon() {
-            const isLight = document.body.classList.contains('light-mode');
-            const sun = document.getElementById('theme-icon-sun');
-            const moon = document.getElementById('theme-icon-moon');
-
-            if (isLight) {
-                sun.classList.remove('hidden');
-                moon.classList.add('hidden');
-            } else {
-                sun.classList.add('hidden');
-                moon.classList.remove('hidden');
-            }
-        }
-
-
-        function loadSession(preserveScroll = false) {
-            // Preserve scroll position if requested
-            const scrollY = preserveScroll ? window.scrollY : 0;
-
-            // Load fresh programs data
+        function loadSession() {
             loadPrograms();
-
-            // Safety check if day deleted
             if (!programs[currentDay]) {
                 const keys = Object.keys(programs);
-                if (keys.length > 0) currentDay = keys[0];
-                else {
-                    // Handle case where all programs deleted? (Should prevent deleting last one)
-                    programs = defaultPrograms;
-                    savePrograms();
-                    currentDay = 'lundi';
-                }
+                currentDay = keys.length > 0 ? keys[0] : 'lundi';
+                if (keys.length === 0) { programs = defaultPrograms; savePrograms(); }
             }
-
             const program = programs[currentDay];
-
-            // Safety check for exercises
             if (!program.exercises || program.exercises.length === 0) {
-                // Add dummy exercise if empty to prevent crash
                 program.exercises = [{ name: "Nouvel Exercice", focus: "Muscle", sets: 3, reps: "10", rest: 60 }];
                 savePrograms();
             }
+            if (currentExerciseIndex >= program.exercises.length) currentExerciseIndex = 0;
 
-            // Safety check for index
-            if (currentExerciseIndex >= program.exercises.length) {
-                currentExerciseIndex = 0;
-            }
-
-            const exercise = program.exercises[currentExerciseIndex];
-
-            // Initialize session if first exercise
             if (currentExerciseIndex === 0 && sessionData.length === 0) {
                 currentSessionId = Date.now().toString();
-                sessionStartTime = new Date(); // Track session start
-                exerciseStartTime = Date.now();
-                setStartTime = Date.now();
+                sessionStartTime = new Date();
             }
-
-            renderExercise(exercise, program.name);
-
-            // Pre-fill inputs with best Previous Performance (PR) logic or Last Session
-            // Setting a small timeout to ensure DOM is ready
-            setTimeout(() => {
-                const prs = getPRs();
-                const exerciseName = exercise.name;
-                const weightInput = document.getElementById('weight-input');
-                const repsInput = document.getElementById('reps-input');
-
-                if (prs[exerciseName]) {
-                    // Show previous best as placeholder
-                    if (weightInput) weightInput.placeholder = `${prs[exerciseName].weight}`;
-                    if (repsInput) repsInput.placeholder = `${prs[exerciseName].reps}`;
-
-                    // Optional: pre-fill values to save time? Let's stick to placeholder for now 
-                    // or user might accidentally log same weight.
-                    // But user asked for "memory", usually means "what did I do last time?"
-                    // Auto-fill makes it faster.
-                    if (weightInput) weightInput.value = prs[exerciseName].weight;
-                }
-            }, 50);
-
-            // Clear any existing timers
-            if (exerciseTimerInterval) clearInterval(exerciseTimerInterval);
-            if (setTimerInterval) clearInterval(setTimerInterval);
+            renderExercise(program.exercises[currentExerciseIndex], program.name);
         }
 
         function renderExercise(exercise, programName) {
-            const completedSets = sessionData.filter(s =>
-                s.exercise === exercise.name
-            ).length;
+            const completedSets = sessionData.filter(s => s.exercise === exercise.name).length;
+            const totalExercises = programs[currentDay].exercises.length;
+            const progress = ((currentExerciseIndex) / totalExercises) * 100;
+            const dayKeys = Object.keys(programs);
 
             const sessionView = document.getElementById('session-view');
-
-            // Dynamic Day Selector
-            let daysHtml = '<div class="grid grid-cols-2 lg:grid-cols-3 gap-3 mb-2">';
-            const dayKeys = Object.keys(programs);
-            dayKeys.forEach(key => {
-                const prog = programs[key];
-                // Capitalize first letter of key
-                const displayKey = key.charAt(0).toUpperCase() + key.slice(1);
-                const isSelected = currentDay === key;
-
-                daysHtml += `
-                    <button onclick="changeDay('${key}')"
-                        class="${isSelected ? 'bg-white/20 ring-2 ring-purple-400/50' : 'bg-white/5'} rounded-2xl py-3 px-2 text-white text-sm font-semibold transition-all btn-glass flex flex-col items-center justify-center relative group min-h-[60px] touch-manipulation">
-                        <span>${displayKey} - ${prog.name}</span>
-                        ${isSelected && dayKeys.length > 1 ? `<span onclick="event.stopPropagation(); deleteDay('${key}')" class="absolute -top-2 -right-2 bg-red-500 rounded-full w-6 h-6 text-xs flex items-center justify-center shadow-lg active:scale-90 transition-transform cursor-pointer z-10 font-bold">×</span>` : ''}
-                    </button>
-                    `;
-            });
-            daysHtml += `
-                    <button onclick="addNewDay()" class="bg-white/5 border border-dashed border-white/30 rounded-2xl py-3 text-white/50 text-sm font-semibold hover:bg-white/10 transition-all flex items-center justify-center gap-2" >
-                        <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 4v16m8-8H4"></path></svg>
-                </button>
-            </div>`;
-
-
             sessionView.innerHTML = `
-                <div class="glass rounded-3xl p-4 space-y-3">
-                    ${daysHtml}
-            <button onclick="renameCurrentDay()" class="w-full text-center text-xs text-white/40 hover:text-white/80 transition-colors">
-                Modifier le nom du programme (${programName})
-            </button>
-                </div >
-
-                <div class="glass rounded-3xl p-6">
-                    <div class="flex justify-between items-center mb-3">
-                        <span class="text-white/70 text-sm">Progression</span>
-                        <span class="text-white font-semibold">${currentExerciseIndex + 1}/${programs[currentDay].exercises.length}</span>
-                    </div>
-                    <div class="w-full bg-white/10 rounded-full h-3 overflow-hidden">
-                        <div class="bg-gradient-to-r from-purple-400 to-pink-400 h-full rounded-full transition-all duration-500" 
-                             style="width: ${((currentExerciseIndex) / programs[currentDay].exercises.length) * 100}%"></div>
-                    </div>
+                <!-- Title -->
+                <div class="mb-2">
+                    <h1 class="text-2xl font-bold">${completedSets > 0 ? `${exercise.sets - completedSets} restant${exercise.sets - completedSets > 1 ? 's' : ''} !` : 'Let\'s go!'}</h1>
                 </div>
 
-                <div class="glass rounded-3xl p-6 md:p-8 relative group">
-                    <!-- Header with Arrows -->
-                    <div class="flex items-center justify-between mb-8 relative">
-                        <button onclick="prevExercise()" class="p-3 rounded-full bg-white/5 hover:bg-white/10 text-white/70 hover:text-white transition-all active:scale-95 ${currentExerciseIndex === 0 ? 'opacity-0 pointer-events-none' : ''}">
-                            <svg class="w-8 h-8" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 19l-7-7 7-7"></path></svg>
+                <!-- Day Chips -->
+                <div class="flex gap-3 overflow-x-auto pb-2 -mx-5 px-5" style="scrollbar-width: none;">
+                    ${dayKeys.map((key, i) => {
+                const prog = programs[key];
+                const isActive = currentDay === key;
+                return `<button onclick="changeDay('${key}')" class="day-chip ${isActive ? 'active' : ''} shrink-0">
+                            <span class="day-name">${prog.name}</span>
+                            <span class="day-number">${String(i + 1).padStart(2, '0')}</span>
+                        </button>`;
+            }).join('')}
+                    <button onclick="addNewDay()" class="day-chip shrink-0 !border-dashed !border-[var(--border)]">
+                        <svg class="w-5 h-5 text-[var(--text-muted)]" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 4v16m8-8H4"/></svg>
+                    </button>
+                </div>
+
+                <!-- Next Training Card -->
+                <div class="card">
+                    <div class="flex justify-between items-start mb-4">
+                        <div>
+                            <p class="text-sm text-[var(--text-muted)] mb-1">Exercice ${currentExerciseIndex + 1}/${totalExercises}</p>
+                            <h2 class="text-xl font-bold">${exercise.name}</h2>
+                            <span class="workout-focus mt-2 inline-block">${exercise.focus}</span>
+                        </div>
+                        <button onclick="openEditModal()" class="btn-icon !w-10 !h-10">
+                            <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15.232 5.232l3.536 3.536m-2.036-5.036a2.5 2.5 0 113.536 3.536L6.5 21.036H3v-3.572L16.732 3.732z"/></svg>
                         </button>
-                        
-                        <div class="text-center flex-1 px-2">
-                             <div class="flex flex-col items-center">
-                                <span class="text-xs font-light text-white/50 tracking-widest uppercase mb-1">${programName}</span>
-                                <h2 class="text-2xl md:text-3xl font-light text-white mb-2 leading-tight">${exercise.name}</h2>
-                                <span class="bg-white/10 px-3 py-1 rounded-full text-[10px] text-white/80 font-medium">${exercise.focus}</span>
+                    </div>
+
+                    <!-- Navigation Arrows -->
+                    <div class="flex justify-between items-center mb-4">
+                        <button onclick="prevExercise()" class="btn-icon ${currentExerciseIndex === 0 ? 'opacity-30 pointer-events-none' : ''}">
+                            <svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 19l-7-7 7-7"/></svg>
+                        </button>
+                        <div class="flex-1 mx-4">
+                            <div class="progress-bar">
+                                <div class="progress-fill" style="width: ${progress}%"></div>
                             </div>
                         </div>
-
-                        <button onclick="nextExercise()" class="p-3 rounded-full bg-white/5 hover:bg-white/10 text-white/70 hover:text-white transition-all active:scale-95 ${currentExerciseIndex === programs[currentDay].exercises.length - 1 ? 'opacity-0 pointer-events-none' : ''}">
-                            <svg class="w-8 h-8" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 5l7 7-7 7"></path></svg>
-                        </button>
-
-                        <!-- Edit Button (Moved out of flow prevents overlap) -->
-                         <button onclick="openEditModal()" class="absolute -top-4 -right-2 p-2 rounded-full text-white/30 hover:text-white transition-all">
-                            <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15.232 5.232l3.536 3.536m-2.036-5.036a2.5 2.5 0 113.536 3.536L6.5 21.036H3v-3.572L16.732 3.732z"></path></svg>
+                        <button onclick="nextExercise()" class="btn-icon ${currentExerciseIndex === totalExercises - 1 ? 'opacity-30 pointer-events-none' : ''}">
+                            <svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 5l7 7-7 7"/></svg>
                         </button>
                     </div>
 
-                    <!-- Exercise Info -->
-                    <div class="grid grid-cols-2 gap-4 mb-6">
-                        <div class="glass-dark rounded-2xl p-4 text-center">
-                            <p class="text-white/70 text-xs mb-1">Séries</p>
-                            <p class="text-white text-2xl font-bold">${completedSets}/${exercise.sets}</p>
+                    <!-- Stats -->
+                    <div class="grid grid-cols-2 gap-3 mb-6">
+                        <div class="stat-card">
+                            <span class="stat-label">Séries</span>
+                            <span class="stat-value">${completedSets}/${exercise.sets}</span>
                         </div>
-                        <div class="glass-dark rounded-2xl p-4 text-center">
-                            <p class="text-white/70 text-xs mb-1">Reps Cibles</p>
-                            <p class="text-white text-2xl font-bold">${exercise.reps}</p>
+                        <div class="stat-card">
+                            <span class="stat-label">Reps Cibles</span>
+                            <span class="stat-value">${exercise.reps}</span>
                         </div>
                     </div>
-                    
 
-
-                    <!-- Set Input (HeroUI Design) -->
-                    <div class="grid grid-cols-2 gap-4 mb-8">
-                        <div class="hero-input-wrapper">
-                            <label class="hero-label">Poids (kg)</label>
-                            <input type="number" id="weight-input" 
-                                   class="hero-input"
-                                   placeholder="0" step="0.5" min="0">
+                    <!-- Inputs -->
+                    <div class="grid grid-cols-2 gap-3 mb-4">
+                        <div class="input-group">
+                            <label>Poids (kg)</label>
+                            <input type="number" id="weight-input" placeholder="0" step="0.5" min="0">
                         </div>
-                        <div class="hero-input-wrapper">
-                            <label class="hero-label">Répétitions</label>
-                            <input type="number" id="reps-input" 
-                                   class="hero-input"
-                                   placeholder="0" min="0">
+                        <div class="input-group">
+                            <label>Répétitions</label>
+                            <input type="number" id="reps-input" placeholder="0" min="0">
                         </div>
                     </div>
 
                     <!-- Action Button -->
-                    <button onclick="logSet()" 
-                            class="w-full bg-gradient-to-r from-red-600 to-red-900 text-white font-bold py-4 md:py-5 rounded-2xl hover:shadow-2xl transition-all btn-glass pulse-glow mb-4 text-lg">
+                    <button onclick="logSet()" class="btn-primary w-full">
+                        <svg class="w-5 h-5" fill="currentColor" viewBox="0 0 24 24"><path d="M8 5v14l11-7z"/></svg>
                         Enregistrer Série ${completedSets + 1}
-                    </button>
-                    
-                    <button onclick="addNewExercise()" class="w-full py-3 rounded-2xl border-2 border-dashed border-white/20 text-white/50 hover:text-white hover:border-white/40 hover:bg-white/5 transition-all text-sm font-semibold">
-                        + Ajouter un exercice
                     </button>
                 </div>
 
-                <!--Completed Sets-- >
+                <!-- Completed Sets -->
                 ${completedSets > 0 ? `
-                <div class="glass rounded-3xl p-6">
-                    <h3 class="text-white font-semibold mb-4">Séries Complétées</h3>
-                    <div class="space-y-3">
+                <div class="card">
+                    <h3 class="font-semibold mb-4">Séries Complétées</h3>
+                    <div class="space-y-2">
                         ${sessionData.filter(s => s.exercise === exercise.name).map((set, i) => `
-                            <div class="glass-dark rounded-2xl p-4 flex justify-between items-center">
-                                <span class="text-white/70">Série ${i + 1}</span>
-                                <span class="text-white font-semibold">${set.weight}kg × ${set.reps} reps</span>
+                            <div class="card-dark flex justify-between items-center">
+                                <span class="text-[var(--text-secondary)]">Série ${i + 1}</span>
+                                <span class="font-semibold">${set.weight}kg × ${set.reps}</span>
                             </div>
                         `).join('')}
                     </div>
                 </div>
-                ` : ''
-                }
+                ` : ''}
+
+                <!-- Add Exercise -->
+                <button onclick="addNewExercise()" class="w-full py-4 border-2 border-dashed border-[var(--border)] rounded-2xl text-[var(--text-muted)] text-sm font-medium hover:border-[var(--text-secondary)] transition-colors">
+                    + Ajouter un exercice
+                </button>
             `;
 
-            // Restore scroll position if preserved
-            if (preserveScroll && scrollY > 0) {
-                requestAnimationFrame(() => {
-                    window.scrollTo(0, scrollY);
-                });
-            }
+            // Pre-fill with PR
+            setTimeout(() => {
+                const prs = getPRs();
+                if (prs[exercise.name]) {
+                    const weightInput = document.getElementById('weight-input');
+                    if (weightInput) weightInput.value = prs[exercise.name].weight;
+                }
+            }, 50);
         }
 
         function logSet() {
             const weight = parseFloat(document.getElementById('weight-input').value);
             const reps = parseInt(document.getElementById('reps-input').value);
-
-            if (!weight || !reps) {
-                alert('Veuillez remplir le poids et les répétitions');
-                return;
-            }
+            if (!weight || !reps) { alert('Remplissez poids et reps'); return; }
 
             const exercise = programs[currentDay].exercises[currentExerciseIndex];
-
-            const setData = {
+            sessionData.push({
                 sessionId: currentSessionId,
                 day: currentDay,
                 programName: programs[currentDay].name,
                 exercise: exercise.name,
-                weight: weight,
-                reps: reps,
+                weight, reps,
                 timestamp: new Date().toISOString()
-            };
+            });
 
-            sessionData.push(setData);
-
-            // Save temporary state to LocalStorage (Crash recovery)
             localStorage.setItem(STORAGE_KEY_CURRENT_SESSION, JSON.stringify({
-                id: currentSessionId,
-                startTime: sessionStartTime,
-                data: sessionData,
-                day: currentDay,
-                exerciseIndex: currentExerciseIndex,
-                set: currentSetNumber
+                id: currentSessionId, startTime: sessionStartTime, data: sessionData,
+                day: currentDay, exerciseIndex: currentExerciseIndex
             }));
-            // Synchronisation automatique avec le cloud
-            if (currentUser) {
-                saveToCloud();
-            }
+            if (currentUser) saveToCloud();
 
-            // Check for PR
-            const isNewPr = updatePR(exercise.name, weight, reps);
-            if (isNewPr) {
-                // Visual feedback for PR could be added here
-                // For now, maybe a small toast or just console
-                console.log("NEW PR!");
-            }
-
-            // Clear inputs
-            document.getElementById('weight-input').value = weight; // Keep weight for next set
+            updatePR(exercise.name, weight, reps);
             document.getElementById('reps-input').value = '';
 
-            // Reset set timer - Not needed anymore as we don't track set duration visually
-            // setStartTime = Date.now();
-
-            // Check if all sets completed
             const completedSets = sessionData.filter(s => s.exercise === exercise.name).length;
-
             if (completedSets >= exercise.sets) {
-                // Move to next exercise
                 if (currentExerciseIndex < programs[currentDay].exercises.length - 1) {
                     currentExerciseIndex++;
-                    currentSetNumber = 1;
-                    loadSession(true);
+                    loadSession();
                 } else {
-                    // Session complete
                     showSessionComplete();
                 }
             } else {
-                currentSetNumber++;
-                loadSession(true);
+                loadSession();
             }
-
-            // Start rest timer
             startRestTimer(exercise.rest);
         }
 
         function startRestTimer(seconds) {
             const timerEl = document.getElementById('rest-timer');
             timerEl.classList.remove('hidden');
-            timerEl.classList.add('flex'); // Ensure flex display
-
             timerRemaining = seconds;
             isTimerPaused = false;
-            updateTimerControls();
             updateTimerDisplay();
-
             clearInterval(timerInterval);
-            timerInterval = setInterval(tickTimer, 1000);
-        }
-
-        function tickTimer() {
-            if (!isTimerPaused) {
-                timerRemaining--;
-                updateTimerDisplay();
-
-                if (timerRemaining <= 0) {
-                    stopRestTimer(true);
+            timerInterval = setInterval(() => {
+                if (!isTimerPaused) {
+                    timerRemaining--;
+                    updateTimerDisplay();
+                    if (timerRemaining <= 0) stopRestTimer(true);
                 }
-            }
+            }, 1000);
         }
 
         function toggleTimer() {
             isTimerPaused = !isTimerPaused;
-            updateTimerControls();
+            document.getElementById('timer-icon-pause').classList.toggle('hidden', isTimerPaused);
+            document.getElementById('timer-icon-play').classList.toggle('hidden', !isTimerPaused);
         }
 
-        function adjustTimer(seconds) {
-            timerRemaining += seconds;
-            if (timerRemaining < 0) timerRemaining = 0;
+        function adjustTimer(sec) {
+            timerRemaining = Math.max(0, timerRemaining + sec);
             updateTimerDisplay();
         }
 
         function stopRestTimer(finished = false) {
             clearInterval(timerInterval);
-            const timerEl = document.getElementById('rest-timer');
-
+            document.getElementById('rest-timer').classList.add('hidden');
             if (finished) {
-                playCompletionSound();
-                // Flash effect or similar could go here
+                const ctx = new (window.AudioContext || window.webkitAudioContext)();
+                const osc = ctx.createOscillator();
+                const gain = ctx.createGain();
+                osc.connect(gain);
+                gain.connect(ctx.destination);
+                osc.frequency.value = 523;
+                gain.gain.setValueAtTime(0.3, ctx.currentTime);
+                gain.gain.exponentialRampToValueAtTime(0.01, ctx.currentTime + 0.3);
+                osc.start();
+                osc.stop(ctx.currentTime + 0.3);
             }
-
-            timerEl.classList.add('hidden');
-            timerEl.classList.remove('flex');
         }
 
         function updateTimerDisplay() {
-            const displayEl = document.getElementById('timer-display');
             const mins = Math.floor(timerRemaining / 60);
             const secs = timerRemaining % 60;
-            displayEl.textContent = `${mins.toString().padStart(2, '0')}:${secs.toString().padStart(2, '0')} `;
-        }
-
-        function updateTimerControls() {
-            const pauseIcon = document.getElementById('timer-icon-pause');
-            const playIcon = document.getElementById('timer-icon-play');
-
-            if (isTimerPaused) {
-                pauseIcon.classList.add('hidden');
-                playIcon.classList.remove('hidden');
-            } else {
-                pauseIcon.classList.remove('hidden');
-                playIcon.classList.add('hidden');
-            }
-        }
-
-        // --- EXERCISE EDITING LOGIC ---
-
-        function openEditModal() {
-            const exercise = programs[currentDay].exercises[currentExerciseIndex];
-
-            document.getElementById('edit-name').value = exercise.name;
-            document.getElementById('edit-focus').value = exercise.focus;
-            document.getElementById('edit-sets').value = exercise.sets;
-            document.getElementById('edit-reps').value = exercise.reps;
-            document.getElementById('edit-rest').value = exercise.rest;
-
-            const modal = document.getElementById('edit-modal');
-            modal.classList.remove('hidden');
-            modal.classList.add('flex');
-        }
-
-        function closeEditModal() {
-            const modal = document.getElementById('edit-modal');
-            modal.classList.add('hidden');
-            modal.classList.remove('flex');
-        }
-
-        function saveExerciseChanges() {
-            const name = document.getElementById('edit-name').value;
-            const focus = document.getElementById('edit-focus').value;
-            const sets = parseInt(document.getElementById('edit-sets').value);
-            const reps = document.getElementById('edit-reps').value;
-            const rest = parseInt(document.getElementById('edit-rest').value);
-
-            if (!name || isNaN(sets) || !reps || isNaN(rest)) {
-                alert("Veuillez remplir correctement tous les champs.");
-                return;
-            }
-
-            // Update data
-            programs[currentDay].exercises[currentExerciseIndex] = {
-                name, focus, sets, reps, rest
-            };
-            savePrograms();
-            closeEditModal();
-            loadSession(); // Re-render
-        }
-
-        function deleteCurrentExercise() {
-            if (!confirm("Êtes-vous sûr de vouloir supprimer cet exercice ?")) return;
-
-            programs[currentDay].exercises.splice(currentExerciseIndex, 1);
-            savePrograms();
-            closeEditModal();
-
-            // Adjust index if needed
-            if (currentExerciseIndex >= programs[currentDay].exercises.length) {
-                currentExerciseIndex = Math.max(0, programs[currentDay].exercises.length - 1);
-            }
-            loadSession();
-        }
-
-        function addNewExercise() {
-            const newExo = {
-                name: "Nouvel Exercice",
-                focus: "Muscle Cible",
-                sets: 3,
-                reps: "10-12",
-                rest: 60
-            };
-            programs[currentDay].exercises.push(newExo);
-            savePrograms();
-            // Go to new exercise
-            currentExerciseIndex = programs[currentDay].exercises.length - 1;
-            loadSession();
-            openEditModal(); // Let user edit immediately
-        }
-
-        function addNewDay() {
-            const id = prompt("Identifiant du jour (ex: jeudi) sans accents/espaces si possible :");
-            if (!id) return;
-            const safeId = id.toLowerCase().replace(/[^a-z0-9]/g, '');
-            if (!safeId) return;
-
-            if (programs[safeId]) {
-                alert("Ce jour existe déjà !");
-                return;
-            }
-
-            const name = prompt("Nom du programme (ex: PUSH B) :");
-            if (!name) return;
-
-            programs[safeId] = {
-                id: safeId,
-                name: name,
-                exercises: [
-                    { name: "Exercice 1", focus: "Muscle", sets: 3, reps: "10", rest: 60 }
-                ]
-            };
-            savePrograms();
-            changeDay(safeId);
-        }
-
-        function deleteDay(key) {
-            if (Object.keys(programs).length <= 1) {
-                alert("Vous devez garder au moins un jour.");
-                return;
-            }
-            if (!confirm(`Supprimer le programme ${programs[key].name} ?`)) return;
-
-            delete programs[key];
-            savePrograms();
-
-            // Switch to a safe day
-            const keys = Object.keys(programs);
-            changeDay(keys[0]);
-        }
-
-        function renameCurrentDay() {
-            const newName = prompt("Nouveau nom pour ce programme :", programs[currentDay].name);
-            if (newName) {
-                programs[currentDay].name = newName;
-                savePrograms();
-                loadSession();
-            }
-        }
-
-        function changeDay(day) {
-            currentDay = day;
-            currentExerciseIndex = 0;
-            currentSetNumber = 1;
-            // Reset state
-            currentSessionId = null;
-            sessionStartTime = null;
-            sessionData = [];
-            currentExerciseIndex = 0;
-            currentSetNumber = 1;
-
-            // Synchronisation automatique avec le cloud
-            if (currentUser) {
-                saveToCloud();
-            }
-
-            // Refresh view
-            switchView('session');
-            loadSession();
-        }
-
-        function prevExercise() {
-            if (currentExerciseIndex > 0) {
-                currentExerciseIndex--;
-                loadSession(true);
-            }
-        }
-
-        function nextExercise() {
-            if (currentExerciseIndex < programs[currentDay].exercises.length - 1) {
-                currentExerciseIndex++;
-                loadSession(true);
-            }
+            document.getElementById('timer-display').textContent = `${String(mins).padStart(2, '0')}:${String(secs).padStart(2, '0')}`;
         }
 
         function showSessionComplete() {
-            // Ensure sessionStartTime is a valid Date object or string
-            let startTimeIso = new Date().toISOString();
-            if (sessionStartTime) {
-                startTimeIso = (sessionStartTime instanceof Date) ? sessionStartTime.toISOString() : new Date(sessionStartTime).toISOString();
-            }
-
-            // Save complete session summary
-            const sessionSummary = {
+            const startTimeIso = sessionStartTime instanceof Date ? sessionStartTime.toISOString() : new Date(sessionStartTime).toISOString();
+            saveSessionToHistory({
                 id: currentSessionId,
                 day: currentDay,
                 programName: programs[currentDay].name,
@@ -1541,681 +895,293 @@
                 endTime: new Date().toISOString(),
                 totalExercises: programs[currentDay].exercises.length,
                 totalSets: sessionData.length,
-                details: sessionData,
-                exercises: sessionData.reduce((acc, set) => {
-                    if (!acc[set.exercise]) {
-                        acc[set.exercise] = { sets: 0, totalWeight: 0, totalReps: 0 };
-                    }
-                    acc[set.exercise].sets++;
-                    acc[set.exercise].totalWeight += set.weight;
-                    acc[set.exercise].totalReps += set.reps;
-                    return acc;
-                }, {})
-            };
-
-            // Save to LocalStorage History
-            saveSessionToHistory(sessionSummary);
-
-            // Auto-Export to .txt
-            // Small delay to ensure UI updates first if needed, but mainly to separate actions
-            setTimeout(() => {
-                exportSessionToTxt(currentSessionId);
-            }, 500);
-
-            // Clear current session temp data
+                details: sessionData
+            });
             localStorage.removeItem(STORAGE_KEY_CURRENT_SESSION);
 
-            const sessionView = document.getElementById('session-view');
-            sessionView.innerHTML = `
-                <div class="glass rounded-3xl p-12 text-center">
+            document.getElementById('session-view').innerHTML = `
+                <div class="card text-center py-12">
                     <div class="text-6xl mb-6">🎉</div>
-                    <h2 class="text-3xl font-bold text-white mb-4">Séance Terminée !</h2>
-                    <p class="text-white/70 mb-8">Excellent travail ! Tu as complété tous les exercices.</p>
-                    <div class="flex flex-col gap-4">
-                        <button onclick="resetSession()" 
-                                class="bg-gradient-to-r from-red-600 to-red-900 text-white font-bold py-4 px-8 rounded-2xl btn-glass w-full">
-                            Nouvelle Séance
-                        </button>
-                        <button onclick="exportSessionToTxt('${currentSessionId}')" 
-                                class="bg-white/10 text-white font-bold py-4 px-8 rounded-2xl btn-glass w-full flex items-center justify-center gap-2">
-                            <svg class="w-5 h-5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 16v1a3 3 0 003 3h10a3 3 0 003-3v-1m-4-4l-4 4m0 0l-4-4m4 4V4" />
-                            </svg>
-                            Exporter en Bloc Note
-                        </button>
-                    </div>
-                </div >
-                `;
+                    <h2 class="text-2xl font-bold mb-2">Séance Terminée !</h2>
+                    <p class="text-[var(--text-secondary)] mb-8">Excellent travail !</p>
+                    <button onclick="resetSession()" class="btn-primary w-full">Nouvelle Séance</button>
+                </div>
+            `;
         }
 
         function resetSession() {
             currentExerciseIndex = 0;
-            currentSetNumber = 1;
             sessionData = [];
             currentSessionId = null;
             sessionStartTime = null;
             loadSession();
         }
 
+        function prevExercise() { if (currentExerciseIndex > 0) { currentExerciseIndex--; loadSession(); } }
+        function nextExercise() { if (currentExerciseIndex < programs[currentDay].exercises.length - 1) { currentExerciseIndex++; loadSession(); } }
+        function changeDay(day) { currentDay = day; currentExerciseIndex = 0; sessionData = []; currentSessionId = null; loadSession(); }
+
+        function openEditModal() {
+            const ex = programs[currentDay].exercises[currentExerciseIndex];
+            document.getElementById('edit-name').value = ex.name;
+            document.getElementById('edit-focus').value = ex.focus;
+            document.getElementById('edit-sets').value = ex.sets;
+            document.getElementById('edit-reps').value = ex.reps;
+            document.getElementById('edit-rest').value = ex.rest;
+            document.getElementById('edit-modal').classList.remove('hidden');
+        }
+
+        function closeEditModal() { document.getElementById('edit-modal').classList.add('hidden'); }
+
+        function saveExerciseChanges() {
+            const name = document.getElementById('edit-name').value;
+            const focus = document.getElementById('edit-focus').value;
+            const sets = parseInt(document.getElementById('edit-sets').value);
+            const reps = document.getElementById('edit-reps').value;
+            const rest = parseInt(document.getElementById('edit-rest').value);
+            if (!name || !sets || !reps || !rest) { alert("Remplissez tous les champs"); return; }
+            programs[currentDay].exercises[currentExerciseIndex] = { name, focus, sets, reps, rest };
+            savePrograms();
+            closeEditModal();
+            loadSession();
+        }
+
+        function deleteCurrentExercise() {
+            if (!confirm("Supprimer cet exercice ?")) return;
+            programs[currentDay].exercises.splice(currentExerciseIndex, 1);
+            savePrograms();
+            closeEditModal();
+            if (currentExerciseIndex >= programs[currentDay].exercises.length) {
+                currentExerciseIndex = Math.max(0, programs[currentDay].exercises.length - 1);
+            }
+            loadSession();
+        }
+
+        function addNewExercise() {
+            programs[currentDay].exercises.push({ name: "Nouvel Exercice", focus: "Muscle", sets: 3, reps: "10-12", rest: 60 });
+            savePrograms();
+            currentExerciseIndex = programs[currentDay].exercises.length - 1;
+            loadSession();
+            openEditModal();
+        }
+
+        function addNewDay() {
+            const id = prompt("ID du jour (ex: jeudi):");
+            if (!id) return;
+            const safeId = id.toLowerCase().replace(/[^a-z0-9]/g, '');
+            if (programs[safeId]) { alert("Ce jour existe déjà"); return; }
+            const name = prompt("Nom du programme (ex: PUSH B):");
+            if (!name) return;
+            programs[safeId] = { id: safeId, name, exercises: [{ name: "Exercice 1", focus: "Muscle", sets: 3, reps: "10", rest: 60 }] };
+            savePrograms();
+            changeDay(safeId);
+        }
+
         function switchView(view) {
-            document.getElementById('session-view').classList.add('hidden');
-            document.getElementById('profile-view').classList.add('hidden');
-            document.getElementById('settings-view').classList.add('hidden');
-            document.getElementById('auth-view').classList.add('hidden');
+            ['session', 'profile', 'settings', 'auth'].forEach(v => {
+                document.getElementById(`${v}-view`).classList.add('hidden');
+                const nav = document.getElementById(`nav-${v}`);
+                if (nav) nav.classList.remove('active');
+            });
+            document.getElementById(`${view}-view`).classList.remove('hidden');
+            const activeNav = document.getElementById(`nav-${view}`);
+            if (activeNav) activeNav.classList.add('active');
 
-            // Ensure scroll to top when switching views
+            if (view === 'profile') renderProfile();
+            if (view === 'settings') renderSettings();
+            if (view === 'auth') renderAuth();
             window.scrollTo(0, 0);
-
-            if (view === 'session') {
-                document.getElementById('session-view').classList.remove('hidden');
-            } else if (view === 'profile') {
-                document.getElementById('profile-view').classList.remove('hidden');
-                // Force re-render to ensure auth state is reflected
-                renderProfile();
-            } else if (view === 'settings') {
-                document.getElementById('settings-view').classList.remove('hidden');
-                renderSettings();
-            } else if (view === 'auth') {
-                document.getElementById('auth-view').classList.remove('hidden');
-                renderAuth();
-            }
-
-            // Update nav icons
-            document.querySelectorAll('.nav-item').forEach((item, i) => {
-                const svg = item.querySelector('svg');
-                const span = item.querySelector('span');
-                const div = item.querySelector('div'); // Glow effect
-
-                // Reset basic state
-                if (span) span.classList.remove('text-white', 'text-white/50');
-                if (svg) svg.classList.remove('group-hover:text-white');
-                if (div) div.classList.remove('opacity-100');
-
-                const isActive = (view === 'session' && i === 0) ||
-                    (view === 'profile' && i === 1) ||
-                    (view === 'stats' && i === 2) ||
-                    (view === 'settings' && i === 3);
-
-                if (isActive) {
-                    if (span) span.classList.add('text-white');
-                    else if (item.querySelector('span')) item.querySelector('span').classList.add('text-white'); // Fallback
-
-                    if (div) div.classList.add('opacity-100');
-                } else {
-                    if (span) span.classList.add('text-white/50');
-                }
-            });
-        }
-
-        const STATS_CATEGORIES = {
-            "Pecs": ["bench", "couché", "dips", "pec", "fly", "écarté", "chest", "pompe"],
-            "Dos": ["pull", "traction", "rowing", "tirage", "lat", "dos", "back"],
-            "Jambes (Quadriceps)": ["squat", "presse", "leg extension", "fente", "hack", "quad"],
-            "Jambes (Ischios/Fessiers)": ["leg curl", "rdl", "soulevé", "deadlift", "hip", "ischio"],
-            "Jambes (Mollets)": ["mollet", "calf", "extension"],
-            "Bras (Biceps)": ["curl", "biceps", "spider"],
-            "Bras (Triceps)": ["barre front", "skull", "triceps", "extension", "corde"],
-            "Épaules": ["militaire", "military", "press", "élévation", "oiseau", "facepull", "shoulder"]
-        };
-
-        function getCategoryForExercise(name) {
-            const lower = name.toLowerCase();
-            for (const [category, keywords] of Object.entries(STATS_CATEGORIES)) {
-                if (keywords.some(k => lower.includes(k))) return category;
-            }
-            return "Autre";
-        }
-
-        function renderPRsSection() {
-            const prs = getPRs();
-            const prKeys = Object.keys(prs);
-            if (prKeys.length === 0) return '<p class="text-white/40 text-sm">Aucun record enregistré.</p>';
-
-            // Sort PRs via Category Order then Alphabetical
-            prKeys.sort((a, b) => {
-                const catA = getCategoryForExercise(a);
-                const catB = getCategoryForExercise(b);
-                // ... Sort logic simple: alphabetical for now or grouped
-                return a.localeCompare(b);
-            });
-
-            return `
-                 <div class="space-y-3 max-h-60 overflow-y-auto pr-2 custom-scrollbar">
-                    ${prKeys.map(key => `
-                        <div class="glass-dark rounded-xl p-3 flex justify-between items-center border border-white/5 mx-1">
-                            <span class="text-white text-sm font-medium">${key}</span>
-                            <span class="text-yellow-400 font-bold text-sm">${prs[key].weight}<span class="text-[10px] text-white/50 font-normal">kg</span> × ${prs[key].reps}</span>
-                        </div>
-                    `).join('')}
-                 </div>
-            `;
-        }
-
-
-        function handleImport() {
-            const text = document.getElementById('import-text').value;
-            const statusEl = document.getElementById('import-status');
-
-            if (!text.trim()) {
-                alert("Veuillez coller du texte.");
-                return;
-            }
-
-            statusEl.textContent = "Analyse en cours...";
-            statusEl.classList.remove('hidden', 'text-green-400', 'text-red-400');
-
-            setTimeout(() => {
-                const result = parseImportText(text);
-                if (result.sets > 0) {
-                    saveSessionToHistory(result.session);
-                    statusEl.textContent = `Succès ! ${result.sets} séries importées dans "${result.session.programName}".`;
-                    statusEl.classList.add('text-green-400');
-                    document.getElementById('import-text').value = '';
-
-                    // Refresh view after short delay to show success message
-                    setTimeout(() => renderProfile(), 1500);
-                } else {
-                    statusEl.textContent = "Aucune donnée valide trouvée. Vérifiez le format (Exercice: Poids kg x Reps).";
-                    statusEl.classList.add('text-red-400');
-                }
-            }, 500);
-        }
-
-        function parseImportText(text) {
-            // Very basic heuristic parser
-            const lines = text.split('\n');
-            const sessionData = [];
-            let currentExercise = "Exercice Inconnu";
-
-            // Try to extract a program name from first line
-            let programName = "Séance Importée";
-            if (lines.length > 0 && lines[0].length < 50) {
-                programName = lines[0].trim();
-            }
-
-            const weightRegex = /(\d+(?:[.,]\d+)?)\s*(?:kg|kgs)/i;
-            const repsRegex = /(\d+)\s*(?:reps|rep|r)/i;
-            // Catch simple format: "100x8" or "100 x 8"
-            const simpleRegex = /(\d+(?:[.,]\d+)?)\s*x\s*(\d+)/i;
-
-            lines.forEach(line => {
-                line = line.trim();
-                if (!line) return;
-
-                // Detect if line is likely an exercise name (no numbers or ends with colon)
-                if (!line.match(/\d/) || line.endsWith(':')) {
-                    currentExercise = line.replace(':', '').trim();
-                } else {
-                    // Try to parse set data
-                    let weight = 0;
-                    let reps = 0;
-
-                    // Strategy 1: Explicit "kg" and "reps"
-                    const wMatch = line.match(weightRegex);
-                    const rMatch = line.match(repsRegex);
-
-                    // Strategy 2: Simple "100x8"
-                    const sMatch = line.match(simpleRegex);
-
-                    if (sMatch) {
-                        weight = parseFloat(sMatch[1].replace(',', '.'));
-                        reps = parseInt(sMatch[2]);
-                    } else if (wMatch) { // At least weight found
-                        weight = parseFloat(wMatch[1].replace(',', '.'));
-                        if (rMatch) reps = parseInt(rMatch[1]);
-                        else {
-                            // Try finding other number for reps
-                            const otherNums = line.replace(wMatch[0], '').match(/(\d+)/);
-                            if (otherNums) reps = parseInt(otherNums[1]);
-                        }
-                    }
-
-                    if (weight > 0 && reps > 0) {
-                        sessionData.push({
-                            exercise: currentExercise,
-                            weight: weight,
-                            reps: reps,
-                            timestamp: new Date().toISOString()
-                        });
-
-                        // Update PRs seamlessly
-                        updatePR(currentExercise, weight, reps);
-                    }
-                }
-            });
-
-            const session = {
-                id: 'import_' + Date.now(),
-                programName: programName,
-                startTime: new Date().toISOString(),
-                endTime: new Date().toISOString(),
-                totalExercises: [...new Set(sessionData.map(s => s.exercise))].length,
-                totalSets: sessionData.length,
-                details: sessionData, // Important for stats
-                exercises: {} // Dummy for old Summary view compatibility if needed
-            };
-
-            return { sets: sessionData.length, session: session };
         }
 
         function renderProfile() {
-            try {
-                const sessions = getSessions().sort((a, b) => new Date(b.startTime) - new Date(a.startTime));
-                const profileView = document.getElementById('profile-view');
+            const sessions = getSessions().sort((a, b) => new Date(b.startTime) - new Date(a.startTime));
+            const prs = getPRs();
+            const prKeys = Object.keys(prs);
 
-                if (!profileView) {
-                    console.error("profile-view element not found");
-                    return;
-                }
+            let authHtml = currentUser ? `
+                <div class="card flex items-center gap-4">
+                    <div class="w-12 h-12 bg-green-500 rounded-full flex items-center justify-center">
+                        <svg class="w-6 h-6 text-white" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 13l4 4L19 7"/></svg>
+                    </div>
+                    <div>
+                        <p class="text-xs text-[var(--text-muted)] uppercase">Connecté</p>
+                        <p class="font-bold">${currentUser.email}</p>
+                    </div>
+                </div>
+            ` : `
+                <div class="card text-center">
+                    <div class="w-16 h-16 bg-[var(--accent)] rounded-full flex items-center justify-center mx-auto mb-4">
+                        <svg class="w-8 h-8 text-white" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M16 7a4 4 0 11-8 0 4 4 0 018 0zM12 14a7 7 0 00-7 7h14a7 7 0 00-7-7z"/></svg>
+                    </div>
+                    <h3 class="font-bold text-lg mb-2">Sauvegardez vos données</h3>
+                    <p class="text-[var(--text-secondary)] text-sm mb-4">Créez un compte pour sauvegarder vos séances.</p>
+                    <button onclick="switchView('auth')" class="btn-primary w-full">Se connecter</button>
+                </div>
+            `;
 
-                // --- AUTH SECTION ---
-                let authHtml = '';
-                if (!currentUser) {
-                    authHtml = `
-                    <div class="glass rounded-3xl p-6 mb-6 flex flex-col items-center text-center">
-                        <div class="w-16 h-16 bg-gradient-to-br from-red-600 to-red-900 rounded-full flex items-center justify-center mb-4 shadow-lg">
-                            <svg class="w-8 h-8 text-white" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M16 7a4 4 0 11-8 0 4 4 0 018 0zM12 14a7 7 0 00-7 7h14a7 7 0 00-7-7z" />
-                            </svg>
+            document.getElementById('profile-view').innerHTML = `
+                ${authHtml}
+                <div class="card">
+                    <h3 class="font-bold text-lg mb-4">🏆 Records Personnels</h3>
+                    ${prKeys.length === 0 ? '<p class="text-[var(--text-muted)] text-sm">Aucun record</p>' : `
+                        <div class="space-y-2 max-h-60 overflow-y-auto">
+                            ${prKeys.map(key => `
+                                <div class="card-dark flex justify-between items-center">
+                                    <span class="text-sm">${key}</span>
+                                    <span class="font-bold text-[var(--accent)]">${prs[key].weight}kg × ${prs[key].reps}</span>
+                                </div>
+                            `).join('')}
                         </div>
-                        <h3 class="text-white font-bold text-lg mb-1">Sauvegardez votre progression</h3>
-                        <p class="text-white/60 text-sm mb-4">Créez un compte pour ne jamais perdre vos séances.</p>
-                        <button onclick="switchView('auth')" class="w-full bg-white text-black font-bold py-3 rounded-xl hover:bg-white/90 transition-all">
-                            Se connecter / S'inscrire
-                        </button>
-                    </div>
-                    `;
-                } else {
-                    authHtml = `
-                    <div class="glass rounded-3xl p-6 mb-6">
-                        <div class="flex items-center gap-4 mb-4">
-                            <div class="w-12 h-12 bg-green-500 rounded-full flex items-center justify-center shadow-lg">
-                                <svg class="w-6 h-6 text-white" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 13l4 4L19 7" />
-                                </svg>
-                            </div>
-                            <div>
-                                <p class="text-white/60 text-xs uppercase tracking-wider font-semibold">Connecté</p>
-                                <p class="text-white font-bold truncate max-w-[200px]">${currentUser.email}</p>
-                            </div>
+                    `}
+                </div>
+                <div class="card">
+                    <h3 class="font-bold text-lg mb-4">📊 Historique</h3>
+                    ${sessions.length === 0 ? '<p class="text-[var(--text-muted)] text-sm">Aucune séance</p>' : `
+                        <div class="space-y-2">
+                            ${sessions.slice(0, 10).map(s => {
+                const d = new Date(s.startTime);
+                const dur = Math.floor((new Date(s.endTime) - d) / 60000);
+                return `<div onclick="showSessionDetail('${s.id}')" class="card-dark cursor-pointer hover:bg-[var(--bg-card-hover)]">
+                                    <p class="font-semibold">${s.programName}</p>
+                                    <p class="text-sm text-[var(--text-muted)]">${d.toLocaleDateString('fr-FR')} • ${dur} min</p>
+                                </div>`;
+            }).join('')}
                         </div>
-                    </div>
-                    `;
-                }
-
-                // --- PRs SECTION ---
-                let prsHtml = '';
-                try {
-                    prsHtml = renderPRsSection();
-                } catch (e) {
-                    console.error("Error rendering PRs:", e);
-                    prsHtml = '<p class="text-white/40 text-sm">Erreur de chargement.</p>';
-                }
-
-                // --- SESSIONS LIST ---
-                let sessionsHtml = '';
-                if (sessions.length === 0) {
-                    sessionsHtml = `
-                    <div class="glass rounded-3xl p-8 text-center">
-                        <h2 class="text-2xl font-bold text-white mb-2">Mes Séances</h2>
-                        <p class="text-white/70 mb-6">Aucune séance enregistrée</p>
-                        <button onclick="switchView('session')" class="bg-gradient-to-r from-red-600 to-red-900 text-white font-bold py-3 px-6 rounded-2xl">
-                            Commencer
-                        </button>
-                    </div>
-                    `;
-                } else {
-                    sessionsHtml = `
-                    <div class="glass rounded-3xl p-6 mb-6">
-                        <h2 class="text-2xl font-bold text-white mb-2">Mes Séances</h2>
-                        <p class="text-white/70 text-sm">${sessions.length} séance(s)</p>
-                    </div>
-                    <div class="space-y-4">
-                    ${sessions.map(s => {
-                        const d = new Date(s.startTime);
-                        const dur = Math.floor((new Date(s.endTime) - d) / 60000);
-                        return `<div class="glass rounded-3xl p-6 cursor-pointer hover:bg-white/5" onclick="showSessionDetail('${s.id}')">
-                            <h3 class="text-xl font-bold text-white">${s.programName}</h3>
-                            <p class="text-white/60 text-sm">${d.toLocaleDateString('fr-FR')} - ${dur} min</p>
-                        </div>`;
-                    }).join('')}
-                    </div>
-                    `;
-                }
-
-                profileView.innerHTML = `
-                    ${authHtml}
-                    <div class="glass glass-dark rounded-3xl p-6 mb-6 border border-white/10">
-                        <h3 class="text-xl font-bold text-white mb-4">🏆 Mes Records</h3>
-                        ${prsHtml}
-                    </div>
-                    <div class="glass glass-dark rounded-3xl p-6 mb-6 border border-white/10">
-                        <h3 class="text-xl font-bold text-white mb-4">📄 Import</h3>
-                        <textarea id="import-text" class="w-full bg-black/30 rounded-xl p-4 text-white text-sm h-24 border border-white/10 outline-none resize-none mb-3" placeholder="Bench: 100kg x 8"></textarea>
-                        <button onclick="handleImport()" class="w-full py-3 bg-red-700 text-white font-bold rounded-xl">Importer</button>
-                        <p id="import-status" class="text-xs mt-2 text-white/50 hidden"></p>
-                    </div>
-                    ${sessionsHtml}
-                `;
-            } catch (error) {
-                console.error("renderProfile error:", error);
-                document.getElementById('profile-view').innerHTML = '<div class="glass p-8 text-white text-center">Erreur. Voir console.</div>';
-            }
+                    `}
+                </div>
+            `;
         }
 
         function showSessionDetail(sessionId) {
-            const sessions = getSessions();
-            const session = sessions.find(s => s.id === sessionId);
-
+            const session = getSessions().find(s => s.id === sessionId);
             if (!session) return;
+            const d = new Date(session.startTime);
+            const dur = Math.floor((new Date(session.endTime) - d) / 60000);
 
-            const startDate = new Date(session.startTime);
-            const endDate = new Date(session.endTime);
-            const duration = Math.floor((endDate - startDate) / 60000);
+            const grouped = (session.details || []).reduce((acc, set) => {
+                if (!acc[set.exercise]) acc[set.exercise] = [];
+                acc[set.exercise].push(set);
+                return acc;
+            }, {});
 
-            const profileView = document.getElementById('profile-view');
-            profileView.innerHTML = `
-                < div class="glass rounded-3xl p-6 mb-6" >
-                    <div class="flex justify-between items-center mb-4">
-                        <button onclick="renderProfile()" class="flex items-center gap-2 text-white/70 hover:text-white transition-all">
-                            <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 19l-7-7 7-7"></path>
-                            </svg>
-                            Retour
-                        </button>
-                        <button onclick="exportSessionToTxt('${session.id}')" class="p-2 bg-white/10 rounded-full hover:bg-white/20 transition-all text-white">
-                            <svg class="w-5 h-5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 16v1a3 3 0 003 3h10a3 3 0 003-3v-1m-4-4l-4 4m0 0l-4-4m4 4V4" />
-                            </svg>
-                        </button>
-                    </div>
-                    <h2 class="text-2xl font-bold text-white mb-2">${session.programName}</h2>
-                    <p class="text-white/70 text-sm">${startDate.toLocaleDateString('fr-FR')} à ${startDate.toLocaleTimeString('fr-FR', { hour: '2-digit', minute: '2-digit' })}</p>
-                </div >
-                
-                <div class="glass rounded-3xl p-6 mb-6">
-                    <div class="grid grid-cols-3 gap-4">
-                        <div class="text-center">
-                            <p class="text-white/60 text-sm mb-1">Durée</p>
-                            <p class="text-white text-2xl font-bold">${duration} min</p>
-                        </div>
-                        <div class="text-center">
-                            <p class="text-white/60 text-sm mb-1">Exercices</p>
-                             <p class="text-white text-2xl font-bold">${session.totalExercises}</p>
-                        </div>
-                        <div class="text-center">
-                            <p class="text-white/60 text-sm mb-1">Séries</p>
-                            <p class="text-white text-2xl font-bold">${session.totalSets}</p>
-                        </div>
-                    </div>
+            document.getElementById('profile-view').innerHTML = `
+                <div class="card">
+                    <button onclick="renderProfile()" class="flex items-center gap-2 text-[var(--text-secondary)] mb-4">
+                        <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 19l-7-7 7-7"/></svg>
+                        Retour
+                    </button>
+                    <h2 class="text-xl font-bold mb-1">${session.programName}</h2>
+                    <p class="text-[var(--text-muted)] text-sm">${d.toLocaleDateString('fr-FR')} • ${dur} min</p>
                 </div>
-                
-                <div class="glass rounded-3xl p-6">
-                    <h3 class="text-white font-semibold mb-4">Détails des Exercices</h3>
+                <div class="grid grid-cols-3 gap-3">
+                    <div class="stat-card text-center"><span class="stat-label">Durée</span><span class="stat-value">${dur}m</span></div>
+                    <div class="stat-card text-center"><span class="stat-label">Exos</span><span class="stat-value">${session.totalExercises}</span></div>
+                    <div class="stat-card text-center"><span class="stat-label">Séries</span><span class="stat-value">${session.totalSets}</span></div>
+                </div>
+                <div class="card">
+                    <h3 class="font-semibold mb-4">Détails</h3>
                     <div class="space-y-3">
-                        ${session.details && session.details.length > 0
-                    ? (() => {
-                        // Group details by exercise name
-                        const grouped = session.details.reduce((acc, set) => {
-                            if (!acc[set.exercise]) acc[set.exercise] = [];
-                            acc[set.exercise].push(set);
-                            return acc;
-                        }, {});
-                        return Object.entries(grouped).map(([exerciseName, sets]) => `
-                                    <div class="glass-dark rounded-2xl p-4">
-                                        <p class="text-white font-semibold mb-2">${exerciseName}</p>
-                                        <div class="space-y-2">
-                                            ${sets.map((set, i) => `
-                                                <div class="flex justify-between text-sm text-white/70">
-                                                    <span>Série ${i + 1}</span>
-                                                    <span class="text-white">${set.weight}kg × ${set.reps} reps</span>
-                                                </div>
-                                            `).join('')}
-                                        </div>
-                                    </div>
-                                `).join('');
-                    })()
-                    : session.exercises
-                        ? Object.entries(session.exercises).map(([exerciseName, data]) => `
-                                    <div class="glass-dark rounded-2xl p-4">
-                                        <p class="text-white font-semibold mb-2">${exerciseName}</p>
-                                        <div class="flex gap-4 text-sm text-white/70">
-                                            <span>${data.sets} séries</span>
-                                            <span>•</span>
-                                            <span>${data.totalReps} reps total</span>
-                                            <span>•</span>
-                                            <span>${(data.totalWeight || 0).toFixed(1)}kg total</span>
-                                        </div>
-                                    </div>
-                                `).join('')
-                        : '<p class="text-white/50 text-sm">Aucun détail disponible</p>'
-                }
+                        ${Object.entries(grouped).map(([name, sets]) => `
+                            <div class="card-dark">
+                                <p class="font-semibold mb-2">${name}</p>
+                                ${sets.map((s, i) => `<div class="flex justify-between text-sm"><span class="text-[var(--text-muted)]">Série ${i + 1}</span><span>${s.weight}kg × ${s.reps}</span></div>`).join('')}
+                            </div>
+                        `).join('')}
                     </div>
                 </div>
             `;
         }
 
         function renderSettings() {
-            const settingsView = document.getElementById('settings-view');
-            settingsView.innerHTML = `
-                < div class="glass rounded-3xl p-8" >
-                    <h2 class="text-2xl font-light text-white mb-8">Paramètres</h2>
-                    <div class="space-y-6">
-                        ${currentUser ? `
-                        <div class="glass-dark rounded-2xl p-6 border border-green-500/30">
-                             <p class="text-white font-medium mb-1">Compte Connecté</p>
-                             <p class="text-white/60 text-sm font-light mb-4">${currentUser.email}</p>
-                             <div class="space-y-3">
-                                <button onclick="saveToCloud()" class="w-full py-3 bg-white/10 hover:bg-white/20 text-white rounded-xl text-sm font-medium transition-colors flex items-center justify-center gap-2">
-                                    <svg class="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 4v5h.582m15.356 2A8.001 8.001 0 004.582 9m0 0H9m11 11v-5h-.581m0 0a8.003 8.003 0 01-15.357-2m15.357 2H15" /></svg>
-                                    Forcer la sauvegarde (Cloud)
-                                </button>
-                                <button onclick="handleLogout()" class="w-full py-3 bg-red-500/10 hover:bg-red-500/20 text-red-300 rounded-xl text-sm font-medium transition-colors">Se déconnecter</button>
-                             </div>
-                        </div>` : ''}
-
-                        <div class="glass-dark rounded-2xl p-6">
-                            <p class="text-white font-medium mb-3">Préférences</p>
-                            
-                            <div class="flex items-center justify-between mb-2">
-                                <span class="text-white/70 text-sm">Mode Clair/Sombre</span>
-                                <!-- Toggle handled by top button, just info here or move toggle here? Let's keep top button -->
-                                <button onclick="toggleTheme()" class="text-xs bg-white/10 px-3 py-1 rounded-full">Basculer</button>
-                            </div>
-
-                            <div class="flex items-center justify-between">
-                                <span class="text-white/70 text-sm">Auto-Synchronisation</span>
-                                <button id="btn-toggle-sync" onclick="toggleAutoSync()" class="relative inline-flex h-6 w-11 items-center rounded-full transition-colors focus:outline-none ${localStorage.getItem('onair_autosync') !== 'false' ? 'bg-green-500' : 'bg-gray-600'}">
-                                    <span class="sr-only">Activer Auto-Sync</span>
-                                    <span class="inline-block h-4 w-4 transform rounded-full bg-white transition duration-200 ease-in-out ${localStorage.getItem('onair_autosync') !== 'false' ? 'translate-x-6' : 'translate-x-1'}" />
-                                </button>
-                            </div>
-                            <p class="text-white/40 text-[10px] mt-2 font-light">Si activé, vos données sont sauvegardées en ligne à chaque changement.</p>
+            document.getElementById('settings-view').innerHTML = `
+                <div class="card">
+                    <h2 class="text-xl font-bold mb-6">Paramètres</h2>
+                    ${currentUser ? `
+                        <div class="card-dark mb-4">
+                            <p class="font-medium mb-1">Compte</p>
+                            <p class="text-sm text-[var(--text-muted)] mb-3">${currentUser.email}</p>
+                            <button onclick="saveToCloud()" class="btn-secondary w-full mb-2">Forcer la sauvegarde</button>
+                            <button onclick="handleLogout()" class="w-full py-3 text-red-500 text-sm">Se déconnecter</button>
                         </div>
-
-                        <div class="glass-dark rounded-2xl p-6">
-                            <p class="text-white font-medium mb-1">À propos</p>
-                            <p class="text-white/60 text-sm font-light">Yutoow Fit Track v2.1</p>
-                            <p class="text-white/40 text-[10px] mt-2 font-light">Développé avec ❤️ pour la performance.</p>
-                        </div>
-
-                        <div class="glass-dark rounded-2xl p-6 border border-red-500/30">
-                            <p class="text-red-400 font-medium mb-4 flex items-center gap-2">
-                                <svg class="w-5 h-5" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 9v2m0 4h.01m-6.938 4h13.856c1.54 0 2.502-1.667 1.732-3L13.732 4c-.77-1.333-2.694-1.333-3.464 0L3.34 16c-.77 1.333.192 3 1.732 3z"/></svg>
-                                Zone de Danger
-                            </p>
-                            <div class="space-y-3">
-                                <button onclick="clearHistory()" class="w-full py-3 bg-red-500/10 hover:bg-red-500/20 text-red-400 rounded-xl text-sm transition-colors border border-red-500/20">
-                                    Effacer l'historique
-                                </button>
-                                <button onclick="resetApp()" class="w-full py-3 bg-red-900/20 hover:bg-red-900/30 text-red-500 rounded-xl text-sm font-bold transition-colors border border-red-500/20">
-                                    Tout réinitialiser (Usine)
-                                </button>
-                            </div>
-                        </div>
+                    ` : ''}
+                    <div class="card-dark mb-4">
+                        <p class="font-medium mb-1">À propos</p>
+                        <p class="text-sm text-[var(--text-muted)]">Yutoow Fit Track v3.0</p>
                     </div>
-                </div >
-                `;
+                    <div class="card-dark border border-red-500/30">
+                        <p class="font-medium text-red-400 mb-3">Zone Danger</p>
+                        <button onclick="clearHistory()" class="btn-secondary w-full mb-2 !text-red-400">Effacer l'historique</button>
+                        <button onclick="resetApp()" class="btn-secondary w-full !text-red-500">Tout réinitialiser</button>
+                    </div>
+                </div>
+            `;
         }
 
         function clearHistory() {
-            if (confirm("Voulez-vous vraiment effacer l'historique de toutes vos séances passées ? Cette action est irréversible.")) {
+            if (confirm("Effacer tout l'historique ?")) {
                 localStorage.removeItem(STORAGE_KEY_SESSIONS);
-                alert("Historique effacé.");
+                alert("Historique effacé");
                 renderSettings();
             }
         }
 
         function resetApp() {
-            if (confirm("ATTENTION : Cela va tout effacer (Séances, Records, Programmes personnalisés). L'application repartira à zéro. Continuer ?")) {
-                if (confirm("Êtes-vous vraiment sûr ?")) {
-                    localStorage.clear();
-                    location.reload();
-                }
+            if (confirm("Tout réinitialiser ?") && confirm("Êtes-vous sûr ?")) {
+                localStorage.clear();
+                location.reload();
             }
         }
-
-        // --- AUTH FUNCTIONS ---
 
         function renderAuth() {
             document.getElementById('auth-view').innerHTML = `
-                < div class="glass rounded-3xl p-8 max-w-sm mx-auto flex flex-col justify-center min-h-[50vh]" >
-                    <h2 class="text-2xl font-bold text-white mb-6 text-center">Connexion</h2>
-                    
+                <div class="card py-8">
+                    <h2 class="text-2xl font-bold mb-6 text-center">Connexion</h2>
                     <div class="space-y-4">
-                        <div class="hero-input-wrapper text-left">
-                            <label class="hero-label text-left !mb-0 !text-[10px]">Email</label>
-                            <input type="email" id="auth-email" class="w-full bg-transparent text-white border-0 outline-none p-1 text-base font-normal" inputmode="email" placeholder="exemple@email.com">
+                        <div class="input-group">
+                            <label>Email</label>
+                            <input type="email" id="auth-email" class="!text-base !text-left" placeholder="exemple@email.com">
                         </div>
-                        <div class="hero-input-wrapper text-left">
-                            <label class="hero-label text-left !mb-0 !text-[10px]">Mot de passe</label>
-                            <input type="password" id="auth-password" class="w-full bg-transparent text-white border-0 outline-none p-1 text-base font-normal" placeholder="••••••••">
+                        <div class="input-group">
+                            <label>Mot de passe</label>
+                            <input type="password" id="auth-password" class="!text-base !text-left" placeholder="••••••••">
                         </div>
                     </div>
-
-                    <div class="grid grid-cols-1 gap-3 mt-6">
-                        <button onclick="handleLogin()" class="w-full bg-gradient-to-r from-red-600 to-red-900 text-white font-bold py-3 rounded-xl btn-glass shadow-lg">
-                            Se connecter
-                        </button>
-                        <button onclick="handleSignup()" class="w-full bg-white/10 text-white font-semibold py-3 rounded-xl hover:bg-white/20 transition-all">
-                            Créer un compte
-                        </button>
+                    <div class="space-y-3 mt-6">
+                        <button onclick="handleLogin()" class="btn-primary w-full">Se connecter</button>
+                        <button onclick="handleSignup()" class="btn-secondary w-full">Créer un compte</button>
                     </div>
-
-                    <button onclick="switchView('profile')" class="w-full mt-4 text-white/50 text-sm hover:text-white transition-colors">
-                        Retour
-                    </button>
-                    
-                    <p id="auth-error" class="text-red-400 text-sm text-center mt-4 hidden"></p>
-                </div >
-                `;
-
-            // Fix for viewport stuck issue
-            requestAnimationFrame(() => {
-                window.scrollTo(0, 0);
-            });
+                    <button onclick="switchView('profile')" class="w-full mt-4 text-[var(--text-muted)] text-sm">Retour</button>
+                    <p id="auth-error" class="text-red-500 text-sm text-center mt-4 hidden"></p>
+                </div>
+            `;
         }
 
         async function handleLogin() {
-            if (!auth) {
-                alert("Erreur: Le service de connexion est bloqué par votre navigateur (Brave Shield ?). Désactivez les protections pour ce site.");
-                return;
-            }
-
+            if (!auth) { alert("Firebase indisponible"); return; }
             const email = document.getElementById('auth-email').value;
             const password = document.getElementById('auth-password').value;
-            const errorEl = document.getElementById('auth-error');
-            const btn = document.querySelector('button[onclick="handleLogin()"]');
-
-            if (!email || !password) {
-                errorEl.textContent = "Veuillez remplir tous les champs.";
-                errorEl.classList.remove('hidden');
-                return;
-            }
-
+            if (!email || !password) { document.getElementById('auth-error').textContent = "Remplissez tous les champs"; document.getElementById('auth-error').classList.remove('hidden'); return; }
             try {
-                // FORCE PERSISTENCE: This is critical for mobile browsers especially Brave
-                await auth.setPersistence(firebase.auth.Auth.Persistence.LOCAL);
-            } catch (pError) {
-                console.error("Persistence Warning:", pError);
-                // Continue anyway, it might work for session only
-            }
-
-            try {
-                // Loading State
-                const originalText = btn.innerText;
-                btn.innerText = "Connexion...";
-                btn.disabled = true;
-                btn.classList.add('opacity-50', 'cursor-not-allowed');
-                errorEl.classList.add('hidden');
-
-                const timeout = new Promise((_, reject) => setTimeout(() => reject(new Error("Délai d'attente dépassé (20s). Vérifiez votre connexion.")), 20000));
-
-                await Promise.race([
-                    auth.signInWithEmailAndPassword(email, password),
-                    timeout
-                ]);
-
-                // Real-time sync handled by onAuthStateChanged
-                // await syncData();
-
+                await auth.signInWithEmailAndPassword(email, password);
                 switchView('profile');
-            } catch (error) {
-                errorEl.textContent = "Erreur: " + error.message;
-                errorEl.classList.remove('hidden');
-                alert("Erreur Connexion: " + error.message); // Explicit alert for mobile
-
-                // Reset Button
-                btn.innerText = "Se connecter";
-                btn.disabled = false;
-                btn.classList.remove('opacity-50', 'cursor-not-allowed');
+            } catch (e) {
+                document.getElementById('auth-error').textContent = e.message;
+                document.getElementById('auth-error').classList.remove('hidden');
             }
         }
 
         async function handleSignup() {
-            if (!auth) {
-                alert("Erreur: Le service d'inscription est bloqué par votre navigateur. Vérifiez vos extensions/bloqueurs.");
-                return;
-            }
-
+            if (!auth) { alert("Firebase indisponible"); return; }
             const email = document.getElementById('auth-email').value;
             const password = document.getElementById('auth-password').value;
-            const errorEl = document.getElementById('auth-error');
-            const btn = document.querySelector('button[onclick="handleSignup()"]');
-
-            if (!email || !password) {
-                errorEl.textContent = "Veuillez remplir tous les champs.";
-                errorEl.classList.remove('hidden');
-                return;
-            }
-
+            if (!email || !password) { document.getElementById('auth-error').textContent = "Remplissez tous les champs"; document.getElementById('auth-error').classList.remove('hidden'); return; }
             try {
-                // Loading State
-                const originalText = btn.innerText;
-                btn.innerText = "Création...";
-                btn.disabled = true;
-                btn.classList.add('opacity-50', 'cursor-not-allowed');
-                errorEl.classList.add('hidden');
-
-                const timeout = new Promise((_, reject) => setTimeout(() => reject(new Error("Délai d'attente dépassé (15s).")), 15000));
-
-                await Promise.race([
-                    auth.createUserWithEmailAndPassword(email, password),
-                    timeout
-                ]);
-
-                // On signup, push local data to cloud immediately if cloud is empty
+                await auth.createUserWithEmailAndPassword(email, password);
                 await saveToCloud(true);
                 switchView('profile');
-            } catch (error) {
-                errorEl.textContent = "Erreur: " + error.message;
-                errorEl.classList.remove('hidden');
-                alert("Erreur Inscription: " + error.message);
-
-                // Reset Button
-                btn.innerText = "Créer un compte";
-                btn.disabled = false;
-                btn.classList.remove('opacity-50', 'cursor-not-allowed');
+            } catch (e) {
+                document.getElementById('auth-error').textContent = e.message;
+                document.getElementById('auth-error').classList.remove('hidden');
             }
         }
 
@@ -2223,284 +1189,64 @@
             if (confirm("Se déconnecter ?")) {
                 await auth.signOut();
                 currentUser = null;
-                switchView('profile'); // Forces refresh
+                switchView('profile');
             }
         }
 
-        // --- CLOUD SYNC FUNCTIONS ---
-
+        // Cloud Sync
         let unsubscribeSnapshot = null;
 
         function setupRealtimeSync() {
             if (!currentUser || !db) return;
             if (unsubscribeSnapshot) unsubscribeSnapshot();
-
-            const docRef = db.collection('users').doc(currentUser.uid);
-
-            unsubscribeSnapshot = docRef.onSnapshot((doc) => {
+            unsubscribeSnapshot = db.collection('users').doc(currentUser.uid).onSnapshot(doc => {
                 if (doc.exists) {
                     const data = doc.data();
-                    console.log("☁️ Real-time update received:", data);
-
-                    // MERGE STRATEGY: Combine local and cloud data intelligently
-                    let hasChanges = false;
-
-                    // 1. Programs
                     if (data.programs) {
-                        // Compare strings to avoid unnecessary parsing/renders
-                        const currentLocalStr = localStorage.getItem(STORAGE_KEY_PROGRAMS);
-                        if (data.programs !== currentLocalStr) {
-                            const cloudPrograms = JSON.parse(data.programs);
-                            // Server wins policy for simplicity in real-time, or check timestamps if available
-                            if (Object.keys(cloudPrograms).length > 0) {
-                                programs = cloudPrograms;
-                                localStorage.setItem(STORAGE_KEY_PROGRAMS, data.programs); // Save exact string
-                                hasChanges = true;
-                            }
+                        const cloud = JSON.parse(data.programs);
+                        if (Object.keys(cloud).length > 0) {
+                            programs = cloud;
+                            localStorage.setItem(STORAGE_KEY_PROGRAMS, data.programs);
                         }
                     }
-
-                    // 2. Sessions (History)
-                    if (data.sessions) {
-                        const currentLocalStr = localStorage.getItem(STORAGE_KEY_SESSIONS);
-                        // optimize: only parse if string different
-                        if (data.sessions !== currentLocalStr) {
-                            const cloudSessions = JSON.parse(data.sessions);
-                            const localSessions = getSessions();
-                            const sessionMap = new Map();
-
-                            localSessions.forEach(s => sessionMap.set(s.id, s));
-                            cloudSessions.forEach(s => sessionMap.set(s.id, s));
-
-                            const mergedSessions = Array.from(sessionMap.values())
-                                .sort((a, b) => new Date(a.startTime) - new Date(b.startTime));
-
-                            const mergedStr = JSON.stringify(mergedSessions);
-                            if (mergedStr !== currentLocalStr) {
-                                localStorage.setItem(STORAGE_KEY_SESSIONS, mergedStr);
-                                hasChanges = true;
-                            }
-                        }
-                    }
-
-                    // 3. PRs
-                    if (data.prs) {
-                        const currentLocalStr = localStorage.getItem(STORAGE_KEY_PRS);
-                        if (data.prs !== currentLocalStr) {
-                            const cloudPRs = JSON.parse(data.prs);
-                            const localPRs = getPRs();
-                            const mergedPRs = { ...localPRs };
-                            let prChanged = false;
-
-                            Object.keys(cloudPRs).forEach(exercise => {
-                                const cloudPR = cloudPRs[exercise];
-                                const localPR = localPRs[exercise];
-
-                                if (!localPR ||
-                                    cloudPR.weight > localPR.weight ||
-                                    (cloudPR.weight === localPR.weight && cloudPR.reps > localPR.reps)) {
-                                    mergedPRs[exercise] = cloudPR;
-                                    prChanged = true;
-                                }
-                            });
-
-                            if (prChanged) {
-                                localStorage.setItem(STORAGE_KEY_PRS, JSON.stringify(mergedPRs));
-                                hasChanges = true;
-                            }
-                        }
-                    }
-
-                    if (hasChanges) {
-                        loadSession(); // Refresh session UI
-                        // Also refresh Stats view if it's currently visible
-                        const statsView = document.getElementById('stats-view');
-                        if (statsView && !statsView.classList.contains('hidden')) {
-                            renderStats();
-                        }
-                        // Also refresh Profile view if visible
-                        const profileView = document.getElementById('profile-view');
-                        if (profileView && !profileView.classList.contains('hidden')) {
-                            renderProfile();
-                        }
-                        showSyncNotification("☁️ Données synchronisées");
-                    }
-
-                } else {
-                    // First time - no cloud data, upload local data
-                    console.log("No cloud data. Uploading local.");
-                    saveToCloud(true);
+                    if (data.sessions) localStorage.setItem(STORAGE_KEY_SESSIONS, data.sessions);
+                    if (data.prs) localStorage.setItem(STORAGE_KEY_PRS, data.prs);
                 }
-            }, (error) => {
-                console.error("Sync error:", error);
             });
-        }
-
-        // Force refresh data from cloud (one-time fetch)
-        async function refreshFromCloud() {
-            if (!currentUser || !db) return;
-
-            try {
-                const doc = await db.collection('users').doc(currentUser.uid).get();
-                if (doc.exists) {
-                    const data = doc.data();
-
-                    // Merge sessions
-                    if (data.sessions) {
-                        const cloudSessions = JSON.parse(data.sessions);
-                        const localSessions = getSessions();
-                        const sessionMap = new Map();
-
-                        localSessions.forEach(s => sessionMap.set(s.id, s));
-                        cloudSessions.forEach(s => sessionMap.set(s.id, s));
-
-                        const mergedSessions = Array.from(sessionMap.values())
-                            .sort((a, b) => new Date(a.startTime) - new Date(b.startTime));
-                        localStorage.setItem(STORAGE_KEY_SESSIONS, JSON.stringify(mergedSessions));
-                    }
-
-                    // Merge PRs (keep best)
-                    if (data.prs) {
-                        const cloudPRs = JSON.parse(data.prs);
-                        const localPRs = getPRs();
-                        const mergedPRs = { ...localPRs };
-
-                        Object.keys(cloudPRs).forEach(exercise => {
-                            const cloudPR = cloudPRs[exercise];
-                            const localPR = localPRs[exercise];
-
-                            if (!localPR ||
-                                cloudPR.weight > localPR.weight ||
-                                (cloudPR.weight === localPR.weight && cloudPR.reps > localPR.reps)) {
-                                mergedPRs[exercise] = cloudPR;
-                            }
-                        });
-
-                        localStorage.setItem(STORAGE_KEY_PRS, JSON.stringify(mergedPRs));
-                    }
-
-                    // Merge programs
-                    if (data.programs) {
-                        const cloudPrograms = JSON.parse(data.programs);
-                        // Just use cloud programs if they exist (they're usually the source of truth)
-                        programs = { ...programs, ...cloudPrograms };
-                        localStorage.setItem(STORAGE_KEY_PROGRAMS, JSON.stringify(programs));
-                    }
-
-                    console.log("Data refreshed from cloud");
-                }
-            } catch (error) {
-                console.error("Refresh from cloud error:", error);
-            }
         }
 
         async function saveToCloud(force = false) {
             if (!currentUser || !db) return;
-
-            const dataToSave = {
-                programs: JSON.stringify(programs),
-                sessions: localStorage.getItem(STORAGE_KEY_SESSIONS) || "[]",
-                prs: localStorage.getItem(STORAGE_KEY_PRS) || "{}",
-                lastUpdate: new Date().toISOString()
-            };
-
-            // Debounce save? For now direct
             try {
-                await db.collection('users').doc(currentUser.uid).set(dataToSave, { merge: true });
-                // console.log("Data saved to Cloud.");
-                showSyncNotification("✅ Sauvegardé");
-            } catch (error) {
-                console.error("Save to cloud error:", error);
-                showSyncNotification("❌ Erreur sync", true);
-            }
+                await db.collection('users').doc(currentUser.uid).set({
+                    programs: JSON.stringify(programs),
+                    sessions: localStorage.getItem(STORAGE_KEY_SESSIONS) || "[]",
+                    prs: localStorage.getItem(STORAGE_KEY_PRS) || "{}",
+                    lastUpdate: new Date().toISOString()
+                }, { merge: true });
+            } catch (e) { console.error("Save error:", e); }
         }
 
-        // Show sync notification
-        function showSyncNotification(message, isError = false) {
-            // Remove existing notification if any
-            const existing = document.getElementById('sync-notification');
-            if (existing) existing.remove();
-
-            const notification = document.createElement('div');
-            notification.id = 'sync-notification';
-            notification.className = `fixed top - 24 right - 6 z - [70] glass rounded - 2xl px - 4 py - 3 text - white text - sm font - medium shadow - 2xl transition - all duration - 300 ${isError ? 'bg-red-500/20 border-red-500/50' : 'bg-green-500/20 border-green-500/50'} border`;
-            notification.style.transform = 'translateX(400px)';
-            notification.textContent = message;
-
-            document.body.appendChild(notification);
-
-            // Slide in
-            setTimeout(() => {
-                notification.style.transform = 'translateX(0)';
-            }, 10);
-
-            // Slide out and remove
-            setTimeout(() => {
-                notification.style.transform = 'translateX(400px)';
-                setTimeout(() => notification.remove(), 300);
-            }, 2000);
+        // Theme
+        function loadTheme() {
+            if (localStorage.getItem('onair_theme') === 'light') document.body.classList.add('light-mode');
+            updateThemeIcon();
         }
 
-        // Note: Hooks removed as core logic now handles auto-sync.
-
-        function setupScrollBehavior() {
-            let scrollTimeout;
-            let lastScrollTop = 0;
-
-            window.addEventListener('scroll', () => {
-                const nav = document.getElementById('top-nav');
-                const currentScrollTop = window.pageYOffset || document.documentElement.scrollTop;
-
-                clearTimeout(scrollTimeout);
-
-                if (currentScrollTop > lastScrollTop && currentScrollTop > 50) {
-                    nav.classList.remove('nav-visible');
-                    nav.classList.add('nav-shrunk');
-                } else {
-                    nav.classList.remove('nav-shrunk');
-                    nav.classList.add('nav-visible');
-                }
-
-                scrollTimeout = setTimeout(() => {
-                    nav.classList.remove('nav-shrunk');
-                    nav.classList.add('nav-visible');
-                }, 1500); // Auto-show after 1.5s of no scrolling
-
-                lastScrollTop = currentScrollTop <= 0 ? 0 : currentScrollTop;
-            });
+        function toggleTheme() {
+            document.body.classList.toggle('light-mode');
+            localStorage.setItem('onair_theme', document.body.classList.contains('light-mode') ? 'light' : 'dark');
+            updateThemeIcon();
         }
 
-        function toggleAutoSync() {
-            const current = localStorage.getItem('onair_autosync') !== 'false';
-            localStorage.setItem('onair_autosync', (!current).toString());
-            renderSettings(); // Re-render to update toggle visual
+        function updateThemeIcon() {
+            const icon = document.getElementById('theme-icon');
+            icon.innerHTML = document.body.classList.contains('light-mode')
+                ? '<path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 3v1m0 16v1m9-9h-1M4 12H3m15.364 6.364l-.707-.707M6.343 6.343l-.707-.707m12.728 0l-.707.707M6.343 17.657l-.707.707M16 12a4 4 0 11-8 0 4 4 0 018 0z"/>'
+                : '<path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M20.354 15.354A9 9 0 018.646 3.646 9.003 9.003 0 0012 21a9.003 9.003 0 008.354-5.646z"/>';
         }
 
-        // --- VIEWPORT FIX SCRIPT ---
-        // Handles the "stuck" view on mobile keyboards
-
-        // 1. Reset scroll on blur
-        document.addEventListener('focusout', function (e) {
-            if (['INPUT', 'TEXTAREA'].includes(e.target.tagName)) {
-                // Slight delay to allow keyboard to close
-                setTimeout(() => {
-                    window.scrollTo(0, 0);
-                    // Force redraw if needed
-                    document.body.style.height = window.innerHeight + 'px';
-                    setTimeout(() => document.body.style.height = '', 50);
-                }, 100);
-            }
-        });
-
-        // 2. Visual Viewport API if available
-        if (window.visualViewport) {
-            window.visualViewport.addEventListener('resize', () => {
-                // If viewport expands (keyboard closed), scroll to top
-                if (window.visualViewport.height >= window.innerHeight - 50) {
-                    window.scrollTo(0, 0);
-                }
-            });
-        }
+        function toggleMenu() { /* Future menu implementation */ }
     </script>
 </body>
 
