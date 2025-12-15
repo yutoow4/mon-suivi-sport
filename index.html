@@ -403,8 +403,6 @@
         let timerTargetTime = null;
         let timerPausedRemaining = 0;
         let isTimerPaused = false;
-        let touchStartX = 0;
-        let touchEndX = 0;
         let wakeLock = null;
 
         loadPrograms();
@@ -487,13 +485,85 @@
             document.getElementById('session-view').innerHTML = html;
             const swipeArea = document.getElementById('swipe-area');
             if (swipeArea) {
-                swipeArea.addEventListener('touchstart', e => { touchStartX = e.changedTouches[0].screenX; }, { passive: true });
-                swipeArea.addEventListener('touchend', e => { touchEndX = e.changedTouches[0].screenX; handleSwipe(); }, { passive: true });
+                swipeArea.addEventListener('touchstart', handleTouchStart, { passive: true });
+                swipeArea.addEventListener('touchmove', handleTouchMove, { passive: false });
+                swipeArea.addEventListener('touchend', handleTouchEnd, { passive: true });
             }
+            // Pre-fill input
             setTimeout(() => { const prs = getPRs(); if (prs[exercise.name]) { const weightInput = document.getElementById('weight-input'); if (weightInput) weightInput.value = prs[exercise.name].weight; } }, 50);
         }
 
-        function handleSwipe() { const threshold = 50; const diff = touchStartX - touchEndX; if (Math.abs(diff) > threshold) { if (diff > 0) nextExercise(); else prevExercise(); } }
+        // --- SWIPE LOGIC ---
+        let touchStartX = 0;
+        let touchCurrentX = 0;
+        let isSwiping = false;
+
+        function handleTouchStart(e) {
+            touchStartX = e.touches[0].clientX;
+            isSwiping = true;
+            const card = document.querySelector('#swipe-area > div.bg-white, #swipe-area > div.dark\\:bg-zinc-900'); // Cible la carte précise
+            if (card) {
+                card.style.transition = 'none'; // Désactive transition pour réactivité immédiate
+            }
+        }
+
+        function handleTouchMove(e) {
+            if (!isSwiping) return;
+            touchCurrentX = e.touches[0].clientX;
+            const diff = touchCurrentX - touchStartX;
+            const card = document.querySelector('#swipe-area > div.bg-white, #swipe-area > div.dark\\:bg-zinc-900');
+
+            // Empêche le scroll vertical si on swipe horizontalement de manière significative
+            if (Math.abs(diff) > 10 && e.cancelable) {
+                e.preventDefault();
+            }
+
+            if (card) {
+                // Déplace la carte et ajoute une légère rotation
+                const rotation = diff / 20;
+                card.style.transform = `translateX(${diff}px) rotate(${rotation}deg)`;
+                // Réduit l'opacité progressivement
+                card.style.opacity = Math.max(0.5, 1 - Math.abs(diff) / 500);
+            }
+        }
+
+        function handleTouchEnd(e) {
+            if (!isSwiping) return;
+            isSwiping = false;
+            const diff = touchCurrentX - touchStartX;
+            const threshold = 100; // Seuil pour valider le swipe
+            const card = document.querySelector('#swipe-area > div.bg-white, #swipe-area > div.dark\\:bg-zinc-900');
+
+            if (!card) return;
+
+            // Rétablit la transition pour l'animation de fin
+            card.style.transition = 'transform 0.3s ease-out, opacity 0.3s ease-out';
+
+            if (Math.abs(diff) > threshold) {
+                // Swipe validé -> Animation de sortie
+                const endX = diff > 0 ? window.innerWidth : -window.innerWidth;
+                card.style.transform = `translateX(${endX}px) rotate(${diff / 10}deg)`;
+                card.style.opacity = '0';
+
+                // Attend la fin de l'animation pour changer d'exo
+                setTimeout(() => {
+                    if (diff > 0) prevExercise(); // Swipe Droite -> Précédent
+                    else nextExercise();         // Swipe Gauche -> Suivant
+                }, 300);
+            } else {
+                // Swipe annulé -> Retour au centre (Effet élastique)
+                card.style.transform = 'translateX(0) rotate(0)';
+                card.style.opacity = '1';
+                // Reset simple après l'anim
+                setTimeout(() => {
+                    card.style.transition = '';
+                }, 300);
+            }
+
+            // Reset valeurs
+            touchStartX = 0;
+            touchCurrentX = 0;
+        }
         function prevExercise() { if (currentExerciseIndex > 0) { currentExerciseIndex--; loadSession(); } }
         function nextExercise() { if (currentExerciseIndex < programs[currentDay].exercises.length - 1) { currentExerciseIndex++; loadSession(); } }
         function changeDay(day) { currentDay = day; currentExerciseIndex = 0; loadSession(); }
