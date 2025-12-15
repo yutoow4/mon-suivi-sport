@@ -524,8 +524,6 @@
                 swipeArea.addEventListener('touchend', handleTouchEnd, { passive: true });
             }
             setTimeout(() => { const prs = getPRs(); if (prs[exercise.name]) { const weightInput = document.getElementById('weight-input'); if (weightInput) weightInput.value = prs[exercise.name].weight; } }, 50);
-
-            isTransitioning = false; // Unlock navigation after load
         }
 
 
@@ -533,11 +531,9 @@
         let touchStartX = 0;
         let touchCurrentX = 0;
         let isSwiping = false;
-        let isTransitioning = false;
         let autoAdvanceTimer = null;
 
         function handleTouchStart(e) {
-            if (isTransitioning) return;
             if (autoAdvanceTimer) { clearTimeout(autoAdvanceTimer); autoAdvanceTimer = null; } // Cancel auto-advance if user interacts
             touchStartX = e.touches[0].clientX;
             isSwiping = true;
@@ -630,17 +626,13 @@
         }
 
         function prevExercise() {
-            if (isTransitioning) return;
             if (currentExerciseIndex > 0) {
-                isTransitioning = true;
                 currentExerciseIndex--;
                 loadSession();
             }
         }
         function nextExercise() {
-            if (isTransitioning) return;
             if (currentExerciseIndex < programs[currentDay].exercises.length - 1) {
-                isTransitioning = true;
                 currentExerciseIndex++;
                 loadSession();
             }
