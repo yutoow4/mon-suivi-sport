@@ -37,6 +37,8 @@
             transition: background-color 0.3s ease, color 0.3s ease;
             -webkit-tap-highlight-color: transparent;
             overscroll-behavior-y: none;
+            touch-action: pan-y;
+            /* Important pour le scroll */
         }
 
         .glass-panel {
@@ -103,20 +105,17 @@
 
         .header-scrolled #app-logo {
             font-size: 1.25rem;
-            /* text-xl */
         }
 
         /* Animation spécifique du logo SVG */
         #logo-svg {
             transition: all 0.5s cubic-bezier(0.4, 0, 0.2, 1);
             width: 3rem;
-            /* w-12 par défaut (48px) */
             height: 3rem;
         }
 
         .header-scrolled #logo-svg {
             width: 2rem;
-            /* w-8 au scroll (32px) */
             height: 2rem;
         }
     </style>
@@ -452,6 +451,7 @@
 
             const getExerciseCardHTML = (exo, isNext = false) => {
                 const isCompleted = sessionData.filter(s => s.exercise === exo.name).length;
+                // Add pointer-events-auto specifically to inputs and buttons to ensure they work even if card has transitions
                 return `
                 <div class="${isNext ? 'absolute top-0 left-0 w-full h-full z-0 scale-95 blur-sm opacity-60 pointer-events-none' : 'relative z-10'} bg-white dark:bg-zinc-900 border border-gray-200 dark:border-zinc-800 rounded-3xl p-6 shadow-xl overflow-hidden transition-all duration-300 exercise-card origin-bottom" ${isNext ? 'id="next-card"' : 'id="active-card"'}>
                     <div class="mb-6 text-zinc-500 dark:text-zinc-400 text-sm italic border-l-2 border-red-500 pl-3">${exo.focus || 'Pas de focus'}</div>
@@ -462,10 +462,20 @@
                     ${!isNext ? `
                     <div class="space-y-6 relative z-10">
                         <div class="flex gap-6">
-                            <div class="flex-1"><label class="text-xs text-zinc-400 font-bold ml-1 mb-2 block">CHARGE (KG)</label><div class="relative"><input type="number" id="weight-input" placeholder="0" class="w-full bg-gray-100 dark:bg-zinc-950 border border-gray-200 dark:border-zinc-700 rounded-2xl py-4 text-center text-2xl font-bold text-zinc-900 dark:text-white focus:border-red-500 focus:ring-1 focus:ring-red-500 transition-all placeholder-zinc-400 dark:placeholder-zinc-700 outline-none"></div></div>
-                            <div class="flex-1"><label class="text-xs text-zinc-400 font-bold ml-1 mb-2 block">RÉPÉTITIONS</label><div class="relative"><input type="number" id="reps-input" placeholder="0" class="w-full bg-gray-100 dark:bg-zinc-950 border border-gray-200 dark:border-zinc-700 rounded-2xl py-4 text-center text-2xl font-bold text-zinc-900 dark:text-white focus:border-red-500 focus:ring-1 focus:ring-red-500 transition-all placeholder-zinc-400 dark:placeholder-zinc-700 outline-none"></div></div>
+                            <div class="flex-1">
+                                <label class="text-xs text-zinc-400 font-bold ml-1 mb-2 block">CHARGE (KG)</label>
+                                <div class="relative">
+                                    <input type="number" id="weight-input" placeholder="0" class="w-full bg-gray-100 dark:bg-zinc-950 border border-gray-200 dark:border-zinc-700 rounded-2xl py-4 text-center text-2xl font-bold text-zinc-900 dark:text-white focus:border-red-500 focus:ring-1 focus:ring-red-500 transition-all placeholder-zinc-400 dark:placeholder-zinc-700 outline-none pointer-events-auto">
+                                </div>
+                            </div>
+                            <div class="flex-1">
+                                <label class="text-xs text-zinc-400 font-bold ml-1 mb-2 block">RÉPÉTITIONS</label>
+                                <div class="relative">
+                                    <input type="number" id="reps-input" placeholder="0" class="w-full bg-gray-100 dark:bg-zinc-950 border border-gray-200 dark:border-zinc-700 rounded-2xl py-4 text-center text-2xl font-bold text-zinc-900 dark:text-white focus:border-red-500 focus:ring-1 focus:ring-red-500 transition-all placeholder-zinc-400 dark:placeholder-zinc-700 outline-none pointer-events-auto">
+                                </div>
+                            </div>
                         </div>
-                        <button onclick="logSet()" class="w-full bg-zinc-900 dark:bg-white text-white dark:text-black font-bold text-lg py-4 rounded-2xl hover:opacity-90 active:scale-[0.98] transition-all flex items-center justify-center gap-2 shadow-lg shadow-black/10"><span>Valider la Série</span><svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2.5" d="M5 13l4 4L19 7"/></svg></button>
+                        <button onclick="logSet()" class="w-full bg-zinc-900 dark:bg-white text-white dark:text-black font-bold text-lg py-4 rounded-2xl hover:opacity-90 active:scale-[0.98] transition-all flex items-center justify-center gap-2 shadow-lg shadow-black/10 pointer-events-auto"><span>Valider la Série</span><svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2.5" d="M5 13l4 4L19 7"/></svg></button>
                     </div>` : '<div class="h-32 flex items-center justify-center text-zinc-400">Prochain exercice...</div>'}
                 </div>`;
             };
@@ -484,7 +494,7 @@
                 <div id="swipe-area" class="relative group perspective-1000 min-h-[450px]">
                     <div class="flex justify-between items-end mb-5 px-1 relative z-20">
                         <div><span class="text-xs text-red-600 dark:text-red-500 font-bold uppercase tracking-wider">Exercice ${currentExerciseIndex + 1} / ${totalExercises}</span><h2 class="text-2xl font-bold text-zinc-900 dark:text-white leading-tight mt-1">${exercise.name}</h2></div>
-                        <button onclick="openEditModal()" class="p-2 text-zinc-400 hover:text-zinc-900 dark:hover:text-white transition-colors"><svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15.232 5.232l3.536 3.536m-2.036-5.036a2.5 2.5 0 113.536 3.536L6.5 21.036H3v-3.572L16.732 3.732z"/></svg></button>
+                        <button onclick="openEditModal()" class="p-2 text-zinc-400 hover:text-zinc-900 dark:hover:text-white transition-colors pointer-events-auto"><svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15.232 5.232l3.536 3.536m-2.036-5.036a2.5 2.5 0 113.536 3.536L6.5 21.036H3v-3.572L16.732 3.732z"/></svg></button>
                     </div>
 
                     <!-- CARD STACK CONTAINER -->
@@ -494,9 +504,9 @@
                     </div>
 
                     <div class="flex justify-between items-center px-4 mt-3 text-zinc-400 dark:text-zinc-500 text-xs font-medium relative z-20">
-                        <button onclick="prevExercise()" class="flex items-center gap-1 hover:text-zinc-900 dark:hover:text-white p-2 ${currentExerciseIndex === 0 ? 'opacity-0 pointer-events-none' : ''}"><svg class="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 19l-7-7 7-7"/></svg>Précédent</button>
+                        <button onclick="prevExercise()" class="flex items-center gap-1 hover:text-zinc-900 dark:hover:text-white p-2 ${currentExerciseIndex === 0 ? 'opacity-0 pointer-events-none' : ''} pointer-events-auto"><svg class="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 19l-7-7 7-7"/></svg>Précédent</button>
                         <span>Swipe pour naviguer</span>
-                        <button onclick="nextExercise()" class="flex items-center gap-1 hover:text-zinc-900 dark:hover:text-white p-2 ${currentExerciseIndex === totalExercises - 1 ? 'opacity-0 pointer-events-none' : ''}">Suivant<svg class="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 5l7 7-7 7"/></svg></button>
+                        <button onclick="nextExercise()" class="flex items-center gap-1 hover:text-zinc-900 dark:hover:text-white p-2 ${currentExerciseIndex === totalExercises - 1 ? 'opacity-0 pointer-events-none' : ''} pointer-events-auto">Suivant<svg class="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 5l7 7-7 7"/></svg></button>
                     </div>
                 </div>
 
@@ -505,7 +515,7 @@
                        <svg class="w-3 h-3" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M11 5H6a2 2 0 00-2 2v11a2 2 0 002 2h11a2 2 0 002-2v-5m-1.414-9.414a2 2 0 112.828 2.828L11.828 15H9v-2.828l8.586-8.586z"/></svg>
                        Notes & Réglages
                     </label>
-                    <textarea oninput="saveCurrentNote(this.value)" class="w-full bg-white dark:bg-zinc-900 border border-gray-200 dark:border-zinc-800 rounded-2xl p-4 text-sm focus:border-red-500 focus:ring-1 focus:ring-red-500 outline-none resize-none h-24 shadow-sm transition-all text-zinc-800 dark:text-zinc-200 placeholder-zinc-400" placeholder="Ex: Siège au cran 4, attention épaule gauche...">${getNotes()[exercise.name] || ''}</textarea>
+                    <textarea oninput="saveCurrentNote(this.value)" class="w-full bg-white dark:bg-zinc-900 border border-gray-200 dark:border-zinc-800 rounded-2xl p-4 text-sm focus:border-red-500 focus:ring-1 focus:ring-red-500 outline-none resize-none h-24 shadow-sm transition-all text-zinc-800 dark:text-zinc-200 placeholder-zinc-400 pointer-events-auto" placeholder="Ex: Siège au cran 4, attention épaule gauche...">${getNotes()[exercise.name] || ''}</textarea>
                 </div>
 
                 ${completedSets > 0 ? `<div class="mt-6 animate-slide-up"><h3 class="text-sm font-bold text-zinc-400 uppercase tracking-wider mb-3 px-1">Aujourd'hui</h3><div class="space-y-2">${sessionData.filter(s => s.exercise === exercise.name).map((set, i) => `<div class="flex items-center justify-between bg-white dark:bg-zinc-900 border border-gray-100 dark:border-zinc-800 rounded-xl p-4 shadow-sm"><div class="flex items-center gap-3"><div class="w-6 h-6 rounded-full bg-red-100 dark:bg-red-500/10 text-red-600 dark:text-red-500 flex items-center justify-center text-xs font-bold">${i + 1}</div><span class="text-zinc-500 dark:text-zinc-400 text-sm">Série terminée</span></div><span class="text-zinc-900 dark:text-white font-bold font-mono text-lg">${set.weight}<span class="text-sm text-zinc-400 font-sans ml-1">kg</span> <span class="mx-1 text-zinc-300">×</span> ${set.reps}</span></div>`).join('')}</div></div>` : ''}
@@ -514,12 +524,13 @@
             document.getElementById('session-view').innerHTML = html;
             const swipeArea = document.getElementById('swipe-area');
             if (swipeArea) {
-                // Remove old listeners if any (though DOM replacement handles this, explicit removal is cleaner if we kept references)
+                // Remove old listeners to be safe
                 swipeArea.removeEventListener('touchstart', handleTouchStart);
                 swipeArea.removeEventListener('touchmove', handleTouchMove);
                 swipeArea.removeEventListener('touchend', handleTouchEnd);
 
-                swipeArea.addEventListener('touchstart', handleTouchStart, { passive: true });
+                // Add new robust listeners
+                swipeArea.addEventListener('touchstart', handleTouchStart, { passive: false }); // passive: false to allow preventDefault if needed
                 swipeArea.addEventListener('touchmove', handleTouchMove, { passive: false });
                 swipeArea.addEventListener('touchend', handleTouchEnd, { passive: true });
             }
@@ -527,16 +538,27 @@
         }
 
 
-        // --- SWIPE LOGIC IMPROVED ---
+        // --- SWIPE LOGIC IMPROVED & DEBUGGED ---
         let touchStartX = 0;
         let touchCurrentX = 0;
+        let touchStartY = 0;
+        let touchCurrentY = 0;
         let isSwiping = false;
         let autoAdvanceTimer = null;
 
         function handleTouchStart(e) {
-            if (autoAdvanceTimer) { clearTimeout(autoAdvanceTimer); autoAdvanceTimer = null; } // Cancel auto-advance if user interacts
+            // CRITICAL FIX: Ignore swipe if touching an input, button, or textarea
+            if (e.target.closest('input, button, textarea, label')) {
+                isSwiping = false;
+                return; // Let the native event happen (typing, clicking)
+            }
+
+            if (autoAdvanceTimer) { clearTimeout(autoAdvanceTimer); autoAdvanceTimer = null; }
+
             touchStartX = e.touches[0].clientX;
+            touchStartY = e.touches[0].clientY;
             isSwiping = true;
+
             const activeCard = document.getElementById('active-card');
             const nextCard = document.getElementById('next-card');
             if (activeCard) activeCard.style.transition = 'none';
@@ -545,31 +567,37 @@
 
         function handleTouchMove(e) {
             if (!isSwiping) return;
-            touchCurrentX = e.touches[0].clientX;
-            const diff = touchCurrentX - touchStartX;
 
-            // Only handle significant horizontal swipes to avoid blocking scroll too easily
-            if (Math.abs(diff) < 5) return;
-            if (e.cancelable) e.preventDefault();
+            touchCurrentX = e.touches[0].clientX;
+            touchCurrentY = e.touches[0].clientY;
+
+            const diffX = touchCurrentX - touchStartX;
+            const diffY = touchCurrentY - touchStartY;
+
+            // SCROLL LOCK FIX: If user moves mostly vertically, allow scroll and cancel swipe
+            if (Math.abs(diffY) > Math.abs(diffX)) {
+                isSwiping = false; // It's a scroll, not a swipe
+                return;
+            }
+
+            // Only prevent default if it is indeed a horizontal swipe to block browser navigation gestures
+            if (Math.abs(diffX) > 10) {
+                if (e.cancelable) e.preventDefault();
+            }
 
             const activeCard = document.getElementById('active-card');
             const nextCard = document.getElementById('next-card');
 
             if (activeCard) {
                 // Active Card Movement
-                const rotation = diff / 25;
-                activeCard.style.transform = `translateX(${diff}px) rotate(${rotation}deg)`;
+                const rotation = diffX / 25;
+                activeCard.style.transform = `translateX(${diffX}px) rotate(${rotation}deg)`;
 
-                // Next Card Animation (Progressive unblur & scale)
-                if (nextCard && diff < 0) { // Only if swiping LEFT (Forward)
-                    // Calculate progress 0 to 1 based on screen width ~factor
-                    const progress = Math.min(Math.abs(diff) / 250, 1);
-
-                    // Scale: 0.95 -> 1
+                // Next Card Animation
+                if (nextCard && diffX < 0) { // Only if swiping LEFT (Forward)
+                    const progress = Math.min(Math.abs(diffX) / 250, 1);
                     const scale = 0.95 + (0.05 * progress);
-                    // Blur: 4px -> 0px
                     const blur = 4 - (4 * progress);
-                    // Opacity: 0.6 -> 1
                     const opacity = 0.6 + (0.4 * progress);
 
                     nextCard.style.transform = `scale(${scale})`;
@@ -582,8 +610,12 @@
         function handleTouchEnd(e) {
             if (!isSwiping) return;
             isSwiping = false;
+
             const diff = touchCurrentX - touchStartX;
-            const threshold = 120; // Slightly higher threshold
+            // Ensure we actually moved somewhat to trigger anything
+            if (touchCurrentX === 0) return;
+
+            const threshold = 100; // Threshold pixels
 
             const activeCard = document.getElementById('active-card');
             const nextCard = document.getElementById('next-card');
@@ -591,7 +623,7 @@
             if (!activeCard) return;
 
             // Restore transitions
-            activeCard.style.transition = 'transform 0.4s cubic-bezier(0.16, 1, 0.3, 1)'; // iOS smooth curve
+            activeCard.style.transition = 'transform 0.4s cubic-bezier(0.16, 1, 0.3, 1)';
             if (nextCard) nextCard.style.transition = 'all 0.4s cubic-bezier(0.16, 1, 0.3, 1)';
 
             if (Math.abs(diff) > threshold) {
@@ -601,7 +633,6 @@
 
                 activeCard.style.transform = `translateX(${endX}px) rotate(${endRot}deg)`;
 
-                // If moving next, finalize the next card state
                 if (diff < 0 && nextCard) {
                     nextCard.style.transform = 'scale(1)';
                     nextCard.style.filter = 'blur(0px)';
@@ -623,6 +654,8 @@
             }
             touchStartX = 0;
             touchCurrentX = 0;
+            touchStartY = 0;
+            touchCurrentY = 0;
         }
 
         function prevExercise() {
@@ -652,11 +685,9 @@
             updatePR(exercise.name, weight, reps);
             repsInput.value = '';
 
-            // Auto swipe animation on validation (optional, can be kept simple)
             const completedSets = sessionData.filter(s => s.exercise === exercise.name).length;
             if (completedSets >= exercise.sets) {
                 if (currentExerciseIndex < programs[currentDay].exercises.length - 1) {
-                    // Simulate swipe next for consistency
                     const activeCard = document.getElementById('active-card');
                     if (activeCard) {
                         activeCard.style.transition = 'transform 0.4s ease';
@@ -794,8 +825,6 @@
                         const localNotes = localStorage.getItem(STORAGE_KEY_NOTES);
                         if (data.notes !== localNotes) {
                             localStorage.setItem(STORAGE_KEY_NOTES, data.notes);
-                            // Optional: Update view if session view is active? 
-                            // Easier to just let next load handle it, or force reload if active.
                         }
                     }
                 }
@@ -830,7 +859,6 @@
             const date = new Date().toLocaleDateString('fr-FR', { weekday: 'long', day: 'numeric', month: 'long' });
             let text = `🔥 Séance ${program.name} - ${date}\n\n`;
 
-            // Group by exercise
             const grouped = {};
             sessionData.forEach(set => {
                 if (!grouped[set.exercise]) grouped[set.exercise] = [];
