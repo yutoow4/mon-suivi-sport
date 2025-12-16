@@ -7,6 +7,7 @@
         content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no, viewport-fit=cover">
     <meta name="theme-color" content="#09090b">
     <meta name="apple-mobile-web-app-capable" content="yes">
+    <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
     <title>YFitracker</title>
     <link rel="preconnect" href="https://fonts.googleapis.com">
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
@@ -119,7 +120,6 @@
             font-size: 16px !important;
         }
 
-        /* Toast Animation */
         @keyframes fade-in-out {
             0% {
                 opacity: 0;
@@ -143,7 +143,7 @@
         }
 
         .toast-active {
-            animation: fade-in-out 2s forwards;
+            animation: fade-in-out 2.5s forwards;
         }
     </style>
 </head>
@@ -263,7 +263,7 @@
         </div>
     </div>
 
-    <!-- Modals -->
+    <!-- Modals (Edit, PR, Session, Import) -->
     <div id="edit-modal"
         class="fixed inset-0 z-[60] bg-black/50 backdrop-blur-sm hidden flex items-end sm:items-center justify-center p-4">
         <div class="glass-panel w-full max-w-md rounded-3xl p-6 shadow-2xl animate-slide-up">
@@ -388,8 +388,8 @@
                             d="M6 18L18 6M6 6l12 12" />
                     </svg></button>
             </div>
-            <p class="text-sm text-zinc-500 mb-4">Collez vos notes (Format libre : "DC 100kg 5reps" ou "Squat 120 5").
-            </p>
+            <p class="text-sm text-zinc-500 mb-4">Collez vos notes (Format libre : "DC 100kg 5reps" ou "Squat 4x10
+                100kg").</p>
             <textarea id="import-text"
                 class="w-full h-32 bg-gray-100 dark:bg-zinc-950 border border-gray-200 dark:border-zinc-800 rounded-xl p-4 text-sm text-zinc-900 dark:text-white resize-none outline-none focus:border-red-500"
                 placeholder="Lundi PUSH&#10;DC 100 5&#10;Incliné 80kg 8reps..."></textarea>
@@ -433,7 +433,7 @@
         function loadPrograms() { const saved = localStorage.getItem(STORAGE_KEY_PROGRAMS); programs = saved ? JSON.parse(saved) : defaultPrograms; Object.keys(programs).forEach(k => { if (!programs[k].id) programs[k].id = k; }); }
         function savePrograms() { localStorage.setItem(STORAGE_KEY_PROGRAMS, JSON.stringify(programs)); if (currentUser) saveToCloud(); }
 
-        // --- CORE SESSION ---
+        // --- SESSION ---
         function loadSession() {
             const saved = localStorage.getItem(STORAGE_KEY_CURRENT_SESSION);
             if (!programs[currentDay]) currentDay = Object.keys(programs)[0] || 'lundi';
@@ -454,13 +454,13 @@
                 <div class="${isNext ? 'absolute top-0 w-full h-full scale-95 blur-sm opacity-50 z-0 pointer-events-none' : 'relative z-10'} bg-white dark:bg-zinc-900 border border-gray-200 dark:border-zinc-800 rounded-3xl p-6 shadow-xl transition-all duration-300" ${isNext ? 'id="next-card"' : 'id="active-card"'}>
                     <div class="mb-6 text-zinc-500 dark:text-zinc-400 text-sm italic border-l-2 border-red-500 pl-3">${e.focus || 'Focus'}</div>
                     <div class="grid grid-cols-2 gap-6 mb-8 relative z-10">
-                        <div class="bg-gray-50 dark:bg-zinc-950/50 rounded-2xl p-4 border border-gray-100 dark:border-zinc-800"><div class="text-xs text-zinc-500 uppercase font-bold mb-1">Séries</div><div class="text-3xl font-bold text-zinc-900 dark:text-white">${done}<span class="text-zinc-400 text-xl">/${e.sets}</span></div></div>
+                        <div class="bg-gray-50 dark:bg-zinc-950/50 rounded-2xl p-4 border border-gray-100 dark:border-zinc-800"><div class="text-xs text-zinc-500 uppercase font-bold mb-1">Séries</div><div class="text-3xl font-bold text-zinc-900 dark:text-white" id="set-counter">${done}<span class="text-zinc-400 text-xl">/${e.sets}</span></div></div>
                         <div class="bg-gray-50 dark:bg-zinc-950/50 rounded-2xl p-4 border border-gray-100 dark:border-zinc-800"><div class="text-xs text-zinc-500 uppercase font-bold mb-1">Objectif</div><div class="text-3xl font-bold text-zinc-900 dark:text-white">${e.reps}</div></div>
                     </div>
                     ${!isNext ? `<div class="space-y-6 relative z-10"><div class="flex gap-6"><div class="flex-1"><label class="text-xs text-zinc-400 font-bold ml-1 mb-2 block">CHARGE</label><input type="number" id="weight-input" placeholder="0" class="w-full bg-gray-100 dark:bg-zinc-950 border border-gray-200 dark:border-zinc-700 rounded-2xl py-4 text-center text-2xl font-bold text-zinc-900 dark:text-white focus:border-red-500 outline-none pointer-events-auto"></div><div class="flex-1"><label class="text-xs text-zinc-400 font-bold ml-1 mb-2 block">REPS</label><input type="number" id="reps-input" placeholder="0" class="w-full bg-gray-100 dark:bg-zinc-950 border border-gray-200 dark:border-zinc-700 rounded-2xl py-4 text-center text-2xl font-bold text-zinc-900 dark:text-white focus:border-red-500 outline-none pointer-events-auto"></div></div><button onclick="logSet()" class="w-full bg-zinc-900 dark:bg-white text-white dark:text-black font-bold text-lg py-4 rounded-2xl hover:opacity-90 active:scale-95 transition-all pointer-events-auto">Valider</button></div>` : ''}
                 </div>`;
 
-            // History & Notes rendered BELOW card
+            // HTML Structure: Session View
             const html = `
                 <div class="flex gap-3 overflow-x-auto pb-4 no-scrollbar -mx-4 px-4 snap-x">${keys.map((k, i) => `<button onclick="changeDay('${k}')" class="snap-center shrink-0 flex flex-col items-center justify-center w-16 h-20 rounded-2xl border transition-all ${currentDay === k ? 'bg-red-600 border-red-500 text-white shadow-lg' : 'bg-white dark:bg-zinc-900 border-gray-200 dark:border-zinc-800 text-zinc-500'}"><span class="text-[10px] uppercase font-bold opacity-80">${programs[k].name.split(' ')[0].substring(0, 3)}</span><span class="text-xl font-bold mt-1">${i + 1}</span></button>`).join('')}</div>
                 <div id="swipe-area" class="relative group perspective-1000 min-h-[450px]">
@@ -468,23 +468,49 @@
                     <div id="cards-stack" class="relative w-full">${next ? card(next, true) : ''}${card(exo, false)}</div>
                     <div class="flex justify-between items-center px-4 mt-3 text-zinc-400 text-xs font-medium relative z-20"><button onclick="prevExercise()" class="p-2 pointer-events-auto">Précédent</button><span>Swipe pour naviguer</span><button onclick="nextExercise()" class="p-2 pointer-events-auto">Suivant</button></div>
                 </div>
-                
-                <!-- NOTES SECTION ADDED HERE -->
                 <div class="mt-6 mx-1 animate-slide-up">
-                    <label class="text-xs text-zinc-400 font-bold uppercase tracking-wider ml-1 mb-2 block flex items-center gap-2">
-                       <svg class="w-3 h-3" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M11 5H6a2 2 0 00-2 2v11a2 2 0 002 2h11a2 2 0 002-2v-5m-1.414-9.414a2 2 0 112.828 2.828L11.828 15H9v-2.828l8.586-8.586z"/></svg>
-                       Notes sur l'exercice
-                    </label>
+                    <label class="text-xs text-zinc-400 font-bold uppercase tracking-wider ml-1 mb-2 block flex items-center gap-2"><svg class="w-3 h-3" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M11 5H6a2 2 0 00-2 2v11a2 2 0 002 2h11a2 2 0 002-2v-5m-1.414-9.414a2 2 0 112.828 2.828L11.828 15H9v-2.828l8.586-8.586z"/></svg>Notes sur l'exercice</label>
                     <textarea oninput="saveCurrentNote(this.value)" class="w-full bg-white dark:bg-zinc-900 border border-gray-200 dark:border-zinc-800 rounded-2xl p-4 text-sm focus:border-red-500 focus:ring-1 focus:ring-red-500 outline-none resize-none h-24 shadow-sm transition-all text-zinc-800 dark:text-zinc-200 placeholder-zinc-400 pointer-events-auto" placeholder="Ex: Siège au cran 4, attention épaule gauche...">${notes[exo.name] || ''}</textarea>
                 </div>
-
-                <!-- LIVE HISTORY -->
-                ${done > 0 ? `<div class="mt-6 animate-slide-up"><h3 class="text-sm font-bold text-zinc-400 uppercase tracking-wider mb-3 px-1">Séries Terminées</h3><div class="space-y-2">${sessionData.filter(s => s.exercise === exo.name).map((s, i) => `<div class="flex justify-between bg-white dark:bg-zinc-900 border border-gray-100 dark:border-zinc-800 rounded-xl p-4 shadow-sm"><div class="flex gap-3 items-center"><div class="w-6 h-6 rounded-full bg-red-100 dark:bg-red-500/10 text-red-600 dark:text-red-500 flex items-center justify-center text-xs font-bold">${i + 1}</div><span class="text-sm text-zinc-500">Terminée</span></div><span class="font-bold font-mono text-zinc-900 dark:text-white">${s.weight}kg <span class="text-zinc-400">x</span> ${s.reps}</span></div>`).join('')}</div></div>` : ''}
+                <div id="history-container" class="mt-6"></div>
                 <div class="h-8"></div>
             `;
             document.getElementById('session-view').innerHTML = html;
             setupSwipe();
+            updateHistoryUI(); // CRITICAL: Populate history immediately
             setTimeout(() => { const pr = getPRs()[exo.name]; if (pr) document.getElementById('weight-input').value = pr.weight; }, 50);
+        }
+
+        // --- NEW FUNCTION: INSTANT HISTORY UPDATE ---
+        function updateHistoryUI() {
+            const container = document.getElementById('history-container');
+            if (!container) return;
+            const program = programs[currentDay];
+            const exo = program.exercises[currentExerciseIndex];
+            const sets = sessionData.filter(s => s.exercise === exo.name);
+            const done = sets.length;
+
+            // Update counter in card
+            const counterEl = document.getElementById('set-counter');
+            if (counterEl) counterEl.innerHTML = `${done}<span class="text-zinc-400 text-xl">/${exo.sets}</span>`;
+
+            if (done === 0) { container.innerHTML = ''; return; }
+
+            container.innerHTML = `
+                <div class="animate-slide-up">
+                    <h3 class="text-sm font-bold text-zinc-400 uppercase tracking-wider mb-3 px-1">Séries Terminées</h3>
+                    <div class="space-y-2">
+                        ${sets.map((s, i) => `
+                            <div class="flex justify-between bg-white dark:bg-zinc-900 border border-gray-100 dark:border-zinc-800 rounded-xl p-4 shadow-sm">
+                                <div class="flex gap-3 items-center">
+                                    <div class="w-6 h-6 rounded-full bg-red-100 dark:bg-red-500/10 text-red-600 dark:text-red-500 flex items-center justify-center text-xs font-bold">${i + 1}</div>
+                                    <span class="text-sm text-zinc-500">Terminée</span>
+                                </div>
+                                <span class="font-bold font-mono text-zinc-900 dark:text-white">${s.weight}kg <span class="text-zinc-400">x</span> ${s.reps}</span>
+                            </div>
+                        `).join('')}
+                    </div>
+                </div>`;
         }
 
         // --- SWIPE ---
@@ -504,23 +530,30 @@
             const w = document.getElementById('weight-input').value, r = document.getElementById('reps-input').value;
             if (!w || !r) return;
             const ex = programs[currentDay].exercises[currentExerciseIndex];
+
+            // Push Data
             sessionData.push({ day: currentDay, programName: programs[currentDay].name, exercise: ex.name, weight: w, reps: r, timestamp: new Date().toISOString() });
             localStorage.setItem(STORAGE_KEY_CURRENT_SESSION, JSON.stringify({ id: currentSessionId, startTime: sessionStartTime, data: sessionData, day: currentDay }));
             if (currentUser) saveToCloud();
 
+            // PR Update
             const prs = getPRs(), old = prs[ex.name] || { weight: 0, reps: 0 };
             if (parseFloat(w) > old.weight || (parseFloat(w) === old.weight && parseInt(r) > old.reps)) { prs[ex.name] = { weight: parseFloat(w), reps: parseInt(r), date: new Date().toISOString() }; localStorage.setItem(STORAGE_KEY_PRS, JSON.stringify(prs)); }
+
+            // Clear Inputs
+            document.getElementById('reps-input').value = '';
+
+            // Instant UI Update (Crucial Fix)
+            updateHistoryUI();
 
             // Check completion
             if (sessionData.filter(s => s.exercise === ex.name).length >= ex.sets) {
                 if (currentExerciseIndex < programs[currentDay].exercises.length - 1) {
                     showToast("Exercice terminé ! Prochain...");
-                    setTimeout(() => { currentExerciseIndex++; loadSession(); }, 1500); // Wait for toast
+                    setTimeout(() => { currentExerciseIndex++; loadSession(); }, 1500);
                 } else {
                     showSessionComplete();
                 }
-            } else {
-                renderSessionView(); // This triggers re-render to show set in history
             }
             startRestTimer(ex.rest);
         }
@@ -530,18 +563,10 @@
             document.getElementById('toast-message').textContent = msg;
             t.classList.remove('pointer-events-none', 'opacity-0');
             t.classList.add('toast-active');
-            setTimeout(() => {
-                t.classList.remove('toast-active');
-                t.classList.add('opacity-0', 'pointer-events-none');
-            }, 2500);
+            setTimeout(() => { t.classList.remove('toast-active'); t.classList.add('opacity-0', 'pointer-events-none'); }, 2500);
         }
 
-        function saveCurrentNote(val) {
-            const ex = programs[currentDay].exercises[currentExerciseIndex];
-            const notes = getNotes();
-            notes[ex.name] = val;
-            localStorage.setItem(STORAGE_KEY_NOTES, JSON.stringify(notes));
-        }
+        function saveCurrentNote(val) { const ex = programs[currentDay].exercises[currentExerciseIndex]; const notes = getNotes(); notes[ex.name] = val; localStorage.setItem(STORAGE_KEY_NOTES, JSON.stringify(notes)); }
 
         // --- TIMER ---
         function startRestTimer(s) { document.getElementById('rest-timer').classList.remove('hidden'); document.getElementById('rest-timer').classList.add('flex'); timerTargetTime = Date.now() + (s * 1000); isTimerPaused = false; updateTimer(); requestWakeLock(); clearInterval(timerInterval); timerInterval = setInterval(timerLoop, 100); }
@@ -575,7 +600,7 @@
                     <div class="grid grid-cols-2 gap-3 mb-4">
                         ${Object.entries(prs).map(([name, data]) => `
                             <div class="relative bg-white dark:bg-zinc-900 border border-gray-100 dark:border-zinc-800 p-4 rounded-2xl shadow-sm hover:border-red-500 transition-colors">
-                                <button onclick="openPRModal('${name}', ${data.weight}, ${data.reps})" class="absolute top-2 right-2 text-zinc-400 hover:text-red-500"><svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15.232 5.232l3.536 3.536m-2.036-5.036a2.5 2.5 0 113.536 3.536L6.5 21.036H3v-3.572L16.732 3.732z" /></svg></button>
+                                <button onclick="openPRModal('${name}', ${data.weight}, ${data.reps})" class="absolute top-2 right-2 bg-gray-200 dark:bg-zinc-800 rounded-full p-1 text-zinc-500 hover:text-white hover:bg-red-500 transition-colors"><svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15.232 5.232l3.536 3.536m-2.036-5.036a2.5 2.5 0 113.536 3.536L6.5 21.036H3v-3.572L16.732 3.732z" /></svg></button>
                                 <p class="text-xs text-zinc-500 truncate mb-1 pr-6">${name}</p>
                                 <p class="text-xl font-bold text-zinc-900 dark:text-white">${data.weight} <span class="text-sm text-zinc-400">kg</span></p>
                             </div>
@@ -602,9 +627,9 @@
                 return `
                                     <div class="bg-white dark:bg-zinc-900 border border-gray-100 dark:border-zinc-800 p-4 rounded-2xl flex justify-between items-center shadow-sm group">
                                         <div><p class="font-bold text-zinc-900 dark:text-white">${s.programName}</p><p class="text-xs text-zinc-500">${date} • ${s.data ? s.data.length : 0} séries</p></div>
-                                        <div class="flex gap-3">
-                                            <button onclick="openSessionEditModal('${s.id}', '${s.programName}', '${dateISO}')" class="text-zinc-300 hover:text-blue-500"><svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15.232 5.232l3.536 3.536m-2.036-5.036a2.5 2.5 0 113.536 3.536L6.5 21.036H3v-3.572L16.732 3.732z" /></svg></button>
-                                            <button onclick="deleteSession('${s.id}')" class="text-zinc-300 hover:text-red-500"><svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16" /></svg></button>
+                                        <div class="flex gap-2">
+                                            <button onclick="openSessionEditModal('${s.id}', '${s.programName}', '${dateISO}')" class="bg-gray-100 dark:bg-zinc-800 p-2 rounded-full text-zinc-500 hover:text-white hover:bg-blue-500 transition-colors"><svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15.232 5.232l3.536 3.536m-2.036-5.036a2.5 2.5 0 113.536 3.536L6.5 21.036H3v-3.572L16.732 3.732z" /></svg></button>
+                                            <button onclick="deleteSession('${s.id}')" class="bg-gray-100 dark:bg-zinc-800 p-2 rounded-full text-zinc-500 hover:text-white hover:bg-red-500 transition-colors"><svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16" /></svg></button>
                                         </div>
                                     </div>`
             }).join('')}
@@ -636,10 +661,42 @@
         function processImport() {
             const text = document.getElementById('import-text').value; if (!text) return;
             let programName = "Importée"; if (text.match(/push|pecs/i)) programName = "Lundi - PUSH"; else if (text.match(/pull|dos/i)) programName = "Mardi - PULL"; else if (text.match(/legs/i)) programName = "Mercredi - LEGS";
-            const sessionSets = [], lines = text.split('\n'), prs = getPRs(), regex = /(.+?)(?:\s*[:\-|]\s*|\s+)(\d+[.,]?\d*)\s*(?:kg|lbs)?\s*[xX]?\s*(\d+)(?:\s*reps?)?/i;
+            const sessionSets = [], lines = text.split('\n'), prs = getPRs();
+            // Regex améliorée: Nom + (Séparateur) + (Sets x) + Reps + (x|@) + Poids OU Poids + Reps
+            // Cas 1: "Curl 3x12 20kg"
+            // Cas 2: "DC 100 5"
             let prsUpdated = false;
-            lines.forEach(line => { const match = line.match(regex); if (match) { const exercise = match[1].trim(), weight = parseFloat(match[2].replace(',', '.')), reps = parseInt(match[3]); if (exercise.length > 2 && !exercise.toLowerCase().includes("séance")) { sessionSets.push({ exercise, weight, reps, day: 'import', programName, timestamp: new Date().toISOString() }); const cur = prs[exercise] || { weight: 0, reps: 0 }; if (weight > cur.weight || (weight === cur.weight && reps > cur.reps)) { prs[exercise] = { weight, reps, date: new Date().toISOString() }; prsUpdated = true; } } } });
-            if (sessionSets.length === 0) return alert("Aucun exercice détecté.");
+
+            lines.forEach(line => {
+                let exercise, weight, reps, sets = 1;
+
+                // Essai format complet: "Curl 3x12 20kg" ou "Curl 3x12 @ 20"
+                let match = line.match(/^(.+?)\s+(\d+)\s*[xX]\s*(\d+)\s*(?:@|à)?\s*(\d+[.,]?\d*)/);
+                if (match) {
+                    exercise = match[1].trim(); sets = parseInt(match[2]); reps = parseInt(match[3]); weight = parseFloat(match[4].replace(',', '.'));
+                } else {
+                    // Essai format simple: "DC 100 5" ou "DC 100kg 5reps"
+                    match = line.match(/^(.+?)\s+(\d+[.,]?\d*)\s*(?:kg)?\s*[xX]?\s*(\d+)/);
+                    if (match) {
+                        exercise = match[1].trim(); weight = parseFloat(match[2].replace(',', '.')); reps = parseInt(match[3]);
+                    }
+                }
+
+                if (exercise && !isNaN(weight)) {
+                    // Ignore les titres de séance
+                    if (exercise.length < 2 || exercise.toLowerCase().includes("séance")) return;
+
+                    for (let i = 0; i < sets; i++) {
+                        sessionSets.push({ exercise, weight, reps, day: 'import', programName, timestamp: new Date().toISOString() });
+                    }
+
+                    const cur = prs[exercise] || { weight: 0, reps: 0 };
+                    if (weight > cur.weight || (weight === cur.weight && reps > cur.reps)) { prs[exercise] = { weight, reps, date: new Date().toISOString() }; prsUpdated = true; }
+                }
+            });
+
+            if (sessionSets.length === 0) return alert("Aucun exercice détecté. Essayez le format: 'Exercice Poids Reps' ou 'Exercice Séries x Reps Poids'");
+
             const newSession = { id: Date.now().toString(), startTime: new Date().toISOString(), endTime: new Date().toISOString(), programName, totalSets: sessionSets.length, data: sessionSets };
             const sessions = getSessions(); sessions.push(newSession); localStorage.setItem(STORAGE_KEY_SESSIONS, JSON.stringify(sessions)); if (prsUpdated) localStorage.setItem(STORAGE_KEY_PRS, JSON.stringify(prs)); if (currentUser) saveToCloud();
             alert(`${sessionSets.length} séries importées.`); closeImportModal(); renderProfile();
