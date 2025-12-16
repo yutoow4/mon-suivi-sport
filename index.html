@@ -7,7 +7,6 @@
         content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no, viewport-fit=cover">
     <meta name="theme-color" content="#09090b">
     <meta name="apple-mobile-web-app-capable" content="yes">
-    <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
     <title>YFitracker</title>
     <link rel="preconnect" href="https://fonts.googleapis.com">
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
@@ -22,15 +21,9 @@
             darkMode: 'class',
             theme: {
                 extend: {
-                    fontFamily: {
-                        sans: ['"Plus Jakarta Sans"', 'sans-serif'],
-                    },
-                    colors: {
-                        card: '#18181b',
-                    },
-                    animation: {
-                        'pulse-slow': 'pulse 3s cubic-bezier(0.4, 0, 0.6, 1) infinite',
-                    }
+                    fontFamily: { sans: ['"Plus Jakarta Sans"', 'sans-serif'] },
+                    colors: { card: '#18181b' },
+                    animation: { 'pulse-slow': 'pulse 3s cubic-bezier(0.4, 0, 0.6, 1) infinite' }
                 }
             }
         }
@@ -40,13 +33,10 @@
             transition: background-color 0.3s ease, color 0.3s ease;
             -webkit-tap-highlight-color: transparent;
             overscroll-behavior-y: none;
-            /* Empêche le rebond */
             touch-action: pan-y;
             -webkit-text-size-adjust: 100%;
-            /* Empêche le zoom auto sur texte */
         }
 
-        /* Glassmorphism */
         .glass-panel {
             background: rgba(255, 255, 255, 0.7);
             backdrop-filter: blur(20px);
@@ -95,7 +85,6 @@
             opacity: 0.95;
         }
 
-        /* Scroll Header Animation */
         .header-scrolled #logo-container {
             padding-top: 0.5rem;
             padding-bottom: 0.5rem;
@@ -124,11 +113,37 @@
             height: 2rem;
         }
 
-        /* Fix for iOS Input Zoom */
         input,
         textarea,
         select {
             font-size: 16px !important;
+        }
+
+        /* Toast Animation */
+        @keyframes fade-in-out {
+            0% {
+                opacity: 0;
+                transform: translate(-50%, 20px);
+            }
+
+            10% {
+                opacity: 1;
+                transform: translate(-50%, 0);
+            }
+
+            90% {
+                opacity: 1;
+                transform: translate(-50%, 0);
+            }
+
+            100% {
+                opacity: 0;
+                transform: translate(-50%, -20px);
+            }
+        }
+
+        .toast-active {
+            animation: fade-in-out 2s forwards;
         }
     </style>
 </head>
@@ -163,6 +178,13 @@
         <div id="auth-view" class="hidden space-y-6 animate-slide-up"></div>
     </main>
 
+    <!-- Toast Notification -->
+    <div id="toast"
+        class="fixed top-24 left-1/2 -translate-x-1/2 z-[150] bg-zinc-900 text-white px-6 py-3 rounded-full shadow-2xl border border-zinc-700 flex items-center gap-3 opacity-0 pointer-events-none transition-all">
+        <div class="w-2 h-2 rounded-full bg-green-500"></div>
+        <span id="toast-message" class="font-bold text-sm">Notification</span>
+    </div>
+
     <!-- Navigation -->
     <nav
         class="fixed bottom-6 left-1/2 -translate-x-1/2 w-auto min-w-[320px] max-w-[90%] liquid-nav z-40 rounded-full px-2 py-2">
@@ -173,7 +195,7 @@
                 <svg class="w-6 h-6 group-[.active]:text-red-600 transition-colors duration-300" fill="none"
                     stroke="currentColor" viewBox="0 0 24 24">
                     <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2.5"
-                        d="M19 11H5m14 0a2 2 0 012 2v6a2 2 0 01-2 2H5a2 2 0 01-2-2v-6a2 2 0 012-2m14 0V9a2 2 0 00-2-2M5 11V9a2 2 0 012-2m0 0V5a2 2 0 012-2h6a2 2 0 012 2v2M7 7h10" />
+                        d="M19 11H5m14 0a2 2 0 012 2v6a2 2 0 01-2 2H5a2 2 0 01-2-2v-6a2 2 0 012-2m14 0V9a2 2 0 00-2-2M5 11V9a2 2 0 00-2-2M5 11V9a2 2 0 012-2m0 0V5a2 2 0 012-2h6a2 2 0 012 2v2M7 7h10" />
                 </svg>
                 <span
                     class="text-[10px] font-bold group-[.active]:text-zinc-900 dark:group-[.active]:text-white transition-colors">Workout</span>
@@ -184,7 +206,7 @@
                 <svg class="w-6 h-6 group-[.active]:text-red-600 transition-colors duration-300" fill="none"
                     stroke="currentColor" viewBox="0 0 24 24">
                     <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2.5"
-                        d="M9 19v-6a2 2 0 00-2-2H5a2 2 0 00-2 2v6a2 2 0 002 2h2a2 2 0 002-2zm0 0V9a2 2 0 012-2h2a2 2 0 012 2v10m-6 0a2 2 0 002 2h2a2 2 0 002-2m0 0V5a2 2 0 012-2h2a2 2 0 012 2v14a2 2 0 01-2 2h-2a2 2 0 01-2-2z" />
+                        d="M9 19v-6a2 2 0 00-2-2H5a2 2 0 00-2 2v6a2 2 0 002 2h2a2 2 0 002-2zm0 0V9a2 2 0 012-2h2a2 2 0 012 2v10m-6 0a2 2 0 002 2h2a2 2 0 002-2m0 0V5a2 2 0 012-2h2a2 2 0 01-2 2h-2a2 2 0 01-2-2z" />
                 </svg>
                 <span
                     class="text-[10px] font-bold group-[.active]:text-zinc-900 dark:group-[.active]:text-white transition-colors">Stats</span>
@@ -207,7 +229,7 @@
 
     <!-- Timer -->
     <div id="rest-timer"
-        class="fixed inset-0 z-[100] bg-zinc-950/90 backdrop-blur-xl hidden flex-col items-center justify-center p-6 animate-slide-up">
+        class="fixed inset-0 z-[100] bg-zinc-950/95 backdrop-blur-xl hidden flex-col items-center justify-center p-6 animate-slide-up">
         <div class="absolute inset-0 pointer-events-none overflow-hidden flex items-center justify-center opacity-20">
             <div class="w-[500px] h-[500px] rounded-full border border-red-500/30 animate-pulse-slow"></div>
             <div class="absolute w-[300px] h-[300px] rounded-full border border-red-500/20"></div>
@@ -257,7 +279,7 @@
             <div class="space-y-4">
                 <div><label class="text-xs text-zinc-500 uppercase font-bold ml-1 mb-1 block">Nom</label><input
                         type="text" id="edit-name"
-                        class="w-full bg-gray-100 dark:bg-zinc-950 border border-gray-200 dark:border-zinc-800 text-zinc-900 dark:text-white rounded-xl px-4 py-3 focus:outline-none focus:border-red-500 focus:ring-1 focus:ring-red-500 transition-all">
+                        class="w-full bg-gray-100 dark:bg-zinc-950 border border-gray-200 dark:border-zinc-800 text-zinc-900 dark:text-white rounded-xl px-4 py-3 focus:outline-none focus:border-red-500">
                 </div>
                 <div class="grid grid-cols-2 gap-4">
                     <div><label class="text-xs text-zinc-500 uppercase font-bold ml-1 mb-1 block">Séries</label><input
@@ -286,7 +308,6 @@
         </div>
     </div>
 
-    <!-- PR Modal (New) -->
     <div id="pr-modal"
         class="fixed inset-0 z-[60] bg-black/50 backdrop-blur-sm hidden flex items-end sm:items-center justify-center p-4">
         <div class="glass-panel w-full max-w-md rounded-3xl p-6 shadow-2xl animate-slide-up">
@@ -325,7 +346,36 @@
         </div>
     </div>
 
-    <!-- Import Modal (New) -->
+    <div id="session-edit-modal"
+        class="fixed inset-0 z-[60] bg-black/50 backdrop-blur-sm hidden flex items-end sm:items-center justify-center p-4">
+        <div class="glass-panel w-full max-w-md rounded-3xl p-6 shadow-2xl animate-slide-up">
+            <div class="flex justify-between items-center mb-6">
+                <h3 class="text-xl font-bold text-zinc-900 dark:text-white">Modifier la Séance</h3><button
+                    onclick="closeSessionEditModal()"
+                    class="p-2 bg-gray-200 dark:bg-zinc-800 rounded-full text-zinc-500 hover:text-zinc-900 dark:hover:text-white"><svg
+                        class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
+                            d="M6 18L18 6M6 6l12 12" />
+                    </svg></button>
+            </div>
+            <div class="space-y-4">
+                <input type="hidden" id="edit-session-id">
+                <div><label class="text-xs text-zinc-500 uppercase font-bold ml-1 mb-1 block">Nom du
+                        Programme</label><input type="text" id="edit-session-name"
+                        class="w-full bg-gray-100 dark:bg-zinc-950 border border-gray-200 dark:border-zinc-800 text-zinc-900 dark:text-white rounded-xl px-4 py-3 focus:border-red-500 outline-none">
+                </div>
+                <div><label class="text-xs text-zinc-500 uppercase font-bold ml-1 mb-1 block">Date
+                        (AAAA-MM-JJ)</label><input type="date" id="edit-session-date"
+                        class="w-full bg-gray-100 dark:bg-zinc-950 border border-gray-200 dark:border-zinc-800 text-zinc-900 dark:text-white rounded-xl px-4 py-3 focus:border-red-500 outline-none">
+                </div>
+            </div>
+            <div class="flex gap-3 mt-8">
+                <button onclick="saveSessionChanges()"
+                    class="w-full py-3.5 rounded-xl bg-red-600 text-white font-semibold hover:bg-red-500 shadow-lg shadow-red-900/40 transition-all">Sauvegarder</button>
+            </div>
+        </div>
+    </div>
+
     <div id="import-modal"
         class="fixed inset-0 z-[60] bg-black/50 backdrop-blur-sm hidden flex items-end sm:items-center justify-center p-4">
         <div class="glass-panel w-full max-w-md rounded-3xl p-6 shadow-2xl animate-slide-up">
@@ -338,11 +388,11 @@
                             d="M6 18L18 6M6 6l12 12" />
                     </svg></button>
             </div>
-            <p class="text-sm text-zinc-500 mb-4">Collez vos notes ici. L'IA va détecter les exercices et les poids (ex:
-                "DC 100kg 5 reps").</p>
+            <p class="text-sm text-zinc-500 mb-4">Collez vos notes (Format libre : "DC 100kg 5reps" ou "Squat 120 5").
+            </p>
             <textarea id="import-text"
                 class="w-full h-32 bg-gray-100 dark:bg-zinc-950 border border-gray-200 dark:border-zinc-800 rounded-xl p-4 text-sm text-zinc-900 dark:text-white resize-none outline-none focus:border-red-500"
-                placeholder="Séance PUSH..."></textarea>
+                placeholder="Lundi PUSH&#10;DC 100 5&#10;Incliné 80kg 8reps..."></textarea>
             <button onclick="processImport()"
                 class="w-full mt-4 bg-red-600 text-white font-bold py-3.5 rounded-xl hover:bg-red-500 transition-all">Analyser
                 & Importer</button>
@@ -350,82 +400,44 @@
     </div>
 
     <script>
-        // --- PERSISTENCE & VIEWPORT FIXES ---
-        window.addEventListener('scroll', () => {
-            const header = document.getElementById('main-header');
-            if (window.scrollY > 20) { header.classList.add('header-scrolled', 'py-2'); header.classList.remove('py-6'); }
-            else { header.classList.remove('header-scrolled', 'py-2'); header.classList.add('py-6'); }
-        });
-
-        // Restore View Logic
+        // --- INIT & THEME ---
+        window.addEventListener('scroll', () => { const h = document.getElementById('main-header'); if (window.scrollY > 20) { h.classList.add('header-scrolled', 'py-2'); h.classList.remove('py-6'); } else { h.classList.remove('header-scrolled', 'py-2'); h.classList.add('py-6'); } });
         window.onload = function () {
-            loadTheme();
-            loadPrograms();
-            loadSession();
-
-            // Restore last active view
-            const lastView = localStorage.getItem('onair_current_view') || 'session';
-            switchView(lastView);
-
-            // Fix viewport zoom
-            const viewport = document.querySelector("meta[name=viewport]");
-            viewport.setAttribute("content", "width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no");
+            loadTheme(); loadPrograms(); loadSession();
+            const lastView = localStorage.getItem('onair_current_view') || 'session'; switchView(lastView);
+            document.querySelector("meta[name=viewport]").setAttribute("content", "width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no");
         };
+        function loadTheme() { if (localStorage.theme === 'dark' || (!('theme' in localStorage) && window.matchMedia('(prefers-color-scheme: dark)').matches)) document.documentElement.classList.add('dark'); }
+        function toggleTheme() { document.documentElement.classList.toggle('dark'); localStorage.theme = document.documentElement.classList.contains('dark') ? 'dark' : 'light'; renderSettings(); }
 
-        function loadTheme() {
-            if (localStorage.theme === 'dark' || (!('theme' in localStorage) && window.matchMedia('(prefers-color-scheme: dark)').matches)) {
-                document.documentElement.classList.add('dark');
-            }
-        }
-        function toggleTheme() {
-            document.documentElement.classList.toggle('dark');
-            localStorage.theme = document.documentElement.classList.contains('dark') ? 'dark' : 'light';
-            renderSettings();
-        }
-
-        // --- FIREBASE SETUP ---
+        // --- FIREBASE ---
         const firebaseConfig = { apiKey: "AIzaSyB5uqBRZFJRHILeLhYbizGYYfEvEOqTbHc", authDomain: "yutoow-fit.firebaseapp.com", projectId: "yutoow-fit", storageBucket: "yutoow-fit.firebasestorage.app", messagingSenderId: "139731145452", appId: "1:139731145452:web:9a139e7ec8c8acd42d4bc9" };
         let auth, db, currentUser;
         try { firebase.initializeApp(firebaseConfig); auth = firebase.auth(); db = firebase.firestore(); auth.onAuthStateChanged(user => { currentUser = user; if (user) setupRealtimeSync(); renderProfile(); renderSettings(); }); } catch (e) { console.log(e); }
 
-        // --- CONSTANTS ---
-        const STORAGE_KEY_SESSIONS = 'onair_sessions';
-        const STORAGE_KEY_CURRENT_SESSION = 'onair_current_session';
-        const STORAGE_KEY_PRS = 'onair_prs';
-        const STORAGE_KEY_PROGRAMS = 'onair_programs_v4';
-        const STORAGE_KEY_NOTES = 'onair_notes';
-
-        // --- STATE ---
-        let programs = {}, currentDay = 'lundi', currentExerciseIndex = 0, sessionData = [], currentSessionId = null, sessionStartTime = null;
-        let timerInterval = null, timerTargetTime = null, timerPausedRemaining = 0, isTimerPaused = false, wakeLock = null;
+        // --- DATA ---
+        const STORAGE_KEY_SESSIONS = 'onair_sessions', STORAGE_KEY_CURRENT_SESSION = 'onair_current_session', STORAGE_KEY_PRS = 'onair_prs', STORAGE_KEY_PROGRAMS = 'onair_programs_v4', STORAGE_KEY_NOTES = 'onair_notes';
+        let programs = {}, currentDay = 'lundi', currentExerciseIndex = 0, sessionData = [], currentSessionId = null, sessionStartTime = null, timerInterval = null, timerTargetTime = null, timerPausedRemaining = 0, isTimerPaused = false, wakeLock = null;
 
         const defaultPrograms = {
-            lundi: { id: 'lundi', name: "Lundi - PUSH", exercises: [{ name: "Développé Couché", focus: "Pectoraux", sets: 4, reps: "6-8", rest: 120 }, { name: "Développé Incliné", focus: "Pecs Haut", sets: 3, reps: "8-12", rest: 90 }] },
-            mardi: { id: 'mardi', name: "Mardi - PULL", exercises: [{ name: "Tractions", focus: "Dos", sets: 4, reps: "Max", rest: 120 }] },
-            mercredi: { id: 'mercredi', name: "Mercredi - LEGS", exercises: [{ name: "Squat", focus: "Jambes", sets: 4, reps: "6-8", rest: 180 }] },
-            vendredi: { id: 'vendredi', name: "Vendredi - Upper", exercises: [{ name: "Dips", focus: "Triceps", sets: 4, reps: "10", rest: 90 }] },
-            samedi: { id: 'samedi', name: "Samedi - Lower", exercises: [{ name: "Fentes", focus: "Fessiers", sets: 3, reps: "12", rest: 90 }] }
+            lundi: { id: 'lundi', name: "Lundi - PUSH", exercises: [{ name: "Développé Couché Barre", focus: "Faisceau claviculaire et sternal", sets: 4, reps: "6-8", rest: 120 }, { name: "Développé Incliné Haltères", focus: "Faisceau claviculaire", sets: 3, reps: "8-12", rest: 90 }, { name: "PecFly", focus: "Faisceau sternal", sets: 3, reps: "12-15", rest: 60 }, { name: "Écarté Couché Haltères", focus: "Faisceau sternal (Isolation)", sets: 3, reps: "10-12", rest: 90 }, { name: "Extensions Triceps Nuque Haltère", focus: "Longue portion du triceps", sets: 4, reps: "12-20", rest: 60 }, { name: "Extensions Triceps Corde", focus: "Portions médiane et latérale", sets: 3, reps: "12-15", rest: 60 }] },
+            mardi: { id: 'mardi', name: "Mardi - PULL", exercises: [{ name: "Tirage Vertical Poulie Neutre", focus: "Grand Dorsal (Largeur)", sets: 4, reps: "8-12", rest: 105 }, { name: "Tirage Horizontal Neutre", focus: "Trapèzes, Rhomboïdes (Épaisseur)", sets: 3, reps: "10-12", rest: 90 }, { name: "Rowing Machine Unilatéral", focus: "Grand Dorsal (Isolation)", sets: 3, reps: "6-8 / bras", rest: 75 }, { name: "Bûcheron Haltère", focus: "Grand Dorsal, Lombaires", sets: 3, reps: "6-8 / bras", rest: 90 }, { name: "Curl Marteau", focus: "Brachial (Épaisseur bras)", sets: 3, reps: "8-12", rest: 75 }, { name: "Curl Incliné", focus: "Biceps (Longue portion)", sets: 3, reps: "10-12", rest: 75 }] },
+            mercredi: { id: 'mercredi', name: "Mercredi - LEGS", exercises: [{ name: "Squat", focus: "Jambes Global", sets: 4, reps: "6-8", rest: 180 }, { name: "Presse à cuisses", focus: "Quadriceps", sets: 4, reps: "10-12", rest: 120 }, { name: "Leg Curl", focus: "Ischio-jambiers", sets: 3, reps: "12-15", rest: 60 }, { name: "Mollets Debout", focus: "Mollets", sets: 4, reps: "15-20", rest: 45 }] },
+            vendredi: { id: 'vendredi', name: "Vendredi - Upper", exercises: [{ name: "Développé Militaire", focus: "Épaules", sets: 4, reps: "8-10", rest: 120 }, { name: "Dips", focus: "Pecs/Triceps", sets: 3, reps: "Max", rest: 90 }, { name: "Tirage Poitrine", focus: "Dos Largeur", sets: 4, reps: "10-12", rest: 90 }] },
+            samedi: { id: 'samedi', name: "Samedi - Lower", exercises: [{ name: "Soulevé de Terre Roumain", focus: "Ischios/Fessiers", sets: 4, reps: "8-10", rest: 120 }, { name: "Fentes Bulgares", focus: "Fessiers", sets: 3, reps: "10/jambe", rest: 90 }, { name: "Leg Extension", focus: "Quadriceps", sets: 3, reps: "15", rest: 60 }] }
         };
 
-        // --- CORE FUNCTIONS ---
-        function getSessions() { return JSON.parse(localStorage.getItem(STORAGE_KEY_SESSIONS) || '[]'); }
-        function getPRs() { return JSON.parse(localStorage.getItem(STORAGE_KEY_PRS) || '{}'); }
-        function getNotes() { return JSON.parse(localStorage.getItem(STORAGE_KEY_NOTES) || '{}'); }
-        function loadPrograms() {
-            const saved = localStorage.getItem(STORAGE_KEY_PROGRAMS);
-            programs = saved ? JSON.parse(saved) : defaultPrograms;
-            Object.keys(programs).forEach(k => { if (!programs[k].id) programs[k].id = k; });
-        }
+        function getSessions() { try { return JSON.parse(localStorage.getItem(STORAGE_KEY_SESSIONS) || '[]'); } catch (e) { return []; } }
+        function getPRs() { try { return JSON.parse(localStorage.getItem(STORAGE_KEY_PRS) || '{}'); } catch (e) { return {}; } }
+        function getNotes() { try { return JSON.parse(localStorage.getItem(STORAGE_KEY_NOTES) || '{}'); } catch (e) { return {}; } }
+        function loadPrograms() { const saved = localStorage.getItem(STORAGE_KEY_PROGRAMS); programs = saved ? JSON.parse(saved) : defaultPrograms; Object.keys(programs).forEach(k => { if (!programs[k].id) programs[k].id = k; }); }
         function savePrograms() { localStorage.setItem(STORAGE_KEY_PROGRAMS, JSON.stringify(programs)); if (currentUser) saveToCloud(); }
 
-        // --- SESSION LOGIC ---
+        // --- CORE SESSION ---
         function loadSession() {
             const saved = localStorage.getItem(STORAGE_KEY_CURRENT_SESSION);
             if (!programs[currentDay]) currentDay = Object.keys(programs)[0] || 'lundi';
-            if (saved) {
-                const s = JSON.parse(saved);
-                if (s.day === currentDay) { sessionData = s.data || []; currentSessionId = s.id; sessionStartTime = new Date(s.startTime); }
-            }
+            if (saved) { const s = JSON.parse(saved); if (s.day === currentDay) { sessionData = s.data || []; currentSessionId = s.id; sessionStartTime = new Date(s.startTime); } }
             if (sessionData.length === 0 && !currentSessionId) { currentSessionId = Date.now().toString(); sessionStartTime = new Date(); }
             renderSessionView();
         }
@@ -436,6 +448,7 @@
             const next = program.exercises[currentExerciseIndex + 1];
             const done = sessionData.filter(s => s.exercise === exo.name).length;
             const keys = Object.keys(programs);
+            const notes = getNotes();
 
             const card = (e, isNext) => `
                 <div class="${isNext ? 'absolute top-0 w-full h-full scale-95 blur-sm opacity-50 z-0 pointer-events-none' : 'relative z-10'} bg-white dark:bg-zinc-900 border border-gray-200 dark:border-zinc-800 rounded-3xl p-6 shadow-xl transition-all duration-300" ${isNext ? 'id="next-card"' : 'id="active-card"'}>
@@ -447,6 +460,7 @@
                     ${!isNext ? `<div class="space-y-6 relative z-10"><div class="flex gap-6"><div class="flex-1"><label class="text-xs text-zinc-400 font-bold ml-1 mb-2 block">CHARGE</label><input type="number" id="weight-input" placeholder="0" class="w-full bg-gray-100 dark:bg-zinc-950 border border-gray-200 dark:border-zinc-700 rounded-2xl py-4 text-center text-2xl font-bold text-zinc-900 dark:text-white focus:border-red-500 outline-none pointer-events-auto"></div><div class="flex-1"><label class="text-xs text-zinc-400 font-bold ml-1 mb-2 block">REPS</label><input type="number" id="reps-input" placeholder="0" class="w-full bg-gray-100 dark:bg-zinc-950 border border-gray-200 dark:border-zinc-700 rounded-2xl py-4 text-center text-2xl font-bold text-zinc-900 dark:text-white focus:border-red-500 outline-none pointer-events-auto"></div></div><button onclick="logSet()" class="w-full bg-zinc-900 dark:bg-white text-white dark:text-black font-bold text-lg py-4 rounded-2xl hover:opacity-90 active:scale-95 transition-all pointer-events-auto">Valider</button></div>` : ''}
                 </div>`;
 
+            // History & Notes rendered BELOW card
             const html = `
                 <div class="flex gap-3 overflow-x-auto pb-4 no-scrollbar -mx-4 px-4 snap-x">${keys.map((k, i) => `<button onclick="changeDay('${k}')" class="snap-center shrink-0 flex flex-col items-center justify-center w-16 h-20 rounded-2xl border transition-all ${currentDay === k ? 'bg-red-600 border-red-500 text-white shadow-lg' : 'bg-white dark:bg-zinc-900 border-gray-200 dark:border-zinc-800 text-zinc-500'}"><span class="text-[10px] uppercase font-bold opacity-80">${programs[k].name.split(' ')[0].substring(0, 3)}</span><span class="text-xl font-bold mt-1">${i + 1}</span></button>`).join('')}</div>
                 <div id="swipe-area" class="relative group perspective-1000 min-h-[450px]">
@@ -454,7 +468,18 @@
                     <div id="cards-stack" class="relative w-full">${next ? card(next, true) : ''}${card(exo, false)}</div>
                     <div class="flex justify-between items-center px-4 mt-3 text-zinc-400 text-xs font-medium relative z-20"><button onclick="prevExercise()" class="p-2 pointer-events-auto">Précédent</button><span>Swipe pour naviguer</span><button onclick="nextExercise()" class="p-2 pointer-events-auto">Suivant</button></div>
                 </div>
-                ${done > 0 ? `<div class="mt-6 animate-slide-up"><h3 class="text-sm font-bold text-zinc-400 uppercase tracking-wider mb-3 px-1">Aujourd'hui</h3><div class="space-y-2">${sessionData.filter(s => s.exercise === exo.name).map((s, i) => `<div class="flex justify-between bg-white dark:bg-zinc-900 border border-gray-100 dark:border-zinc-800 rounded-xl p-4 shadow-sm"><div class="flex gap-3 items-center"><div class="w-6 h-6 rounded-full bg-red-100 dark:bg-red-500/10 text-red-600 dark:text-red-500 flex items-center justify-center text-xs font-bold">${i + 1}</div><span class="text-sm text-zinc-500">Terminée</span></div><span class="font-bold font-mono text-zinc-900 dark:text-white">${s.weight}kg <span class="text-zinc-400">x</span> ${s.reps}</span></div>`).join('')}</div></div>` : ''}
+                
+                <!-- NOTES SECTION ADDED HERE -->
+                <div class="mt-6 mx-1 animate-slide-up">
+                    <label class="text-xs text-zinc-400 font-bold uppercase tracking-wider ml-1 mb-2 block flex items-center gap-2">
+                       <svg class="w-3 h-3" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M11 5H6a2 2 0 00-2 2v11a2 2 0 002 2h11a2 2 0 002-2v-5m-1.414-9.414a2 2 0 112.828 2.828L11.828 15H9v-2.828l8.586-8.586z"/></svg>
+                       Notes sur l'exercice
+                    </label>
+                    <textarea oninput="saveCurrentNote(this.value)" class="w-full bg-white dark:bg-zinc-900 border border-gray-200 dark:border-zinc-800 rounded-2xl p-4 text-sm focus:border-red-500 focus:ring-1 focus:ring-red-500 outline-none resize-none h-24 shadow-sm transition-all text-zinc-800 dark:text-zinc-200 placeholder-zinc-400 pointer-events-auto" placeholder="Ex: Siège au cran 4, attention épaule gauche...">${notes[exo.name] || ''}</textarea>
+                </div>
+
+                <!-- LIVE HISTORY -->
+                ${done > 0 ? `<div class="mt-6 animate-slide-up"><h3 class="text-sm font-bold text-zinc-400 uppercase tracking-wider mb-3 px-1">Séries Terminées</h3><div class="space-y-2">${sessionData.filter(s => s.exercise === exo.name).map((s, i) => `<div class="flex justify-between bg-white dark:bg-zinc-900 border border-gray-100 dark:border-zinc-800 rounded-xl p-4 shadow-sm"><div class="flex gap-3 items-center"><div class="w-6 h-6 rounded-full bg-red-100 dark:bg-red-500/10 text-red-600 dark:text-red-500 flex items-center justify-center text-xs font-bold">${i + 1}</div><span class="text-sm text-zinc-500">Terminée</span></div><span class="font-bold font-mono text-zinc-900 dark:text-white">${s.weight}kg <span class="text-zinc-400">x</span> ${s.reps}</span></div>`).join('')}</div></div>` : ''}
                 <div class="h-8"></div>
             `;
             document.getElementById('session-view').innerHTML = html;
@@ -465,41 +490,16 @@
         // --- SWIPE ---
         let tx = 0, ty = 0, swiping = false;
         function setupSwipe() {
-            const el = document.getElementById('swipe-area');
-            if (!el) return;
-            el.addEventListener('touchstart', e => {
-                if (e.target.closest('input, button')) { swiping = false; return; }
-                tx = e.touches[0].clientX; ty = e.touches[0].clientY; swiping = true;
-                const c = document.getElementById('active-card'); if (c) c.style.transition = 'none';
-            }, { passive: false });
-            el.addEventListener('touchmove', e => {
-                if (!swiping) return;
-                const dx = e.touches[0].clientX - tx, dy = e.touches[0].clientY - ty;
-                if (Math.abs(dy) > Math.abs(dx)) { swiping = false; return; }
-                if (Math.abs(dx) > 10 && e.cancelable) e.preventDefault();
-                const c = document.getElementById('active-card');
-                if (c) c.style.transform = `translateX(${dx}px) rotate(${dx / 25}deg)`;
-            }, { passive: false });
-            el.addEventListener('touchend', e => {
-                if (!swiping) return;
-                swiping = false;
-                const dx = e.changedTouches[0].clientX - tx;
-                const c = document.getElementById('active-card');
-                if (!c) return;
-                c.style.transition = 'transform 0.4s ease';
-                if (Math.abs(dx) > 100) {
-                    c.style.transform = `translateX(${dx > 0 ? window.innerWidth : -window.innerWidth}px)`;
-                    setTimeout(() => dx > 0 ? prevExercise() : nextExercise(), 300);
-                } else {
-                    c.style.transform = 'translateX(0)';
-                }
-            });
+            const el = document.getElementById('swipe-area'); if (!el) return;
+            el.addEventListener('touchstart', e => { if (e.target.closest('input, button, textarea')) { swiping = false; return; } tx = e.touches[0].clientX; ty = e.touches[0].clientY; swiping = true; const c = document.getElementById('active-card'); if (c) c.style.transition = 'none'; }, { passive: false });
+            el.addEventListener('touchmove', e => { if (!swiping) return; const dx = e.touches[0].clientX - tx, dy = e.touches[0].clientY - ty; if (Math.abs(dy) > Math.abs(dx)) { swiping = false; return; } if (Math.abs(dx) > 10 && e.cancelable) e.preventDefault(); const c = document.getElementById('active-card'); if (c) c.style.transform = `translateX(${dx}px) rotate(${dx / 25}deg)`; }, { passive: false });
+            el.addEventListener('touchend', e => { if (!swiping) return; swiping = false; const dx = e.changedTouches[0].clientX - tx; const c = document.getElementById('active-card'); if (!c) return; c.style.transition = 'transform 0.4s ease'; if (Math.abs(dx) > 100) { c.style.transform = `translateX(${dx > 0 ? window.innerWidth : -window.innerWidth}px)`; setTimeout(() => dx > 0 ? prevExercise() : nextExercise(), 300); } else { c.style.transform = 'translateX(0)'; } });
         }
-
         function prevExercise() { if (currentExerciseIndex > 0) { currentExerciseIndex--; loadSession(); } }
         function nextExercise() { if (currentExerciseIndex < programs[currentDay].exercises.length - 1) { currentExerciseIndex++; loadSession(); } }
         function changeDay(day) { currentDay = day; currentExerciseIndex = 0; loadSession(); }
 
+        // --- LOG SET & LOGIC ---
         function logSet() {
             const w = document.getElementById('weight-input').value, r = document.getElementById('reps-input').value;
             if (!w || !r) return;
@@ -508,84 +508,75 @@
             localStorage.setItem(STORAGE_KEY_CURRENT_SESSION, JSON.stringify({ id: currentSessionId, startTime: sessionStartTime, data: sessionData, day: currentDay }));
             if (currentUser) saveToCloud();
 
-            // Auto update PR if better
-            const prs = getPRs();
-            const old = prs[ex.name] || { weight: 0, reps: 0 };
-            if (parseFloat(w) > old.weight || (parseFloat(w) === old.weight && parseInt(r) > old.reps)) {
-                prs[ex.name] = { weight: parseFloat(w), reps: parseInt(r), date: new Date().toISOString() };
-                localStorage.setItem(STORAGE_KEY_PRS, JSON.stringify(prs));
-            }
+            const prs = getPRs(), old = prs[ex.name] || { weight: 0, reps: 0 };
+            if (parseFloat(w) > old.weight || (parseFloat(w) === old.weight && parseInt(r) > old.reps)) { prs[ex.name] = { weight: parseFloat(w), reps: parseInt(r), date: new Date().toISOString() }; localStorage.setItem(STORAGE_KEY_PRS, JSON.stringify(prs)); }
 
+            // Check completion
             if (sessionData.filter(s => s.exercise === ex.name).length >= ex.sets) {
-                if (currentExerciseIndex < programs[currentDay].exercises.length - 1) setTimeout(() => { currentExerciseIndex++; loadSession(); }, 300);
-            } else renderSessionView();
+                if (currentExerciseIndex < programs[currentDay].exercises.length - 1) {
+                    showToast("Exercice terminé ! Prochain...");
+                    setTimeout(() => { currentExerciseIndex++; loadSession(); }, 1500); // Wait for toast
+                } else {
+                    showSessionComplete();
+                }
+            } else {
+                renderSessionView(); // This triggers re-render to show set in history
+            }
             startRestTimer(ex.rest);
         }
 
+        function showToast(msg) {
+            const t = document.getElementById('toast');
+            document.getElementById('toast-message').textContent = msg;
+            t.classList.remove('pointer-events-none', 'opacity-0');
+            t.classList.add('toast-active');
+            setTimeout(() => {
+                t.classList.remove('toast-active');
+                t.classList.add('opacity-0', 'pointer-events-none');
+            }, 2500);
+        }
+
+        function saveCurrentNote(val) {
+            const ex = programs[currentDay].exercises[currentExerciseIndex];
+            const notes = getNotes();
+            notes[ex.name] = val;
+            localStorage.setItem(STORAGE_KEY_NOTES, JSON.stringify(notes));
+        }
+
         // --- TIMER ---
-        function startRestTimer(s) {
-            document.getElementById('rest-timer').classList.remove('hidden'); document.getElementById('rest-timer').classList.add('flex');
-            timerTargetTime = Date.now() + (s * 1000); isTimerPaused = false; updateTimer(); requestWakeLock();
-            clearInterval(timerInterval); timerInterval = setInterval(timerLoop, 100);
-        }
+        function startRestTimer(s) { document.getElementById('rest-timer').classList.remove('hidden'); document.getElementById('rest-timer').classList.add('flex'); timerTargetTime = Date.now() + (s * 1000); isTimerPaused = false; updateTimer(); requestWakeLock(); clearInterval(timerInterval); timerInterval = setInterval(timerLoop, 100); }
         function timerLoop() { if (!isTimerPaused) { const diff = Math.ceil((timerTargetTime - Date.now()) / 1000); if (diff <= 0) stopRestTimer(true); else updateTimer(diff); } }
-        function updateTimer(val) {
-            const v = val !== undefined ? val : Math.ceil((timerTargetTime - Date.now()) / 1000);
-            const m = Math.floor(v / 60), s = v % 60;
-            document.getElementById('timer-display').textContent = `${m < 10 ? '0' + m : m}:${s < 10 ? '0' + s : s}`;
-        }
-        function toggleTimer() {
-            isTimerPaused = !isTimerPaused;
-            document.getElementById('timer-icon-pause').classList.toggle('hidden', isTimerPaused);
-            document.getElementById('timer-icon-play').classList.toggle('hidden', !isTimerPaused);
-            if (isTimerPaused) timerPausedRemaining = Math.ceil((timerTargetTime - Date.now()) / 1000);
-            else timerTargetTime = Date.now() + (timerPausedRemaining * 1000);
-        }
-        function adjustTimer(s) {
-            if (isTimerPaused) { timerPausedRemaining += s; updateTimer(timerPausedRemaining); }
-            else { timerTargetTime += s * 1000; updateTimer(); }
-        }
-        function stopRestTimer(sound = false) {
-            clearInterval(timerInterval); document.getElementById('rest-timer').classList.add('hidden'); document.getElementById('rest-timer').classList.remove('flex');
-            if (sound && navigator.vibrate) navigator.vibrate([200, 100, 200]);
-        }
+        function updateTimer(val) { const v = val !== undefined ? val : Math.ceil((timerTargetTime - Date.now()) / 1000); const m = Math.floor(v / 60), s = v % 60; document.getElementById('timer-display').textContent = `${m < 10 ? '0' + m : m}:${s < 10 ? '0' + s : s}`; }
+        function toggleTimer() { isTimerPaused = !isTimerPaused; document.getElementById('timer-icon-pause').classList.toggle('hidden', isTimerPaused); document.getElementById('timer-icon-play').classList.toggle('hidden', !isTimerPaused); if (isTimerPaused) timerPausedRemaining = Math.ceil((timerTargetTime - Date.now()) / 1000); else timerTargetTime = Date.now() + (timerPausedRemaining * 1000); }
+        function adjustTimer(s) { if (isTimerPaused) { timerPausedRemaining += s; updateTimer(timerPausedRemaining); } else { timerTargetTime += s * 1000; updateTimer(); } }
+        function stopRestTimer(sound = false) { clearInterval(timerInterval); document.getElementById('rest-timer').classList.add('hidden'); document.getElementById('rest-timer').classList.remove('flex'); if (sound && navigator.vibrate) navigator.vibrate([200, 100, 200]); }
         async function requestWakeLock() { try { if ('wakeLock' in navigator) wakeLock = await navigator.wakeLock.request('screen'); } catch (e) { } }
 
         // --- VIEWS ---
         function switchView(view) {
-            ['session', 'profile', 'settings', 'auth'].forEach(v => {
-                document.getElementById(`${v}-view`).classList.add('hidden');
-                document.getElementById(`nav-${v}`)?.classList.remove('active');
-            });
+            ['session', 'profile', 'settings', 'auth'].forEach(v => { document.getElementById(`${v}-view`).classList.add('hidden'); document.getElementById(`nav-${v}`)?.classList.remove('active'); });
             const t = document.getElementById(`${view}-view`); t.classList.remove('hidden'); t.classList.remove('animate-slide-up'); void t.offsetWidth; t.classList.add('animate-slide-up');
             document.getElementById(`nav-${view}`)?.classList.add('active');
-            localStorage.setItem('onair_current_view', view); // Save state
-            if (view === 'profile') renderProfile();
-            if (view === 'settings') renderSettings();
-            if (view === 'auth') renderAuth();
+            localStorage.setItem('onair_current_view', view);
+            if (view === 'profile') renderProfile(); if (view === 'settings') renderSettings(); if (view === 'auth') renderAuth();
             window.scrollTo(0, 0);
         }
 
-        // --- STATS & CRUD ---
+        // --- STATS ---
         function renderProfile() {
             const sessions = getSessions().sort((a, b) => new Date(b.startTime) - new Date(a.startTime));
             const prs = getPRs();
-
-            // Group History by Category
-            const groupedHistory = {};
-            sessions.forEach(s => {
-                const cat = s.programName.split(' ')[0] || "Autre"; // Take first word (Lundi, Mardi...)
-                if (!groupedHistory[cat]) groupedHistory[cat] = [];
-                groupedHistory[cat].push(s);
-            });
+            const grouped = {};
+            sessions.forEach(s => { const cat = s.programName.split(' ')[0] || "Autre"; if (!grouped[cat]) grouped[cat] = []; grouped[cat].push(s); });
 
             let html = `
                 <div class="glass-panel rounded-3xl p-6 shadow-sm mb-6">
                     <h2 class="text-2xl font-bold mb-4 text-zinc-900 dark:text-white">Records (PRs)</h2>
                     <div class="grid grid-cols-2 gap-3 mb-4">
                         ${Object.entries(prs).map(([name, data]) => `
-                            <div onclick="openPRModal('${name}', ${data.weight}, ${data.reps})" class="bg-white dark:bg-zinc-900 border border-gray-100 dark:border-zinc-800 p-4 rounded-2xl shadow-sm cursor-pointer hover:border-red-500 transition-colors">
-                                <p class="text-xs text-zinc-500 truncate mb-1">${name}</p>
+                            <div class="relative bg-white dark:bg-zinc-900 border border-gray-100 dark:border-zinc-800 p-4 rounded-2xl shadow-sm hover:border-red-500 transition-colors">
+                                <button onclick="openPRModal('${name}', ${data.weight}, ${data.reps})" class="absolute top-2 right-2 text-zinc-400 hover:text-red-500"><svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15.232 5.232l3.536 3.536m-2.036-5.036a2.5 2.5 0 113.536 3.536L6.5 21.036H3v-3.572L16.732 3.732z" /></svg></button>
+                                <p class="text-xs text-zinc-500 truncate mb-1 pr-6">${name}</p>
                                 <p class="text-xl font-bold text-zinc-900 dark:text-white">${data.weight} <span class="text-sm text-zinc-400">kg</span></p>
                             </div>
                         `).join('')}
@@ -594,26 +585,27 @@
                 </div>
 
                 <div class="glass-panel rounded-3xl p-6 shadow-sm mb-6">
-                    <div class="flex justify-between items-center mb-4">
-                        <h2 class="text-2xl font-bold text-zinc-900 dark:text-white">Import Note</h2>
-                        <button onclick="document.getElementById('import-modal').classList.remove('hidden'); document.getElementById('import-modal').classList.add('flex')" class="text-xs bg-red-100 dark:bg-red-900/30 text-red-600 dark:text-red-400 px-3 py-1 rounded-full font-bold">IA Local</button>
-                    </div>
+                    <div class="flex justify-between items-center mb-4"><h2 class="text-2xl font-bold text-zinc-900 dark:text-white">Import Note</h2><button onclick="document.getElementById('import-modal').classList.remove('hidden'); document.getElementById('import-modal').classList.add('flex')" class="text-xs bg-red-100 dark:bg-red-900/30 text-red-600 dark:text-red-400 px-3 py-1 rounded-full font-bold">IA Local</button></div>
                     <p class="text-xs text-zinc-500">Collez un résumé texte pour l'ajouter à l'historique.</p>
                 </div>
 
                 <div class="space-y-6 pb-20">
                     <h2 class="text-2xl font-bold px-2 text-zinc-900 dark:text-white">Historique</h2>
-                    ${Object.keys(groupedHistory).length === 0 ? '<p class="px-2 text-zinc-500">Aucune séance.</p>' : ''}
-                    ${Object.entries(groupedHistory).map(([cat, list]) => `
+                    ${Object.keys(grouped).length === 0 ? '<p class="px-2 text-zinc-500">Aucune séance.</p>' : ''}
+                    ${Object.entries(grouped).map(([cat, list]) => `
                         <div>
                             <h3 class="font-bold text-red-500 uppercase tracking-wider text-xs mb-3 px-2 border-b border-gray-200 dark:border-zinc-800 pb-1">${cat}</h3>
                             <div class="space-y-2">
                                 ${list.map(s => {
                 const date = new Date(s.startTime).toLocaleDateString('fr-FR', { day: 'numeric', month: 'short' });
+                const dateISO = new Date(s.startTime).toISOString().split('T')[0];
                 return `
-                                    <div class="bg-white dark:bg-zinc-900 border border-gray-100 dark:border-zinc-800 p-4 rounded-2xl flex justify-between items-center shadow-sm">
+                                    <div class="bg-white dark:bg-zinc-900 border border-gray-100 dark:border-zinc-800 p-4 rounded-2xl flex justify-between items-center shadow-sm group">
                                         <div><p class="font-bold text-zinc-900 dark:text-white">${s.programName}</p><p class="text-xs text-zinc-500">${date} • ${s.data ? s.data.length : 0} séries</p></div>
-                                        <button onclick="deleteSession('${s.id}')" class="text-zinc-300 hover:text-red-500"><svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16" /></svg></button>
+                                        <div class="flex gap-3">
+                                            <button onclick="openSessionEditModal('${s.id}', '${s.programName}', '${dateISO}')" class="text-zinc-300 hover:text-blue-500"><svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15.232 5.232l3.536 3.536m-2.036-5.036a2.5 2.5 0 113.536 3.536L6.5 21.036H3v-3.572L16.732 3.732z" /></svg></button>
+                                            <button onclick="deleteSession('${s.id}')" class="text-zinc-300 hover:text-red-500"><svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16" /></svg></button>
+                                        </div>
                                     </div>`
             }).join('')}
                             </div>
@@ -624,153 +616,59 @@
             document.getElementById('profile-view').innerHTML = html;
         }
 
-        // --- PR MODAL LOGIC ---
-        function openPRModal(name = '', weight = '', reps = '') {
-            document.getElementById('pr-modal').classList.remove('hidden');
-            document.getElementById('pr-modal').classList.add('flex');
-            document.getElementById('pr-name').value = name;
-            document.getElementById('pr-weight').value = weight;
-            document.getElementById('pr-reps').value = reps;
-            document.getElementById('pr-key-hidden').value = name; // Store original name to detect renaming
-            document.getElementById('pr-modal-title').textContent = name ? "Modifier Record" : "Nouveau Record";
-            document.getElementById('pr-delete-btn').classList.toggle('hidden', !name);
+        // --- HANDLERS (EDIT & SAVE) ---
+        function openSessionEditModal(id, name, date) { document.getElementById('edit-session-id').value = id; document.getElementById('edit-session-name').value = name; document.getElementById('edit-session-date').value = date; document.getElementById('session-edit-modal').classList.remove('hidden'); document.getElementById('session-edit-modal').classList.add('flex'); }
+        function closeSessionEditModal() { document.getElementById('session-edit-modal').classList.add('hidden'); document.getElementById('session-edit-modal').classList.remove('flex'); }
+        function saveSessionChanges() {
+            const id = document.getElementById('edit-session-id').value, newName = document.getElementById('edit-session-name').value, newDate = document.getElementById('edit-session-date').value;
+            if (!newName || !newDate) return alert("Remplissez tout");
+            const sessions = getSessions(), idx = sessions.findIndex(s => s.id === id);
+            if (idx !== -1) { sessions[idx].programName = newName; sessions[idx].startTime = new Date(newDate).toISOString(); localStorage.setItem(STORAGE_KEY_SESSIONS, JSON.stringify(sessions)); if (currentUser) saveToCloud(); closeSessionEditModal(); renderProfile(); }
         }
+        function deleteSession(id) { if (!confirm("Supprimer ?")) return; const sessions = getSessions().filter(s => s.id !== id); localStorage.setItem(STORAGE_KEY_SESSIONS, JSON.stringify(sessions)); if (currentUser) saveToCloud(); renderProfile(); }
+
+        function openPRModal(name = '', weight = '', reps = '') { document.getElementById('pr-modal').classList.remove('hidden'); document.getElementById('pr-modal').classList.add('flex'); document.getElementById('pr-name').value = name; document.getElementById('pr-weight').value = weight; document.getElementById('pr-reps').value = reps; document.getElementById('pr-key-hidden').value = name; document.getElementById('pr-modal-title').textContent = name ? "Modifier Record" : "Nouveau Record"; document.getElementById('pr-delete-btn').classList.toggle('hidden', !name); }
         function closePRModal() { document.getElementById('pr-modal').classList.add('hidden'); document.getElementById('pr-modal').classList.remove('flex'); }
+        function savePR() { const name = document.getElementById('pr-name').value, weight = parseFloat(document.getElementById('pr-weight').value), reps = parseInt(document.getElementById('pr-reps').value); if (!name || isNaN(weight)) return; const prs = getPRs(), old = document.getElementById('pr-key-hidden').value; if (old && old !== name) delete prs[old]; prs[name] = { weight, reps: isNaN(reps) ? 0 : reps, date: new Date().toISOString() }; localStorage.setItem(STORAGE_KEY_PRS, JSON.stringify(prs)); if (currentUser) saveToCloud(); closePRModal(); renderProfile(); }
+        function deletePR() { const name = document.getElementById('pr-key-hidden').value; if (!confirm("Supprimer ?")) return; const prs = getPRs(); delete prs[name]; localStorage.setItem(STORAGE_KEY_PRS, JSON.stringify(prs)); if (currentUser) saveToCloud(); closePRModal(); renderProfile(); }
 
-        function savePR() {
-            const name = document.getElementById('pr-name').value;
-            const weight = parseFloat(document.getElementById('pr-weight').value);
-            const reps = parseInt(document.getElementById('pr-reps').value);
-            if (!name || isNaN(weight) || isNaN(reps)) return alert("Remplissez tout !");
-
-            const prs = getPRs();
-            const oldKey = document.getElementById('pr-key-hidden').value;
-            if (oldKey && oldKey !== name) delete prs[oldKey]; // Handle rename
-
-            prs[name] = { weight, reps, date: new Date().toISOString() };
-            localStorage.setItem(STORAGE_KEY_PRS, JSON.stringify(prs));
-            if (currentUser) saveToCloud();
-            closePRModal();
-            renderProfile();
-        }
-
-        function deletePR() {
-            const name = document.getElementById('pr-key-hidden').value;
-            if (!confirm("Supprimer ce record ?")) return;
-            const prs = getPRs();
-            delete prs[name];
-            localStorage.setItem(STORAGE_KEY_PRS, JSON.stringify(prs));
-            if (currentUser) saveToCloud();
-            closePRModal();
-            renderProfile();
-        }
-
-        function deleteSession(id) {
-            if (!confirm("Supprimer cette séance de l'historique ?")) return;
-            let sessions = getSessions();
-            sessions = sessions.filter(s => s.id !== id);
-            localStorage.setItem(STORAGE_KEY_SESSIONS, JSON.stringify(sessions));
-            if (currentUser) saveToCloud();
-            renderProfile();
-        }
-
-        // --- SMART IMPORT LOGIC ---
         function closeImportModal() { document.getElementById('import-modal').classList.add('hidden'); document.getElementById('import-modal').classList.remove('flex'); }
-
         function processImport() {
-            const text = document.getElementById('import-text').value;
-            if (!text) return;
-
-            // 1. Detect Category/Program
-            let programName = "Séance Importée";
-            if (text.match(/push|pecs|triceps/i)) programName = "Lundi - PUSH (Import)";
-            else if (text.match(/pull|dos|biceps/i)) programName = "Mardi - PULL (Import)";
-            else if (text.match(/legs|jambes|squat/i)) programName = "Mercredi - LEGS (Import)";
-
-            const sessionSets = [];
-            const lines = text.split('\n');
-            const prs = getPRs();
+            const text = document.getElementById('import-text').value; if (!text) return;
+            let programName = "Importée"; if (text.match(/push|pecs/i)) programName = "Lundi - PUSH"; else if (text.match(/pull|dos/i)) programName = "Mardi - PULL"; else if (text.match(/legs/i)) programName = "Mercredi - LEGS";
+            const sessionSets = [], lines = text.split('\n'), prs = getPRs(), regex = /(.+?)(?:\s*[:\-|]\s*|\s+)(\d+[.,]?\d*)\s*(?:kg|lbs)?\s*[xX]?\s*(\d+)(?:\s*reps?)?/i;
             let prsUpdated = false;
-
-            // 2. Local AI Parser (Regex)
-            // Pattern: Exercise name followed by numbers (100x5 or 100 5 or 100kg 5)
-            // Example match: "DC 100 5" -> Ex: DC, W: 100, R: 5
-            lines.forEach(line => {
-                const match = line.match(/^([a-zA-ZÀ-ÿ\s]+)[:\s]+(\d+(?:[.,]\d+)?)\s*(?:kg|x)?\s*(\d+)/i);
-                if (match) {
-                    const exercise = match[1].trim();
-                    const weight = parseFloat(match[2].replace(',', '.'));
-                    const reps = parseInt(match[3]);
-
-                    // Add to session
-                    sessionSets.push({ exercise, weight, reps, day: 'import', programName, timestamp: new Date().toISOString() });
-
-                    // Check PR
-                    const currentPr = prs[exercise] || { weight: 0, reps: 0 };
-                    if (weight > currentPr.weight || (weight === currentPr.weight && reps > currentPr.reps)) {
-                        prs[exercise] = { weight, reps, date: new Date().toISOString() };
-                        prsUpdated = true;
-                    }
-                }
-            });
-
-            if (sessionSets.length === 0) return alert("Impossible d'analyser le texte. Utilisez le format : 'Exercice Poids Reps' par ligne.");
-
-            // 3. Save
-            const newSession = {
-                id: Date.now().toString(),
-                startTime: new Date().toISOString(),
-                endTime: new Date().toISOString(),
-                programName: programName,
-                totalSets: sessionSets.length,
-                data: sessionSets
-            };
-
-            const sessions = getSessions();
-            sessions.push(newSession);
-            localStorage.setItem(STORAGE_KEY_SESSIONS, JSON.stringify(sessions));
-
-            if (prsUpdated) localStorage.setItem(STORAGE_KEY_PRS, JSON.stringify(prs));
-            if (currentUser) saveToCloud();
-
-            alert(`Import réussi ! ${sessionSets.length} séries ajoutées.`);
-            closeImportModal();
-            document.getElementById('import-text').value = '';
-            renderProfile();
+            lines.forEach(line => { const match = line.match(regex); if (match) { const exercise = match[1].trim(), weight = parseFloat(match[2].replace(',', '.')), reps = parseInt(match[3]); if (exercise.length > 2 && !exercise.toLowerCase().includes("séance")) { sessionSets.push({ exercise, weight, reps, day: 'import', programName, timestamp: new Date().toISOString() }); const cur = prs[exercise] || { weight: 0, reps: 0 }; if (weight > cur.weight || (weight === cur.weight && reps > cur.reps)) { prs[exercise] = { weight, reps, date: new Date().toISOString() }; prsUpdated = true; } } } });
+            if (sessionSets.length === 0) return alert("Aucun exercice détecté.");
+            const newSession = { id: Date.now().toString(), startTime: new Date().toISOString(), endTime: new Date().toISOString(), programName, totalSets: sessionSets.length, data: sessionSets };
+            const sessions = getSessions(); sessions.push(newSession); localStorage.setItem(STORAGE_KEY_SESSIONS, JSON.stringify(sessions)); if (prsUpdated) localStorage.setItem(STORAGE_KEY_PRS, JSON.stringify(prs)); if (currentUser) saveToCloud();
+            alert(`${sessionSets.length} séries importées.`); closeImportModal(); renderProfile();
         }
 
-        // --- AUTH & SETTINGS ---
-        function renderSettings() {
-            const isDark = document.documentElement.classList.contains('dark');
-            document.getElementById('settings-view').innerHTML = `
-                <div class="glass-panel rounded-3xl p-6 shadow-sm space-y-4">
-                    <h2 class="text-2xl font-bold text-zinc-900 dark:text-white">Paramètres</h2>
-                    <button onclick="toggleTheme()" class="w-full flex justify-between items-center p-4 bg-gray-100 dark:bg-zinc-900 rounded-xl text-zinc-900 dark:text-white"><span>Mode Sombre</span><div class="w-12 h-6 bg-zinc-300 dark:bg-zinc-700 rounded-full relative transition-colors"><div class="w-5 h-5 bg-white rounded-full absolute top-0.5 transition-all ${isDark ? 'left-[1.6rem]' : 'left-0.5'} shadow-sm"></div></div></button>
-                    <div class="pt-6 border-t border-gray-200 dark:border-zinc-800 space-y-3">
-                        <button onclick="clearUserData()" class="w-full py-4 bg-red-500/10 border border-red-500/20 text-red-600 dark:text-red-500 font-bold hover:bg-red-500/20 text-sm rounded-xl transition-all flex items-center justify-center gap-2"><svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16" /></svg>Supprimer Stats & Records</button>
-                        <button onclick="if(confirm('Tout réinitialiser ?')){localStorage.clear(); location.reload();}" class="w-full py-3 text-zinc-400 hover:text-zinc-600 dark:hover:text-white font-medium text-xs transition-colors">Réinitialisation d'usine</button>
-                    </div>
-                </div>`;
-        }
-
-        async function clearUserData() {
-            if (!confirm("Supprimer l'historique et les records ?")) return;
-            localStorage.removeItem(STORAGE_KEY_SESSIONS); localStorage.removeItem(STORAGE_KEY_PRS);
-            if (currentUser) await db.collection('users').doc(currentUser.uid).set({ sessions: "[]", prs: "{}" }, { merge: true });
-            alert("Données effacées."); renderProfile();
-        }
-
-        function renderAuth() { document.getElementById('auth-view').innerHTML = `<div class="glass-panel rounded-3xl p-8 shadow-xl mt-10"><h2 class="text-2xl font-bold mb-6 text-center text-zinc-900 dark:text-white">Connexion</h2><div class="space-y-4"><input type="email" id="auth-email" placeholder="Email" class="w-full bg-gray-100 dark:bg-zinc-950 border border-gray-200 dark:border-zinc-800 text-zinc-900 dark:text-white rounded-xl px-4 py-3 outline-none"><input type="password" id="auth-password" placeholder="Mot de passe" class="w-full bg-gray-100 dark:bg-zinc-950 border border-gray-200 dark:border-zinc-800 text-zinc-900 dark:text-white rounded-xl px-4 py-3 outline-none"></div><div class="grid grid-cols-2 gap-3 mt-6"><button onclick="handleLogin()" class="bg-gray-200 dark:bg-zinc-800 text-zinc-900 dark:text-white py-3 rounded-xl font-bold">Connexion</button><button onclick="handleSignup()" class="bg-red-600 text-white py-3 rounded-xl font-bold">Créer</button></div></div>`; }
+        function renderSettings() { document.getElementById('settings-view').innerHTML = `<div class="glass-panel rounded-3xl p-6 shadow-sm space-y-4"><h2 class="text-2xl font-bold text-zinc-900 dark:text-white">Paramètres</h2><button onclick="toggleTheme()" class="w-full flex justify-between items-center p-4 bg-gray-100 dark:bg-zinc-900 rounded-xl text-zinc-900 dark:text-white"><span>Mode Sombre</span><div class="w-12 h-6 bg-zinc-300 dark:bg-zinc-700 rounded-full relative transition-colors"><div class="w-5 h-5 bg-white rounded-full absolute top-0.5 transition-all ${document.documentElement.classList.contains('dark') ? 'left-[1.6rem]' : 'left-0.5'} shadow-sm"></div></div></button><div class="pt-6 border-t border-gray-200 dark:border-zinc-800 space-y-3"><button onclick="clearUserData()" class="w-full py-4 bg-red-500/10 border border-red-500/20 text-red-600 dark:text-red-500 font-bold hover:bg-red-500/20 text-sm rounded-xl">Supprimer Stats & Records</button><button onclick="if(confirm('Tout réinitialiser ?')){localStorage.clear(); location.reload();}" class="w-full py-3 text-zinc-400 hover:text-zinc-600 dark:hover:text-white font-medium text-xs">Réinitialisation d'usine</button></div></div>`; }
+        async function clearUserData() { if (!confirm("Supprimer l'historique ?")) return; localStorage.removeItem(STORAGE_KEY_SESSIONS); localStorage.removeItem(STORAGE_KEY_PRS); if (currentUser) await db.collection('users').doc(currentUser.uid).set({ sessions: "[]", prs: "{}" }, { merge: true }); alert("Données effacées."); renderProfile(); }
+        function renderAuth() { document.getElementById('auth-view').innerHTML = `<div class="glass-panel rounded-3xl p-8 shadow-xl mt-10"><h2 class="text-2xl font-bold mb-6 text-center text-zinc-900 dark:text-white">Connexion</h2><div class="space-y-4"><input type="email" id="auth-email" placeholder="Email" class="w-full bg-gray-100 dark:bg-zinc-900 border border-gray-200 dark:border-zinc-800 text-zinc-900 dark:text-white rounded-xl px-4 py-3 outline-none"><input type="password" id="auth-password" placeholder="Mot de passe" class="w-full bg-gray-100 dark:bg-zinc-900 border border-gray-200 dark:border-zinc-800 text-zinc-900 dark:text-white rounded-xl px-4 py-3 outline-none"></div><div class="grid grid-cols-2 gap-3 mt-6"><button onclick="handleLogin()" class="bg-gray-200 dark:bg-zinc-800 text-zinc-900 dark:text-white py-3 rounded-xl font-bold">Connexion</button><button onclick="handleSignup()" class="bg-red-600 text-white py-3 rounded-xl font-bold">Créer</button></div></div>`; }
         async function handleLogin() { try { await auth.signInWithEmailAndPassword(document.getElementById('auth-email').value, document.getElementById('auth-password').value); switchView('profile'); } catch (e) { alert(e.message); } }
         async function handleSignup() { try { await auth.createUserWithEmailAndPassword(document.getElementById('auth-email').value, document.getElementById('auth-password').value); switchView('profile'); } catch (e) { alert(e.message); } }
         function setupRealtimeSync() { if (!currentUser) return; db.collection('users').doc(currentUser.uid).onSnapshot(doc => { if (doc.exists) { const d = doc.data(); if (d.programs) { programs = JSON.parse(d.programs); localStorage.setItem(STORAGE_KEY_PROGRAMS, d.programs); } } }); }
 
-        // MODALS
         function openEditModal() { const ex = programs[currentDay].exercises[currentExerciseIndex]; document.getElementById('edit-name').value = ex.name; document.getElementById('edit-sets').value = ex.sets; document.getElementById('edit-reps').value = ex.reps; document.getElementById('edit-rest').value = ex.rest; document.getElementById('edit-focus').value = ex.focus || ""; document.getElementById('edit-modal').classList.remove('hidden'); document.getElementById('edit-modal').classList.add('flex'); }
         function closeEditModal() { document.getElementById('edit-modal').classList.add('hidden'); document.getElementById('edit-modal').classList.remove('flex'); }
-        function saveExerciseChanges() { const name = document.getElementById('edit-name').value, sets = document.getElementById('edit-sets').value, reps = document.getElementById('edit-reps').value, rest = document.getElementById('edit-rest').value, focus = document.getElementById('edit-focus').value; if (!name) return; programs[currentDay].exercises[currentExerciseIndex] = { name, sets, reps, rest, focus }; savePrograms(); closeEditModal(); loadSession(); }
+        function saveExerciseChanges() {
+            const name = document.getElementById('edit-name').value, sets = parseInt(document.getElementById('edit-sets').value), reps = document.getElementById('edit-reps').value, rest = parseInt(document.getElementById('edit-rest').value), focus = document.getElementById('edit-focus').value;
+            if (!name) return;
+            const oldName = programs[currentDay].exercises[currentExerciseIndex].name;
+            programs[currentDay].exercises[currentExerciseIndex] = { name, sets, reps, rest, focus };
+            if (oldName !== name) {
+                sessionData = sessionData.map(s => s.exercise === oldName ? { ...s, exercise: name } : s);
+                localStorage.setItem(STORAGE_KEY_CURRENT_SESSION, JSON.stringify({ id: currentSessionId, startTime: sessionStartTime, data: sessionData, day: currentDay }));
+            }
+            savePrograms(); closeEditModal(); loadSession();
+        }
         function deleteCurrentExercise() { if (confirm("Supprimer ?")) { programs[currentDay].exercises.splice(currentExerciseIndex, 1); savePrograms(); closeEditModal(); if (currentExerciseIndex >= programs[currentDay].exercises.length) currentExerciseIndex = Math.max(0, programs[currentDay].exercises.length - 1); loadSession(); } }
         function addNewDay() { const id = prompt("ID (ex: dimanche)"); if (id) { programs[id.toLowerCase()] = { id: id.toLowerCase(), name: id, exercises: [{ name: "New", sets: 3, reps: 10, rest: 60 }] }; savePrograms(); changeDay(id.toLowerCase()); } }
+
+        function showSessionComplete() { document.getElementById('session-view').innerHTML = `<div class="glass-panel rounded-3xl p-8 text-center animate-slide-up mt-10"><div class="text-6xl mb-4">🔥</div><h2 class="text-3xl font-bold mb-2 text-zinc-900 dark:text-white">Séance Terminée !</h2><p class="text-zinc-500 dark:text-zinc-400 mb-8">Repose-toi bien, guerrier.</p><button onclick="currentExerciseIndex=0; sessionData=[]; loadSession()" class="w-full bg-zinc-900 dark:bg-white text-white dark:text-black font-bold py-4 rounded-xl">Nouvelle Séance</button></div>`; }
     </script>
 </body>
 
