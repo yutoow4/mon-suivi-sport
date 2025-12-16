@@ -388,8 +388,8 @@
                             d="M6 18L18 6M6 6l12 12" />
                     </svg></button>
             </div>
-            <p class="text-sm text-zinc-500 mb-4">Collez vos notes (Format libre : "DC 100kg 5reps" ou "Squat 4x10
-                100kg").</p>
+            <p class="text-sm text-zinc-500 mb-4">Collez vos notes (Format libre : "DC 100kg 5reps" ou "Squat 120 5").
+            </p>
             <textarea id="import-text"
                 class="w-full h-32 bg-gray-100 dark:bg-zinc-950 border border-gray-200 dark:border-zinc-800 rounded-xl p-4 text-sm text-zinc-900 dark:text-white resize-none outline-none focus:border-red-500"
                 placeholder="Lundi PUSH&#10;DC 100 5&#10;Incliné 80kg 8reps..."></textarea>
@@ -422,7 +422,17 @@
         const defaultPrograms = {
             lundi: { id: 'lundi', name: "Lundi - PUSH", exercises: [{ name: "Développé Couché Barre", focus: "Faisceau claviculaire et sternal", sets: 4, reps: "6-8", rest: 120 }, { name: "Développé Incliné Haltères", focus: "Faisceau claviculaire", sets: 3, reps: "8-12", rest: 90 }, { name: "PecFly", focus: "Faisceau sternal", sets: 3, reps: "12-15", rest: 60 }, { name: "Écarté Couché Haltères", focus: "Faisceau sternal (Isolation)", sets: 3, reps: "10-12", rest: 90 }, { name: "Extensions Triceps Nuque Haltère", focus: "Longue portion du triceps", sets: 4, reps: "12-20", rest: 60 }, { name: "Extensions Triceps Corde", focus: "Portions médiane et latérale", sets: 3, reps: "12-15", rest: 60 }] },
             mardi: { id: 'mardi', name: "Mardi - PULL", exercises: [{ name: "Tirage Vertical Poulie Neutre", focus: "Grand Dorsal (Largeur)", sets: 4, reps: "8-12", rest: 105 }, { name: "Tirage Horizontal Neutre", focus: "Trapèzes, Rhomboïdes (Épaisseur)", sets: 3, reps: "10-12", rest: 90 }, { name: "Rowing Machine Unilatéral", focus: "Grand Dorsal (Isolation)", sets: 3, reps: "6-8 / bras", rest: 75 }, { name: "Bûcheron Haltère", focus: "Grand Dorsal, Lombaires", sets: 3, reps: "6-8 / bras", rest: 90 }, { name: "Curl Marteau", focus: "Brachial (Épaisseur bras)", sets: 3, reps: "8-12", rest: 75 }, { name: "Curl Incliné", focus: "Biceps (Longue portion)", sets: 3, reps: "10-12", rest: 75 }] },
-            mercredi: { id: 'mercredi', name: "Mercredi - LEGS", exercises: [{ name: "Squat", focus: "Jambes Global", sets: 4, reps: "6-8", rest: 180 }, { name: "Presse à cuisses", focus: "Quadriceps", sets: 4, reps: "10-12", rest: 120 }, { name: "Leg Curl", focus: "Ischio-jambiers", sets: 3, reps: "12-15", rest: 60 }, { name: "Mollets Debout", focus: "Mollets", sets: 4, reps: "15-20", rest: 45 }] },
+            mercredi: {
+                id: 'mercredi',
+                name: "Mercredi - LEGS",
+                exercises: [
+                    { name: "Leg Extension", focus: "Quadriceps (Isolation)", sets: 3, reps: "12-15", rest: 90 },
+                    { name: "Presse Incliné", focus: "Quadriceps, Fessiers, Ischios", sets: 4, reps: "6-8", rest: 150 },
+                    { name: "Hack Squat", focus: "Quadriceps (Vastes externes)", sets: 3, reps: "10-12", rest: 105 },
+                    { name: "Leg Curl Allongé/Assis", focus: "Ischio-jambiers (Isolation)", sets: 3, reps: "10-12", rest: 75 },
+                    { name: "Mollets Debout Haltères", focus: "Mollets (Gastrocnémien)", sets: 4, reps: "12-20", rest: 60 }
+                ]
+            },
             vendredi: { id: 'vendredi', name: "Vendredi - Upper", exercises: [{ name: "Développé Militaire", focus: "Épaules", sets: 4, reps: "8-10", rest: 120 }, { name: "Dips", focus: "Pecs/Triceps", sets: 3, reps: "Max", rest: 90 }, { name: "Tirage Poitrine", focus: "Dos Largeur", sets: 4, reps: "10-12", rest: 90 }] },
             samedi: { id: 'samedi', name: "Samedi - Lower", exercises: [{ name: "Soulevé de Terre Roumain", focus: "Ischios/Fessiers", sets: 4, reps: "8-10", rest: 120 }, { name: "Fentes Bulgares", focus: "Fessiers", sets: 3, reps: "10/jambe", rest: 90 }, { name: "Leg Extension", focus: "Quadriceps", sets: 3, reps: "15", rest: 60 }] }
         };
@@ -661,42 +671,10 @@
         function processImport() {
             const text = document.getElementById('import-text').value; if (!text) return;
             let programName = "Importée"; if (text.match(/push|pecs/i)) programName = "Lundi - PUSH"; else if (text.match(/pull|dos/i)) programName = "Mardi - PULL"; else if (text.match(/legs/i)) programName = "Mercredi - LEGS";
-            const sessionSets = [], lines = text.split('\n'), prs = getPRs();
-            // Regex améliorée: Nom + (Séparateur) + (Sets x) + Reps + (x|@) + Poids OU Poids + Reps
-            // Cas 1: "Curl 3x12 20kg"
-            // Cas 2: "DC 100 5"
+            const sessionSets = [], lines = text.split('\n'), prs = getPRs(), regex = /(.+?)(?:\s*[:\-|]\s*|\s+)(\d+[.,]?\d*)\s*(?:kg|lbs)?\s*[xX]?\s*(\d+)(?:\s*reps?)?/i;
             let prsUpdated = false;
-
-            lines.forEach(line => {
-                let exercise, weight, reps, sets = 1;
-
-                // Essai format complet: "Curl 3x12 20kg" ou "Curl 3x12 @ 20"
-                let match = line.match(/^(.+?)\s+(\d+)\s*[xX]\s*(\d+)\s*(?:@|à)?\s*(\d+[.,]?\d*)/);
-                if (match) {
-                    exercise = match[1].trim(); sets = parseInt(match[2]); reps = parseInt(match[3]); weight = parseFloat(match[4].replace(',', '.'));
-                } else {
-                    // Essai format simple: "DC 100 5" ou "DC 100kg 5reps"
-                    match = line.match(/^(.+?)\s+(\d+[.,]?\d*)\s*(?:kg)?\s*[xX]?\s*(\d+)/);
-                    if (match) {
-                        exercise = match[1].trim(); weight = parseFloat(match[2].replace(',', '.')); reps = parseInt(match[3]);
-                    }
-                }
-
-                if (exercise && !isNaN(weight)) {
-                    // Ignore les titres de séance
-                    if (exercise.length < 2 || exercise.toLowerCase().includes("séance")) return;
-
-                    for (let i = 0; i < sets; i++) {
-                        sessionSets.push({ exercise, weight, reps, day: 'import', programName, timestamp: new Date().toISOString() });
-                    }
-
-                    const cur = prs[exercise] || { weight: 0, reps: 0 };
-                    if (weight > cur.weight || (weight === cur.weight && reps > cur.reps)) { prs[exercise] = { weight, reps, date: new Date().toISOString() }; prsUpdated = true; }
-                }
-            });
-
-            if (sessionSets.length === 0) return alert("Aucun exercice détecté. Essayez le format: 'Exercice Poids Reps' ou 'Exercice Séries x Reps Poids'");
-
+            lines.forEach(line => { const match = line.match(regex); if (match) { const exercise = match[1].trim(), weight = parseFloat(match[2].replace(',', '.')), reps = parseInt(match[3]); if (exercise.length > 2 && !exercise.toLowerCase().includes("séance")) { sessionSets.push({ exercise, weight, reps, day: 'import', programName, timestamp: new Date().toISOString() }); const cur = prs[exercise] || { weight: 0, reps: 0 }; if (weight > cur.weight || (weight === cur.weight && reps > cur.reps)) { prs[exercise] = { weight, reps, date: new Date().toISOString() }; prsUpdated = true; } } } });
+            if (sessionSets.length === 0) return alert("Aucun exercice détecté.");
             const newSession = { id: Date.now().toString(), startTime: new Date().toISOString(), endTime: new Date().toISOString(), programName, totalSets: sessionSets.length, data: sessionSets };
             const sessions = getSessions(); sessions.push(newSession); localStorage.setItem(STORAGE_KEY_SESSIONS, JSON.stringify(sessions)); if (prsUpdated) localStorage.setItem(STORAGE_KEY_PRS, JSON.stringify(prs)); if (currentUser) saveToCloud();
             alert(`${sessionSets.length} séries importées.`); closeImportModal(); renderProfile();
