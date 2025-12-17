@@ -13,10 +13,17 @@
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
     <link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@300;400;500;600;700;800&display=swap"
         rel="stylesheet">
+
+    <!-- Libraries for Export -->
     <script src="https://cdn.tailwindcss.com"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/html2canvas/1.4.1/html2canvas.min.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.5.1/jspdf.umd.min.js"></script>
+
+    <!-- Firebase -->
     <script src="https://www.gstatic.com/firebasejs/9.22.0/firebase-app-compat.js"></script>
     <script src="https://www.gstatic.com/firebasejs/9.22.0/firebase-firestore-compat.js"></script>
     <script src="https://www.gstatic.com/firebasejs/9.22.0/firebase-auth-compat.js"></script>
+
     <script>
         tailwind.config = {
             darkMode: 'class',
@@ -400,7 +407,6 @@
     </div>
 
     <script>
-        // --- INIT & THEME ---
         window.addEventListener('scroll', () => { const h = document.getElementById('main-header'); if (window.scrollY > 20) { h.classList.add('header-scrolled', 'py-2'); h.classList.remove('py-6'); } else { h.classList.remove('header-scrolled', 'py-2'); h.classList.add('py-6'); } });
         window.onload = function () {
             loadTheme(); loadPrograms(); loadSession();
@@ -410,41 +416,18 @@
         function loadTheme() { if (localStorage.theme === 'dark' || (!('theme' in localStorage) && window.matchMedia('(prefers-color-scheme: dark)').matches)) document.documentElement.classList.add('dark'); }
         function toggleTheme() { document.documentElement.classList.toggle('dark'); localStorage.theme = document.documentElement.classList.contains('dark') ? 'dark' : 'light'; renderSettings(); }
 
-        // --- FIREBASE ---
         const firebaseConfig = { apiKey: "AIzaSyB5uqBRZFJRHILeLhYbizGYYfEvEOqTbHc", authDomain: "yutoow-fit.firebaseapp.com", projectId: "yutoow-fit", storageBucket: "yutoow-fit.firebasestorage.app", messagingSenderId: "139731145452", appId: "1:139731145452:web:9a139e7ec8c8acd42d4bc9" };
         let auth, db, currentUser;
         try { firebase.initializeApp(firebaseConfig); auth = firebase.auth(); db = firebase.firestore(); auth.onAuthStateChanged(user => { currentUser = user; if (user) setupRealtimeSync(); renderProfile(); renderSettings(); }); } catch (e) { console.log(e); }
 
-        // --- DATA ---
         const STORAGE_KEY_SESSIONS = 'onair_sessions', STORAGE_KEY_CURRENT_SESSION = 'onair_current_session', STORAGE_KEY_PRS = 'onair_prs', STORAGE_KEY_PROGRAMS = 'onair_programs_v5', STORAGE_KEY_NOTES = 'onair_notes';
         let programs = {}, currentDay = 'lundi', currentExerciseIndex = 0, sessionData = [], currentSessionId = null, sessionStartTime = null, timerInterval = null, timerTargetTime = null, timerPausedRemaining = 0, isTimerPaused = false, wakeLock = null;
 
         const defaultPrograms = {
             lundi: { id: 'lundi', name: "Lundi - PUSH", exercises: [{ name: "Développé Couché Barre", focus: "Faisceau claviculaire et sternal", sets: 4, reps: "6-8", rest: 120 }, { name: "Développé Incliné Haltères", focus: "Faisceau claviculaire", sets: 3, reps: "8-12", rest: 90 }, { name: "PecFly", focus: "Faisceau sternal", sets: 3, reps: "12-15", rest: 60 }, { name: "Écarté Couché Haltères", focus: "Faisceau sternal (Isolation)", sets: 3, reps: "10-12", rest: 90 }, { name: "Extensions Triceps Nuque Haltère", focus: "Longue portion du triceps", sets: 4, reps: "12-20", rest: 60 }, { name: "Extensions Triceps Corde", focus: "Portions médiane et latérale", sets: 3, reps: "12-15", rest: 60 }] },
             mardi: { id: 'mardi', name: "Mardi - PULL", exercises: [{ name: "Tirage Vertical Poulie Neutre", focus: "Grand Dorsal (Largeur)", sets: 4, reps: "8-12", rest: 105 }, { name: "Tirage Horizontal Neutre", focus: "Trapèzes, Rhomboïdes (Épaisseur)", sets: 3, reps: "10-12", rest: 90 }, { name: "Rowing Machine Unilatéral", focus: "Grand Dorsal (Isolation)", sets: 3, reps: "6-8 / bras", rest: 75 }, { name: "Bûcheron Haltère", focus: "Grand Dorsal, Lombaires", sets: 3, reps: "6-8 / bras", rest: 90 }, { name: "Curl Marteau", focus: "Brachial (Épaisseur bras)", sets: 3, reps: "8-12", rest: 75 }, { name: "Curl Incliné", focus: "Biceps (Longue portion)", sets: 3, reps: "10-12", rest: 75 }] },
-            mercredi: {
-                id: 'mercredi',
-                name: "Mercredi - LEGS",
-                exercises: [
-                    { name: "Leg Extension", focus: "Quadriceps (Isolation)", sets: 3, reps: "12-15", rest: 90 },
-                    { name: "Presse Incliné", focus: "Quadriceps, Fessiers, Ischios", sets: 4, reps: "6-8", rest: 150 },
-                    { name: "Hack Squat", focus: "Quadriceps (Vastes externes)", sets: 3, reps: "10-12", rest: 105 },
-                    { name: "Leg Curl Allongé/Assis", focus: "Ischio-jambiers (Isolation)", sets: 3, reps: "10-12", rest: 75 },
-                    { name: "Mollets Debout Haltères", focus: "Mollets (Gastrocnémien)", sets: 4, reps: "12-20", rest: 60 }
-                ]
-            },
-            vendredi: {
-                id: 'vendredi',
-                name: "Vendredi - Upper",
-                exercises: [
-                    { name: "Chest Presse Couché", focus: "Faisceau sternal", sets: 4, reps: "6-8", rest: 105 },
-                    { name: "Développé incliné haltères", focus: "Faisceau claviculaire", sets: 3, reps: "8-12", rest: 90 },
-                    { name: "PecFly", focus: "Faisceau sternal et étirement", sets: 3, reps: "12-15", rest: 60 },
-                    { name: "Développé Militaire Haltères", focus: "Faisceaux antérieur et moyen", sets: 3, reps: "10-12", rest: 90 },
-                    { name: "Élévations Latérales", focus: "Faisceau moyen", sets: 4, reps: "12-20", rest: 45 },
-                    { name: "Face Pulls", focus: "Faisceau postérieur", sets: 3, reps: "15-20", rest: 60 }
-                ]
-            },
+            mercredi: { id: 'mercredi', name: "Mercredi - LEGS", exercises: [{ name: "Leg Extension", focus: "Quadriceps (Isolation)", sets: 3, reps: "12-15", rest: 90 }, { name: "Presse Incliné", focus: "Quadriceps, Fessiers, Ischios", sets: 4, reps: "6-8", rest: 150 }, { name: "Hack Squat", focus: "Quadriceps (Vastes externes)", sets: 3, reps: "10-12", rest: 105 }, { name: "Leg Curl Allongé/Assis", focus: "Ischio-jambiers (Isolation)", sets: 3, reps: "10-12", rest: 75 }, { name: "Mollets Debout Haltères", focus: "Mollets (Gastrocnémien)", sets: 4, reps: "12-20", rest: 60 }] },
+            vendredi: { id: 'vendredi', name: "Vendredi - Upper", exercises: [{ name: "Chest Presse Couché", focus: "Faisceau sternal", sets: 4, reps: "6-8", rest: 105 }, { name: "Développé incliné haltères", focus: "Faisceau claviculaire", sets: 3, reps: "8-12", rest: 90 }, { name: "PecFly", focus: "Faisceau sternal et étirement", sets: 3, reps: "12-15", rest: 60 }, { name: "Développé Militaire Haltères", focus: "Faisceaux antérieur et moyen", sets: 3, reps: "10-12", rest: 90 }, { name: "Élévations Latérales", focus: "Faisceau moyen", sets: 4, reps: "12-20", rest: 45 }, { name: "Face Pulls", focus: "Faisceau postérieur", sets: 3, reps: "15-20", rest: 60 }] },
             samedi: { id: 'samedi', name: "Samedi - Lower", exercises: [{ name: "Soulevé de Terre Roumain", focus: "Ischios/Fessiers", sets: 4, reps: "8-10", rest: 120 }, { name: "Fentes Bulgares", focus: "Fessiers", sets: 3, reps: "10/jambe", rest: 90 }, { name: "Leg Extension", focus: "Quadriceps", sets: 3, reps: "15", rest: 60 }] }
         };
 
@@ -481,7 +464,6 @@
                     ${!isNext ? `<div class="space-y-6 relative z-10"><div class="flex gap-6"><div class="flex-1"><label class="text-xs text-zinc-400 font-bold ml-1 mb-2 block">CHARGE</label><input type="number" id="weight-input" placeholder="0" class="w-full bg-gray-100 dark:bg-zinc-950 border border-gray-200 dark:border-zinc-700 rounded-2xl py-4 text-center text-2xl font-bold text-zinc-900 dark:text-white focus:border-red-500 outline-none pointer-events-auto"></div><div class="flex-1"><label class="text-xs text-zinc-400 font-bold ml-1 mb-2 block">REPS</label><input type="number" id="reps-input" placeholder="0" class="w-full bg-gray-100 dark:bg-zinc-950 border border-gray-200 dark:border-zinc-700 rounded-2xl py-4 text-center text-2xl font-bold text-zinc-900 dark:text-white focus:border-red-500 outline-none pointer-events-auto"></div></div><button onclick="logSet()" class="w-full bg-zinc-900 dark:bg-white text-white dark:text-black font-bold text-lg py-4 rounded-2xl hover:opacity-90 active:scale-95 transition-all pointer-events-auto">Valider</button></div>` : ''}
                 </div>`;
 
-            // HTML Structure: Session View
             const html = `
                 <div class="flex gap-3 overflow-x-auto pb-4 no-scrollbar -mx-4 px-4 snap-x">${keys.map((k, i) => `<button onclick="changeDay('${k}')" class="snap-center shrink-0 flex flex-col items-center justify-center w-16 h-20 rounded-2xl border transition-all ${currentDay === k ? 'bg-red-600 border-red-500 text-white shadow-lg' : 'bg-white dark:bg-zinc-900 border-gray-200 dark:border-zinc-800 text-zinc-500'}"><span class="text-[10px] uppercase font-bold opacity-80">${programs[k].name.split(' ')[0].substring(0, 3)}</span><span class="text-xl font-bold mt-1">${i + 1}</span></button>`).join('')}</div>
                 <div id="swipe-area" class="relative group perspective-1000 min-h-[450px]">
@@ -498,11 +480,10 @@
             `;
             document.getElementById('session-view').innerHTML = html;
             setupSwipe();
-            updateHistoryUI(); // CRITICAL: Populate history immediately
+            updateHistoryUI();
             setTimeout(() => { const pr = getPRs()[exo.name]; if (pr) document.getElementById('weight-input').value = pr.weight; }, 50);
         }
 
-        // --- NEW FUNCTION: INSTANT HISTORY UPDATE ---
         function updateHistoryUI() {
             const container = document.getElementById('history-container');
             if (!container) return;
@@ -511,12 +492,12 @@
             const sets = sessionData.filter(s => s.exercise === exo.name);
             const done = sets.length;
 
-            // Update counter in card
             const counterEl = document.getElementById('set-counter');
             if (counterEl) counterEl.innerHTML = `${done}<span class="text-zinc-400 text-xl">/${exo.sets}</span>`;
 
             if (done === 0) { container.innerHTML = ''; return; }
 
+            // MODIFICATION: Added Edit/Delete Buttons directly in history items
             container.innerHTML = `
                 <div class="animate-slide-up">
                     <h3 class="text-sm font-bold text-zinc-400 uppercase tracking-wider mb-3 px-1">Séries Terminées</h3>
@@ -527,14 +508,43 @@
                                     <div class="w-6 h-6 rounded-full bg-red-100 dark:bg-red-500/10 text-red-600 dark:text-red-500 flex items-center justify-center text-xs font-bold">${i + 1}</div>
                                     <span class="text-sm text-zinc-500">Terminée</span>
                                 </div>
-                                <span class="font-bold font-mono text-zinc-900 dark:text-white">${s.weight}kg <span class="text-zinc-400">x</span> ${s.reps}</span>
+                                <div class="flex items-center gap-3">
+                                    <span class="font-bold font-mono text-zinc-900 dark:text-white mr-2">${s.weight}kg <span class="text-zinc-400">x</span> ${s.reps}</span>
+                                    <button onclick="editSet(${sessionData.indexOf(s)})" class="text-zinc-400 hover:text-blue-500"><svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15.232 5.232l3.536 3.536m-2.036-5.036a2.5 2.5 0 113.536 3.536L6.5 21.036H3v-3.572L16.732 3.732z"/></svg></button>
+                                    <button onclick="deleteSet(${sessionData.indexOf(s)})" class="text-zinc-400 hover:text-red-500"><svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16"/></svg></button>
+                                </div>
                             </div>
                         `).join('')}
                     </div>
                 </div>`;
         }
 
-        // --- SWIPE ---
+        // --- NEW EDIT/DELETE SET LOGIC ---
+        function deleteSet(index) {
+            if (!confirm("Supprimer cette série ?")) return;
+            sessionData.splice(index, 1);
+            saveCurrentSessionState();
+            updateHistoryUI();
+        }
+
+        function editSet(index) {
+            const set = sessionData[index];
+            const newWeight = prompt("Nouveau poids (kg) :", set.weight);
+            const newReps = prompt("Nouvelles répétitions :", set.reps);
+
+            if (newWeight !== null && newReps !== null) {
+                sessionData[index].weight = parseFloat(newWeight);
+                sessionData[index].reps = parseInt(newReps);
+                saveCurrentSessionState();
+                updateHistoryUI();
+            }
+        }
+
+        function saveCurrentSessionState() {
+            localStorage.setItem(STORAGE_KEY_CURRENT_SESSION, JSON.stringify({ id: currentSessionId, startTime: sessionStartTime, data: sessionData, day: currentDay }));
+            if (currentUser) saveToCloud();
+        }
+
         let tx = 0, ty = 0, swiping = false;
         function setupSwipe() {
             const el = document.getElementById('swipe-area'); if (!el) return;
@@ -546,46 +556,25 @@
         function nextExercise() { if (currentExerciseIndex < programs[currentDay].exercises.length - 1) { currentExerciseIndex++; loadSession(); } }
         function changeDay(day) { currentDay = day; currentExerciseIndex = 0; loadSession(); }
 
-        // --- LOG SET & LOGIC ---
         function logSet() {
             const w = document.getElementById('weight-input').value, r = document.getElementById('reps-input').value;
             if (!w || !r) return;
             const ex = programs[currentDay].exercises[currentExerciseIndex];
-
             sessionData.push({ day: currentDay, programName: programs[currentDay].name, exercise: ex.name, weight: w, reps: r, timestamp: new Date().toISOString() });
-            localStorage.setItem(STORAGE_KEY_CURRENT_SESSION, JSON.stringify({ id: currentSessionId, startTime: sessionStartTime, data: sessionData, day: currentDay }));
-            if (currentUser) saveToCloud();
-
+            saveCurrentSessionState();
             const prs = getPRs(), old = prs[ex.name] || { weight: 0, reps: 0 };
-            if (parseFloat(w) > old.weight || (parseFloat(w) === old.weight && parseInt(r) > old.reps)) { prs[ex.name] = { weight: parseFloat(w), reps: parseInt(r), date: new Date().toISOString() }; localStorage.setItem(STORAGE_KEY_PRS, JSON.stringify(prs)); if (currentUser) saveToCloud(); }
-
+            if (parseFloat(w) > old.weight || (parseFloat(w) === old.weight && parseInt(r) > old.reps)) { prs[ex.name] = { weight: parseFloat(w), reps: parseInt(r), date: new Date().toISOString() }; localStorage.setItem(STORAGE_KEY_PRS, JSON.stringify(prs)); }
             document.getElementById('reps-input').value = '';
             updateHistoryUI();
-
             if (sessionData.filter(s => s.exercise === ex.name).length >= ex.sets) {
-                if (currentExerciseIndex < programs[currentDay].exercises.length - 1) {
-                    showToast("Exercice terminé ! Prochain...");
-                    setTimeout(() => { currentExerciseIndex++; loadSession(); }, 1500);
-                    startRestTimer(ex.rest);
-                } else {
-                    showSessionComplete();
-                }
-            } else {
-                startRestTimer(ex.rest);
+                if (currentExerciseIndex < programs[currentDay].exercises.length - 1) { showToast("Exercice terminé ! Prochain..."); setTimeout(() => { currentExerciseIndex++; loadSession(); }, 1500); } else { showSessionComplete(); }
             }
+            startRestTimer(ex.rest);
         }
 
-        function showToast(msg) {
-            const t = document.getElementById('toast');
-            document.getElementById('toast-message').textContent = msg;
-            t.classList.remove('pointer-events-none', 'opacity-0');
-            t.classList.add('toast-active');
-            setTimeout(() => { t.classList.remove('toast-active'); t.classList.add('opacity-0', 'pointer-events-none'); }, 2500);
-        }
+        function showToast(msg) { const t = document.getElementById('toast'); document.getElementById('toast-message').textContent = msg; t.classList.remove('pointer-events-none', 'opacity-0'); t.classList.add('toast-active'); setTimeout(() => { t.classList.remove('toast-active'); t.classList.add('opacity-0', 'pointer-events-none'); }, 2500); }
+        function saveCurrentNote(val) { const ex = programs[currentDay].exercises[currentExerciseIndex]; const notes = getNotes(); notes[ex.name] = val; localStorage.setItem(STORAGE_KEY_NOTES, JSON.stringify(notes)); }
 
-        function saveCurrentNote(val) { const ex = programs[currentDay].exercises[currentExerciseIndex]; const notes = getNotes(); notes[ex.name] = val; localStorage.setItem(STORAGE_KEY_NOTES, JSON.stringify(notes)); if (currentUser) saveToCloud(); }
-
-        // --- TIMER ---
         function startRestTimer(s) { document.getElementById('rest-timer').classList.remove('hidden'); document.getElementById('rest-timer').classList.add('flex'); timerTargetTime = Date.now() + (s * 1000); isTimerPaused = false; updateTimer(); requestWakeLock(); clearInterval(timerInterval); timerInterval = setInterval(timerLoop, 100); }
         function timerLoop() { if (!isTimerPaused) { const diff = Math.ceil((timerTargetTime - Date.now()) / 1000); if (diff <= 0) stopRestTimer(true); else updateTimer(diff); } }
         function updateTimer(val) { const v = val !== undefined ? val : Math.ceil((timerTargetTime - Date.now()) / 1000); const m = Math.floor(v / 60), s = v % 60; document.getElementById('timer-display').textContent = `${m < 10 ? '0' + m : m}:${s < 10 ? '0' + s : s}`; }
@@ -594,7 +583,6 @@
         function stopRestTimer(sound = false) { clearInterval(timerInterval); document.getElementById('rest-timer').classList.add('hidden'); document.getElementById('rest-timer').classList.remove('flex'); if (sound && navigator.vibrate) navigator.vibrate([200, 100, 200]); }
         async function requestWakeLock() { try { if ('wakeLock' in navigator) wakeLock = await navigator.wakeLock.request('screen'); } catch (e) { } }
 
-        // --- VIEWS ---
         function switchView(view) {
             ['session', 'profile', 'settings', 'auth'].forEach(v => { document.getElementById(`${v}-view`).classList.add('hidden'); document.getElementById(`nav-${v}`)?.classList.remove('active'); });
             const t = document.getElementById(`${view}-view`); t.classList.remove('hidden'); t.classList.remove('animate-slide-up'); void t.offsetWidth; t.classList.add('animate-slide-up');
@@ -604,7 +592,6 @@
             window.scrollTo(0, 0);
         }
 
-        // --- STATS ---
         function renderProfile() {
             const sessions = getSessions().sort((a, b) => new Date(b.startTime) - new Date(a.startTime));
             const prs = getPRs();
@@ -612,106 +599,141 @@
             sessions.forEach(s => { const cat = s.programName.split(' ')[0] || "Autre"; if (!grouped[cat]) grouped[cat] = []; grouped[cat].push(s); });
 
             let html = `
-                <div class="glass-panel rounded-3xl p-6 shadow-sm mb-6">
-                    <h2 class="text-2xl font-bold mb-4 text-zinc-900 dark:text-white">Records (PRs)</h2>
-                    <div class="grid grid-cols-2 gap-3 mb-4">
-                        ${Object.entries(prs).map(([name, data]) => `
-                            <div class="relative bg-white dark:bg-zinc-900 border border-gray-100 dark:border-zinc-800 p-4 rounded-2xl shadow-sm hover:border-red-500 transition-colors">
-                                <button onclick="openPRModal('${name}', ${data.weight}, ${data.reps})" class="absolute top-2 right-2 bg-gray-200 dark:bg-zinc-800 rounded-full p-1 text-zinc-500 hover:text-white hover:bg-red-500 transition-colors"><svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15.232 5.232l3.536 3.536m-2.036-5.036a2.5 2.5 0 113.536 3.536L6.5 21.036H3v-3.572L16.732 3.732z" /></svg></button>
-                                <p class="text-xs text-zinc-500 truncate mb-1 pr-6">${name}</p>
-                                <p class="text-xl font-bold text-zinc-900 dark:text-white">${data.weight} <span class="text-sm text-zinc-400">kg</span></p>
-                            </div>
-                        `).join('')}
-                    </div>
-                    <button onclick="openPRModal()" class="w-full py-3 rounded-xl border border-dashed border-gray-300 dark:border-zinc-700 text-zinc-500 text-sm font-medium hover:text-red-500 hover:border-red-500 transition-colors">+ Ajouter un record</button>
-                </div>
-
-                <div class="glass-panel rounded-3xl p-6 shadow-sm mb-6">
-                    <div class="flex justify-between items-center mb-4"><h2 class="text-2xl font-bold text-zinc-900 dark:text-white">Import Note</h2><button onclick="document.getElementById('import-modal').classList.remove('hidden'); document.getElementById('import-modal').classList.add('flex')" class="text-xs bg-red-100 dark:bg-red-900/30 text-red-600 dark:text-red-400 px-3 py-1 rounded-full font-bold">IA Local</button></div>
-                    <p class="text-xs text-zinc-500">Collez un résumé texte pour l'ajouter à l'historique.</p>
-                </div>
-
-                <div class="space-y-6 pb-20">
-                    <h2 class="text-2xl font-bold px-2 text-zinc-900 dark:text-white">Historique</h2>
-                    ${Object.keys(grouped).length === 0 ? '<p class="px-2 text-zinc-500">Aucune séance.</p>' : ''}
-                    ${Object.entries(grouped).map(([cat, list]) => `
-                        <div>
-                            <h3 class="font-bold text-red-500 uppercase tracking-wider text-xs mb-3 px-2 border-b border-gray-200 dark:border-zinc-800 pb-1">${cat}</h3>
-                            <div class="space-y-2">
-                                ${list.map(s => {
-                const date = new Date(s.startTime).toLocaleDateString('fr-FR', { day: 'numeric', month: 'short' });
-                const dateISO = new Date(s.startTime).toISOString().split('T')[0];
-                return `
-                                    <div class="bg-white dark:bg-zinc-900 border border-gray-100 dark:border-zinc-800 p-4 rounded-2xl flex justify-between items-center shadow-sm group">
-                                        <div><p class="font-bold text-zinc-900 dark:text-white">${s.programName}</p><p class="text-xs text-zinc-500">${date} • ${s.data ? s.data.length : 0} séries</p></div>
-                                        <div class="flex gap-2">
-                                            <button onclick="openSessionEditModal('${s.id}', '${s.programName}', '${dateISO}')" class="bg-gray-100 dark:bg-zinc-800 p-2 rounded-full text-zinc-500 hover:text-white hover:bg-blue-500 transition-colors"><svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15.232 5.232l3.536 3.536m-2.036-5.036a2.5 2.5 0 113.536 3.536L6.5 21.036H3v-3.572L16.732 3.732z" /></svg></button>
-                                            <button onclick="deleteSession('${s.id}')" class="bg-gray-100 dark:bg-zinc-800 p-2 rounded-full text-zinc-500 hover:text-white hover:bg-red-500 transition-colors"><svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16" /></svg></button>
-                                        </div>
-                                    </div>`
-            }).join('')}
-                            </div>
-                        </div>
-                    `).join('')}
-                </div>
-            `;
+                <div class="glass-panel rounded-3xl p-6 shadow-sm mb-6"><h2 class="text-2xl font-bold mb-4 text-zinc-900 dark:text-white">Records (PRs)</h2><div class="grid grid-cols-2 gap-3 mb-4">${Object.entries(prs).map(([name, data]) => `<div class="relative bg-white dark:bg-zinc-900 border border-gray-100 dark:border-zinc-800 p-4 rounded-2xl shadow-sm hover:border-red-500 transition-colors"><button onclick="openPRModal('${name}', ${data.weight}, ${data.reps})" class="absolute top-2 right-2 bg-gray-200 dark:bg-zinc-800 rounded-full p-1 text-zinc-500 hover:text-white hover:bg-red-500 transition-colors"><svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15.232 5.232l3.536 3.536m-2.036-5.036a2.5 2.5 0 113.536 3.536L6.5 21.036H3v-3.572L16.732 3.732z" /></svg></button><p class="text-xs text-zinc-500 truncate mb-1 pr-6">${name}</p><p class="text-xl font-bold text-zinc-900 dark:text-white">${data.weight} <span class="text-sm text-zinc-400">kg</span></p></div>`).join('')}</div><button onclick="openPRModal()" class="w-full py-3 rounded-xl border border-dashed border-gray-300 dark:border-zinc-700 text-zinc-500 text-sm font-medium hover:text-red-500 hover:border-red-500 transition-colors">+ Ajouter un record</button></div>
+                <div class="glass-panel rounded-3xl p-6 shadow-sm mb-6"><div class="flex justify-between items-center mb-4"><h2 class="text-2xl font-bold text-zinc-900 dark:text-white">Import Note</h2><button onclick="document.getElementById('import-modal').classList.remove('hidden'); document.getElementById('import-modal').classList.add('flex')" class="text-xs bg-red-100 dark:bg-red-900/30 text-red-600 dark:text-red-400 px-3 py-1 rounded-full font-bold">IA Local</button></div><p class="text-xs text-zinc-500">Collez un résumé texte pour l'ajouter à l'historique.</p></div>
+                <div class="space-y-6 pb-20"><h2 class="text-2xl font-bold px-2 text-zinc-900 dark:text-white">Historique</h2>${Object.entries(grouped).map(([cat, list]) => `<div><h3 class="font-bold text-red-500 uppercase tracking-wider text-xs mb-3 px-2 border-b border-gray-200 dark:border-zinc-800 pb-1">${cat}</h3><div class="space-y-2">${list.map(s => { const date = new Date(s.startTime).toLocaleDateString('fr-FR', { day: 'numeric', month: 'short' }); return `<div class="bg-white dark:bg-zinc-900 border border-gray-100 dark:border-zinc-800 p-4 rounded-2xl flex justify-between items-center shadow-sm group"><div><p class="font-bold text-zinc-900 dark:text-white">${s.programName}</p><p class="text-xs text-zinc-500">${date} • ${s.data ? s.data.length : 0} séries</p></div><div class="flex gap-2"><button onclick="openSessionEditModal('${s.id}', '${s.programName}', '${new Date(s.startTime).toISOString().split('T')[0]}')" class="bg-gray-100 dark:bg-zinc-800 p-2 rounded-full text-zinc-500 hover:text-white hover:bg-blue-500 transition-colors"><svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15.232 5.232l3.536 3.536m-2.036-5.036a2.5 2.5 0 113.536 3.536L6.5 21.036H3v-3.572L16.732 3.732z" /></svg></button><button onclick="deleteSession('${s.id}')" class="bg-gray-100 dark:bg-zinc-800 p-2 rounded-full text-zinc-500 hover:text-white hover:bg-red-500 transition-colors"><svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16"/></svg></button></div></div>` }).join('')}</div></div>`).join('')}</div>`;
             document.getElementById('profile-view').innerHTML = html;
         }
 
-        // --- HANDLERS (EDIT & SAVE) ---
         function openSessionEditModal(id, name, date) { document.getElementById('edit-session-id').value = id; document.getElementById('edit-session-name').value = name; document.getElementById('edit-session-date').value = date; document.getElementById('session-edit-modal').classList.remove('hidden'); document.getElementById('session-edit-modal').classList.add('flex'); }
         function closeSessionEditModal() { document.getElementById('session-edit-modal').classList.add('hidden'); document.getElementById('session-edit-modal').classList.remove('flex'); }
-        function saveSessionChanges() {
-            const id = document.getElementById('edit-session-id').value, newName = document.getElementById('edit-session-name').value, newDate = document.getElementById('edit-session-date').value;
-            if (!newName || !newDate) return alert("Remplissez tout");
-            const sessions = getSessions(), idx = sessions.findIndex(s => s.id === id);
-            if (idx !== -1) { sessions[idx].programName = newName; sessions[idx].startTime = new Date(newDate).toISOString(); localStorage.setItem(STORAGE_KEY_SESSIONS, JSON.stringify(sessions)); if (currentUser) saveToCloud(); closeSessionEditModal(); renderProfile(); }
-        }
+        function saveSessionChanges() { const id = document.getElementById('edit-session-id').value, newName = document.getElementById('edit-session-name').value, newDate = document.getElementById('edit-session-date').value; if (!newName || !newDate) return; const sessions = getSessions(), idx = sessions.findIndex(s => s.id === id); if (idx !== -1) { sessions[idx].programName = newName; sessions[idx].startTime = new Date(newDate).toISOString(); localStorage.setItem(STORAGE_KEY_SESSIONS, JSON.stringify(sessions)); if (currentUser) saveToCloud(); closeSessionEditModal(); renderProfile(); } }
         function deleteSession(id) { if (!confirm("Supprimer ?")) return; const sessions = getSessions().filter(s => s.id !== id); localStorage.setItem(STORAGE_KEY_SESSIONS, JSON.stringify(sessions)); if (currentUser) saveToCloud(); renderProfile(); }
-
         function openPRModal(name = '', weight = '', reps = '') { document.getElementById('pr-modal').classList.remove('hidden'); document.getElementById('pr-modal').classList.add('flex'); document.getElementById('pr-name').value = name; document.getElementById('pr-weight').value = weight; document.getElementById('pr-reps').value = reps; document.getElementById('pr-key-hidden').value = name; document.getElementById('pr-modal-title').textContent = name ? "Modifier Record" : "Nouveau Record"; document.getElementById('pr-delete-btn').classList.toggle('hidden', !name); }
         function closePRModal() { document.getElementById('pr-modal').classList.add('hidden'); document.getElementById('pr-modal').classList.remove('flex'); }
         function savePR() { const name = document.getElementById('pr-name').value, weight = parseFloat(document.getElementById('pr-weight').value), reps = parseInt(document.getElementById('pr-reps').value); if (!name || isNaN(weight)) return; const prs = getPRs(), old = document.getElementById('pr-key-hidden').value; if (old && old !== name) delete prs[old]; prs[name] = { weight, reps: isNaN(reps) ? 0 : reps, date: new Date().toISOString() }; localStorage.setItem(STORAGE_KEY_PRS, JSON.stringify(prs)); if (currentUser) saveToCloud(); closePRModal(); renderProfile(); }
         function deletePR() { const name = document.getElementById('pr-key-hidden').value; if (!confirm("Supprimer ?")) return; const prs = getPRs(); delete prs[name]; localStorage.setItem(STORAGE_KEY_PRS, JSON.stringify(prs)); if (currentUser) saveToCloud(); closePRModal(); renderProfile(); }
-
         function closeImportModal() { document.getElementById('import-modal').classList.add('hidden'); document.getElementById('import-modal').classList.remove('flex'); }
-        function processImport() {
-            const text = document.getElementById('import-text').value; if (!text) return;
-            let programName = "Importée"; if (text.match(/push|pecs/i)) programName = "Lundi - PUSH"; else if (text.match(/pull|dos/i)) programName = "Mardi - PULL"; else if (text.match(/legs/i)) programName = "Mercredi - LEGS";
-            const sessionSets = [], lines = text.split('\n'), prs = getPRs(), regex = /(.+?)(?:\s*[:\-|]\s*|\s+)(\d+[.,]?\d*)\s*(?:kg|lbs)?\s*[xX]?\s*(\d+)(?:\s*reps?)?/i;
-            let prsUpdated = false;
-            lines.forEach(line => { const match = line.match(regex); if (match) { const exercise = match[1].trim(), weight = parseFloat(match[2].replace(',', '.')), reps = parseInt(match[3]); if (exercise.length > 2 && !exercise.toLowerCase().includes("séance")) { sessionSets.push({ exercise, weight, reps, day: 'import', programName, timestamp: new Date().toISOString() }); const cur = prs[exercise] || { weight: 0, reps: 0 }; if (weight > cur.weight || (weight === cur.weight && reps > cur.reps)) { prs[exercise] = { weight, reps, date: new Date().toISOString() }; prsUpdated = true; } } } });
-            if (sessionSets.length === 0) return alert("Aucun exercice détecté.");
-            const newSession = { id: Date.now().toString(), startTime: new Date().toISOString(), endTime: new Date().toISOString(), programName, totalSets: sessionSets.length, data: sessionSets };
-            const sessions = getSessions(); sessions.push(newSession); localStorage.setItem(STORAGE_KEY_SESSIONS, JSON.stringify(sessions)); if (prsUpdated) localStorage.setItem(STORAGE_KEY_PRS, JSON.stringify(prs)); if (currentUser) saveToCloud();
-            alert(`${sessionSets.length} séries importées.`); closeImportModal(); renderProfile();
-        }
-
+        function processImport() { const text = document.getElementById('import-text').value; if (!text) return; let programName = "Importée"; if (text.match(/push|pecs/i)) programName = "Lundi - PUSH"; else if (text.match(/pull|dos/i)) programName = "Mardi - PULL"; else if (text.match(/legs/i)) programName = "Mercredi - LEGS"; const sessionSets = [], lines = text.split('\n'), prs = getPRs(), regex = /(.+?)(?:\s*[:\-|]\s*|\s+)(\d+[.,]?\d*)\s*(?:kg|lbs)?\s*[xX]?\s*(\d+)(?:\s*reps?)?/i; let prsUpdated = false; lines.forEach(line => { const match = line.match(regex); if (match) { const exercise = match[1].trim(), weight = parseFloat(match[2].replace(',', '.')), reps = parseInt(match[3]); if (exercise.length > 2) { sessionSets.push({ exercise, weight, reps, day: 'import', programName, timestamp: new Date().toISOString() }); const cur = prs[exercise] || { weight: 0, reps: 0 }; if (weight > cur.weight || (weight === cur.weight && reps > cur.reps)) { prs[exercise] = { weight, reps, date: new Date().toISOString() }; prsUpdated = true; } } } }); if (sessionSets.length === 0) return alert("Rien détecté."); const newSession = { id: Date.now().toString(), startTime: new Date().toISOString(), endTime: new Date().toISOString(), programName, totalSets: sessionSets.length, data: sessionSets }; const sessions = getSessions(); sessions.push(newSession); localStorage.setItem(STORAGE_KEY_SESSIONS, JSON.stringify(sessions)); if (prsUpdated) localStorage.setItem(STORAGE_KEY_PRS, JSON.stringify(prs)); if (currentUser) saveToCloud(); alert("Importé."); closeImportModal(); renderProfile(); }
         function renderSettings() { document.getElementById('settings-view').innerHTML = `<div class="glass-panel rounded-3xl p-6 shadow-sm space-y-4"><h2 class="text-2xl font-bold text-zinc-900 dark:text-white">Paramètres</h2><button onclick="toggleTheme()" class="w-full flex justify-between items-center p-4 bg-gray-100 dark:bg-zinc-900 rounded-xl text-zinc-900 dark:text-white"><span>Mode Sombre</span><div class="w-12 h-6 bg-zinc-300 dark:bg-zinc-700 rounded-full relative transition-colors"><div class="w-5 h-5 bg-white rounded-full absolute top-0.5 transition-all ${document.documentElement.classList.contains('dark') ? 'left-[1.6rem]' : 'left-0.5'} shadow-sm"></div></div></button><div class="pt-6 border-t border-gray-200 dark:border-zinc-800 space-y-3"><button onclick="clearUserData()" class="w-full py-4 bg-red-500/10 border border-red-500/20 text-red-600 dark:text-red-500 font-bold hover:bg-red-500/20 text-sm rounded-xl">Supprimer Stats & Records</button><button onclick="if(confirm('Tout réinitialiser ?')){localStorage.clear(); location.reload();}" class="w-full py-3 text-zinc-400 hover:text-zinc-600 dark:hover:text-white font-medium text-xs">Réinitialisation d'usine</button></div></div>`; }
         async function clearUserData() { if (!confirm("Supprimer l'historique ?")) return; localStorage.removeItem(STORAGE_KEY_SESSIONS); localStorage.removeItem(STORAGE_KEY_PRS); if (currentUser) await db.collection('users').doc(currentUser.uid).set({ sessions: "[]", prs: "{}" }, { merge: true }); alert("Données effacées."); renderProfile(); }
         function renderAuth() { document.getElementById('auth-view').innerHTML = `<div class="glass-panel rounded-3xl p-8 shadow-xl mt-10"><h2 class="text-2xl font-bold mb-6 text-center text-zinc-900 dark:text-white">Connexion</h2><div class="space-y-4"><input type="email" id="auth-email" placeholder="Email" class="w-full bg-gray-100 dark:bg-zinc-900 border border-gray-200 dark:border-zinc-800 text-zinc-900 dark:text-white rounded-xl px-4 py-3 outline-none"><input type="password" id="auth-password" placeholder="Mot de passe" class="w-full bg-gray-100 dark:bg-zinc-900 border border-gray-200 dark:border-zinc-800 text-zinc-900 dark:text-white rounded-xl px-4 py-3 outline-none"></div><div class="grid grid-cols-2 gap-3 mt-6"><button onclick="handleLogin()" class="bg-gray-200 dark:bg-zinc-800 text-zinc-900 dark:text-white py-3 rounded-xl font-bold">Connexion</button><button onclick="handleSignup()" class="bg-red-600 text-white py-3 rounded-xl font-bold">Créer</button></div></div>`; }
         async function handleLogin() { try { await auth.signInWithEmailAndPassword(document.getElementById('auth-email').value, document.getElementById('auth-password').value); switchView('profile'); } catch (e) { alert(e.message); } }
         async function handleSignup() { try { await auth.createUserWithEmailAndPassword(document.getElementById('auth-email').value, document.getElementById('auth-password').value); switchView('profile'); } catch (e) { alert(e.message); } }
         function setupRealtimeSync() { if (!currentUser) return; db.collection('users').doc(currentUser.uid).onSnapshot(doc => { if (doc.exists) { const d = doc.data(); if (d.programs) { programs = JSON.parse(d.programs); localStorage.setItem(STORAGE_KEY_PROGRAMS, d.programs); } } }); }
-        function saveToCloud() { if (!currentUser) return; db.collection('users').doc(currentUser.uid).set({ programs: JSON.stringify(programs), sessions: JSON.stringify(getSessions()), prs: JSON.stringify(getPRs()), notes: JSON.stringify(getNotes()) }, { merge: true }); }
 
         function openEditModal() { const ex = programs[currentDay].exercises[currentExerciseIndex]; document.getElementById('edit-name').value = ex.name; document.getElementById('edit-sets').value = ex.sets; document.getElementById('edit-reps').value = ex.reps; document.getElementById('edit-rest').value = ex.rest; document.getElementById('edit-focus').value = ex.focus || ""; document.getElementById('edit-modal').classList.remove('hidden'); document.getElementById('edit-modal').classList.add('flex'); }
         function closeEditModal() { document.getElementById('edit-modal').classList.add('hidden'); document.getElementById('edit-modal').classList.remove('flex'); }
-        function saveExerciseChanges() {
-            const name = document.getElementById('edit-name').value, sets = parseInt(document.getElementById('edit-sets').value), reps = document.getElementById('edit-reps').value, rest = parseInt(document.getElementById('edit-rest').value), focus = document.getElementById('edit-focus').value;
-            if (!name) return;
-            const oldName = programs[currentDay].exercises[currentExerciseIndex].name;
-            programs[currentDay].exercises[currentExerciseIndex] = { name, sets, reps, rest, focus };
-            if (oldName !== name) {
-                sessionData = sessionData.map(s => s.exercise === oldName ? { ...s, exercise: name } : s);
-                localStorage.setItem(STORAGE_KEY_CURRENT_SESSION, JSON.stringify({ id: currentSessionId, startTime: sessionStartTime, data: sessionData, day: currentDay }));
-            }
-            savePrograms(); closeEditModal(); loadSession();
-        }
+        function saveExerciseChanges() { const name = document.getElementById('edit-name').value, sets = parseInt(document.getElementById('edit-sets').value), reps = document.getElementById('edit-reps').value, rest = parseInt(document.getElementById('edit-rest').value), focus = document.getElementById('edit-focus').value; if (!name) return; const oldName = programs[currentDay].exercises[currentExerciseIndex].name; programs[currentDay].exercises[currentExerciseIndex] = { name, sets, reps, rest, focus }; if (oldName !== name) { sessionData = sessionData.map(s => s.exercise === oldName ? { ...s, exercise: name } : s); localStorage.setItem(STORAGE_KEY_CURRENT_SESSION, JSON.stringify({ id: currentSessionId, startTime: sessionStartTime, data: sessionData, day: currentDay })); } savePrograms(); closeEditModal(); loadSession(); }
         function deleteCurrentExercise() { if (confirm("Supprimer ?")) { programs[currentDay].exercises.splice(currentExerciseIndex, 1); savePrograms(); closeEditModal(); if (currentExerciseIndex >= programs[currentDay].exercises.length) currentExerciseIndex = Math.max(0, programs[currentDay].exercises.length - 1); loadSession(); } }
         function addNewDay() { const id = prompt("ID (ex: dimanche)"); if (id) { programs[id.toLowerCase()] = { id: id.toLowerCase(), name: id, exercises: [{ name: "New", sets: 3, reps: 10, rest: 60 }] }; savePrograms(); changeDay(id.toLowerCase()); } }
 
-        function showSessionComplete() { document.getElementById('session-view').innerHTML = `<div class="glass-panel rounded-3xl p-8 text-center animate-slide-up mt-10"><div class="text-6xl mb-4">🔥</div><h2 class="text-3xl font-bold mb-2 text-zinc-900 dark:text-white">Séance Terminée !</h2><p class="text-zinc-500 dark:text-zinc-400 mb-8">Repose-toi bien, guerrier.</p><button onclick="currentExerciseIndex=0; sessionData=[]; loadSession()" class="w-full bg-zinc-900 dark:bg-white text-white dark:text-black font-bold py-4 rounded-xl">Nouvelle Séance</button></div>`; }
+        // --- FINISH SESSION ---
+        function showSessionComplete() {
+            const program = programs[currentDay];
+            const duration = Math.floor((Date.now() - sessionStartTime.getTime()) / 60000);
+            const hour = Math.floor(duration / 60);
+            const min = duration % 60;
+            const timeStr = hour > 0 ? `${hour}h ${min}m` : `${min} min`;
+
+            // Generate Summary by Muscle/Exercise
+            const grouped = {};
+            sessionData.forEach(set => {
+                if (!grouped[set.exercise]) grouped[set.exercise] = [];
+                grouped[set.exercise].push(set);
+            });
+
+            let summaryHTML = `<div class="mb-6 space-y-4 text-left">`;
+            for (const [exName, sets] of Object.entries(grouped)) {
+                summaryHTML += `
+                    <div class="bg-gray-100 dark:bg-zinc-800 p-3 rounded-xl border border-gray-200 dark:border-zinc-700">
+                        <h4 class="font-bold text-zinc-900 dark:text-white text-sm mb-1">${exName}</h4>
+                        <div class="flex flex-wrap gap-2">
+                            ${sets.map((s, i) => `<span class="text-xs bg-white dark:bg-zinc-700 px-2 py-1 rounded-md text-zinc-600 dark:text-zinc-300 font-mono">${s.weight}kg x ${s.reps}</span>`).join('')}
+                        </div>
+                    </div>`;
+            }
+            summaryHTML += `</div>`;
+
+            document.getElementById('session-view').innerHTML = `
+                <div class="glass-panel rounded-3xl p-8 text-center animate-slide-up mt-6 mb-20" id="summary-card">
+                    <div class="text-6xl mb-4">🔥</div>
+                    <h2 class="text-2xl font-bold mb-1 text-zinc-900 dark:text-white">Séance Terminée !</h2>
+                    <p class="text-zinc-500 dark:text-zinc-400 mb-6 text-sm">${program.name} • ${timeStr}</p>
+                    
+                    ${summaryHTML}
+
+                    <div class="grid grid-cols-3 gap-2 mb-6">
+                        <button onclick="downloadIMG()" class="bg-blue-100 dark:bg-blue-900/30 text-blue-600 dark:text-blue-400 py-2 rounded-xl text-xs font-bold hover:opacity-80">IMG</button>
+                        <button onclick="downloadPDF()" class="bg-red-100 dark:bg-red-900/30 text-red-600 dark:text-red-400 py-2 rounded-xl text-xs font-bold hover:opacity-80">PDF</button>
+                        <button onclick="downloadTXT()" class="bg-green-100 dark:bg-green-900/30 text-green-600 dark:text-green-400 py-2 rounded-xl text-xs font-bold hover:opacity-80">TXT</button>
+                    </div>
+
+                    <button onclick="finishSession()" class="w-full bg-zinc-900 dark:bg-white text-white dark:text-black font-bold py-4 rounded-xl shadow-lg hover:scale-[1.02] transition-transform">Nouvelle Séance</button>
+                </div>
+            `;
+        }
+
+        function finishSession() {
+            // Save to History (Stats)
+            const sessionToSave = {
+                id: currentSessionId,
+                startTime: sessionStartTime.toISOString(),
+                endTime: new Date().toISOString(),
+                programName: programs[currentDay].name,
+                totalSets: sessionData.length,
+                data: sessionData
+            };
+            const history = getSessions();
+            history.push(sessionToSave);
+            localStorage.setItem(STORAGE_KEY_SESSIONS, JSON.stringify(history));
+
+            // Clear current session
+            localStorage.removeItem(STORAGE_KEY_CURRENT_SESSION);
+            sessionData = [];
+            currentSessionId = null;
+            currentExerciseIndex = 0;
+
+            if (currentUser) saveToCloud();
+
+            // Reload clean session
+            loadSession();
+            window.scrollTo(0, 0);
+        }
+
+        // --- EXPORT FUNCTIONS ---
+        function downloadTXT() {
+            let text = `YFitracker - Séance ${programs[currentDay].name}\nDate: ${new Date().toLocaleDateString()}\n\n`;
+            sessionData.forEach(s => text += `${s.exercise}: ${s.weight}kg x ${s.reps}\n`);
+            const blob = new Blob([text], { type: 'text/plain' });
+            const a = document.createElement('a');
+            a.href = URL.createObjectURL(blob);
+            a.download = `Seance_${new Date().toISOString().split('T')[0]}.txt`;
+            a.click();
+        }
+
+        function downloadIMG() {
+            const element = document.getElementById('summary-card');
+            html2canvas(element, { backgroundColor: '#18181b', scale: 2 }).then(canvas => {
+                const link = document.createElement('a');
+                link.download = `Seance_${new Date().toISOString().split('T')[0]}.png`;
+                link.href = canvas.toDataURL();
+                link.click();
+            });
+        }
+
+        function downloadPDF() {
+            const { jsPDF } = window.jspdf;
+            const doc = new jsPDF();
+            doc.text(`YFitracker - Séance ${programs[currentDay].name}`, 10, 10);
+            let y = 20;
+            sessionData.forEach(s => {
+                doc.text(`${s.exercise}: ${s.weight}kg x ${s.reps}`, 10, y);
+                y += 10;
+            });
+            doc.save(`Seance_${new Date().toISOString().split('T')[0]}.pdf`);
+        }
+
     </script>
 </body>
 
