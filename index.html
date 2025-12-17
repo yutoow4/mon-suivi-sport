@@ -416,7 +416,7 @@
         try { firebase.initializeApp(firebaseConfig); auth = firebase.auth(); db = firebase.firestore(); auth.onAuthStateChanged(user => { currentUser = user; if (user) setupRealtimeSync(); renderProfile(); renderSettings(); }); } catch (e) { console.log(e); }
 
         // --- DATA ---
-        const STORAGE_KEY_SESSIONS = 'onair_sessions', STORAGE_KEY_CURRENT_SESSION = 'onair_current_session', STORAGE_KEY_PRS = 'onair_prs', STORAGE_KEY_PROGRAMS = 'onair_programs_v4', STORAGE_KEY_NOTES = 'onair_notes';
+        const STORAGE_KEY_SESSIONS = 'onair_sessions', STORAGE_KEY_CURRENT_SESSION = 'onair_current_session', STORAGE_KEY_PRS = 'onair_prs', STORAGE_KEY_PROGRAMS = 'onair_programs_v5', STORAGE_KEY_NOTES = 'onair_notes';
         let programs = {}, currentDay = 'lundi', currentExerciseIndex = 0, sessionData = [], currentSessionId = null, sessionStartTime = null, timerInterval = null, timerTargetTime = null, timerPausedRemaining = 0, isTimerPaused = false, wakeLock = null;
 
         const defaultPrograms = {
