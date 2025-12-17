@@ -416,7 +416,7 @@
         try { firebase.initializeApp(firebaseConfig); auth = firebase.auth(); db = firebase.firestore(); auth.onAuthStateChanged(user => { currentUser = user; if (user) setupRealtimeSync(); renderProfile(); renderSettings(); }); } catch (e) { console.log(e); }
 
         // --- DATA ---
-        const STORAGE_KEY_SESSIONS = 'onair_sessions', STORAGE_KEY_CURRENT_SESSION = 'onair_current_session', STORAGE_KEY_PRS = 'onair_prs', STORAGE_KEY_PROGRAMS = 'onair_programs_v6', STORAGE_KEY_NOTES = 'onair_notes';
+        const STORAGE_KEY_SESSIONS = 'onair_sessions', STORAGE_KEY_CURRENT_SESSION = 'onair_current_session', STORAGE_KEY_PRS = 'onair_prs', STORAGE_KEY_PROGRAMS = 'onair_programs_v5', STORAGE_KEY_NOTES = 'onair_notes';
         let programs = {}, currentDay = 'lundi', currentExerciseIndex = 0, sessionData = [], currentSessionId = null, sessionStartTime = null, timerInterval = null, timerTargetTime = null, timerPausedRemaining = 0, isTimerPaused = false, wakeLock = null;
 
         const defaultPrograms = {
@@ -552,31 +552,27 @@
             if (!w || !r) return;
             const ex = programs[currentDay].exercises[currentExerciseIndex];
 
-            // Push Data
             sessionData.push({ day: currentDay, programName: programs[currentDay].name, exercise: ex.name, weight: w, reps: r, timestamp: new Date().toISOString() });
             localStorage.setItem(STORAGE_KEY_CURRENT_SESSION, JSON.stringify({ id: currentSessionId, startTime: sessionStartTime, data: sessionData, day: currentDay }));
             if (currentUser) saveToCloud();
 
-            // PR Update
             const prs = getPRs(), old = prs[ex.name] || { weight: 0, reps: 0 };
-            if (parseFloat(w) > old.weight || (parseFloat(w) === old.weight && parseInt(r) > old.reps)) { prs[ex.name] = { weight: parseFloat(w), reps: parseInt(r), date: new Date().toISOString() }; localStorage.setItem(STORAGE_KEY_PRS, JSON.stringify(prs)); }
+            if (parseFloat(w) > old.weight || (parseFloat(w) === old.weight && parseInt(r) > old.reps)) { prs[ex.name] = { weight: parseFloat(w), reps: parseInt(r), date: new Date().toISOString() }; localStorage.setItem(STORAGE_KEY_PRS, JSON.stringify(prs)); if (currentUser) saveToCloud(); }
 
-            // Clear Inputs
             document.getElementById('reps-input').value = '';
-
-            // Instant UI Update (Crucial Fix)
             updateHistoryUI();
 
-            // Check completion
             if (sessionData.filter(s => s.exercise === ex.name).length >= ex.sets) {
                 if (currentExerciseIndex < programs[currentDay].exercises.length - 1) {
                     showToast("Exercice terminé ! Prochain...");
                     setTimeout(() => { currentExerciseIndex++; loadSession(); }, 1500);
+                    startRestTimer(ex.rest);
                 } else {
                     showSessionComplete();
                 }
+            } else {
+                startRestTimer(ex.rest);
             }
-            startRestTimer(ex.rest);
         }
 
         function showToast(msg) {
@@ -587,7 +583,7 @@
             setTimeout(() => { t.classList.remove('toast-active'); t.classList.add('opacity-0', 'pointer-events-none'); }, 2500);
         }
 
-        function saveCurrentNote(val) { const ex = programs[currentDay].exercises[currentExerciseIndex]; const notes = getNotes(); notes[ex.name] = val; localStorage.setItem(STORAGE_KEY_NOTES, JSON.stringify(notes)); }
+        function saveCurrentNote(val) { const ex = programs[currentDay].exercises[currentExerciseIndex]; const notes = getNotes(); notes[ex.name] = val; localStorage.setItem(STORAGE_KEY_NOTES, JSON.stringify(notes)); if (currentUser) saveToCloud(); }
 
         // --- TIMER ---
         function startRestTimer(s) { document.getElementById('rest-timer').classList.remove('hidden'); document.getElementById('rest-timer').classList.add('flex'); timerTargetTime = Date.now() + (s * 1000); isTimerPaused = false; updateTimer(); requestWakeLock(); clearInterval(timerInterval); timerInterval = setInterval(timerLoop, 100); }
@@ -697,6 +693,7 @@
         async function handleLogin() { try { await auth.signInWithEmailAndPassword(document.getElementById('auth-email').value, document.getElementById('auth-password').value); switchView('profile'); } catch (e) { alert(e.message); } }
         async function handleSignup() { try { await auth.createUserWithEmailAndPassword(document.getElementById('auth-email').value, document.getElementById('auth-password').value); switchView('profile'); } catch (e) { alert(e.message); } }
         function setupRealtimeSync() { if (!currentUser) return; db.collection('users').doc(currentUser.uid).onSnapshot(doc => { if (doc.exists) { const d = doc.data(); if (d.programs) { programs = JSON.parse(d.programs); localStorage.setItem(STORAGE_KEY_PROGRAMS, d.programs); } } }); }
+        function saveToCloud() { if (!currentUser) return; db.collection('users').doc(currentUser.uid).set({ programs: JSON.stringify(programs), sessions: JSON.stringify(getSessions()), prs: JSON.stringify(getPRs()), notes: JSON.stringify(getNotes()) }, { merge: true }); }
 
         function openEditModal() { const ex = programs[currentDay].exercises[currentExerciseIndex]; document.getElementById('edit-name').value = ex.name; document.getElementById('edit-sets').value = ex.sets; document.getElementById('edit-reps').value = ex.reps; document.getElementById('edit-rest').value = ex.rest; document.getElementById('edit-focus').value = ex.focus || ""; document.getElementById('edit-modal').classList.remove('hidden'); document.getElementById('edit-modal').classList.add('flex'); }
         function closeEditModal() { document.getElementById('edit-modal').classList.add('hidden'); document.getElementById('edit-modal').classList.remove('flex'); }
