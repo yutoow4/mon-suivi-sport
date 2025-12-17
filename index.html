@@ -150,10 +150,11 @@
             animation: fade-in-out 2.5s forwards;
         }
 
-        /* Modal z-index fix */
         .modal-overlay {
-            z-index: 9999;
+            z-index: 10000 !important;
         }
+
+        /* Force modals on top */
     </style>
 </head>
 
@@ -200,30 +201,33 @@
         <div class="flex justify-between items-center h-14 relative">
             <button onclick="switchView('session')"
                 class="nav-item group relative flex-1 h-full flex flex-col items-center justify-center gap-1 text-zinc-400 dark:text-zinc-500 transition-colors rounded-full hover:bg-black/5 dark:hover:bg-white/5"
-                id="nav-session"><svg class="w-6 h-6 group-[.active]:text-red-600 transition-colors duration-300"
+                id="nav-session"><svg
+                    class="w-6 h-6 group-[.active]:text-red-600 transition-colors duration-300 pointer-events-none"
                     fill="none" stroke="currentColor" viewBox="0 0 24 24">
                     <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2.5"
                         d="M19 11H5m14 0a2 2 0 012 2v6a2 2 0 01-2 2H5a2 2 0 01-2-2v-6a2 2 0 012-2m14 0V9a2 2 0 00-2-2M5 11V9a2 2 0 00-2-2M5 11V9a2 2 0 012-2m0 0V5a2 2 0 012-2h6a2 2 0 012 2v2M7 7h10" />
                 </svg><span
-                    class="text-[10px] font-bold group-[.active]:text-zinc-900 dark:group-[.active]:text-white transition-colors">Workout</span></button>
+                    class="text-[10px] font-bold group-[.active]:text-zinc-900 dark:group-[.active]:text-white transition-colors pointer-events-none">Workout</span></button>
             <button onclick="switchView('profile')"
                 class="nav-item group relative flex-1 h-full flex flex-col items-center justify-center gap-1 text-zinc-400 dark:text-zinc-500 transition-colors rounded-full hover:bg-black/5 dark:hover:bg-white/5"
-                id="nav-profile"><svg class="w-6 h-6 group-[.active]:text-red-600 transition-colors duration-300"
+                id="nav-profile"><svg
+                    class="w-6 h-6 group-[.active]:text-red-600 transition-colors duration-300 pointer-events-none"
                     fill="none" stroke="currentColor" viewBox="0 0 24 24">
                     <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2.5"
                         d="M9 19v-6a2 2 0 00-2-2H5a2 2 0 00-2 2v6a2 2 0 002 2h2a2 2 0 002-2zm0 0V9a2 2 0 012-2h2a2 2 0 012 2v10m-6 0a2 2 0 002 2h2a2 2 0 002-2m0 0V5a2 2 0 012-2h2a2 2 0 01-2 2h-2a2 2 0 01-2-2z" />
                 </svg><span
-                    class="text-[10px] font-bold group-[.active]:text-zinc-900 dark:group-[.active]:text-white transition-colors">Stats</span></button>
+                    class="text-[10px] font-bold group-[.active]:text-zinc-900 dark:group-[.active]:text-white transition-colors pointer-events-none">Stats</span></button>
             <button onclick="switchView('settings')"
                 class="nav-item group relative flex-1 h-full flex flex-col items-center justify-center gap-1 text-zinc-400 dark:text-zinc-500 transition-colors rounded-full hover:bg-black/5 dark:hover:bg-white/5"
-                id="nav-settings"><svg class="w-6 h-6 group-[.active]:text-red-600 transition-colors duration-300"
+                id="nav-settings"><svg
+                    class="w-6 h-6 group-[.active]:text-red-600 transition-colors duration-300 pointer-events-none"
                     fill="none" stroke="currentColor" viewBox="0 0 24 24">
                     <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2.5"
                         d="M10.325 4.317c.426-1.756 2.924-1.756 3.35 0a1.724 1.724 0 002.573 1.066c1.543-.94 3.31.826 2.37 2.37a1.724 1.724 0 001.065 2.572c1.756.426 1.756 2.924 0 3.35a1.724 1.724 0 00-1.066 2.573c.94 1.543-.826 3.31-2.37 2.37a1.724 1.724 0 00-2.572 1.065c-.426 1.756-2.924 1.756-3.35 0a1.724 1.724 0 00-2.573-1.066c-1.543.94-3.31-.826-2.37-2.37a1.724 1.724 0 00-1.065-2.572c-1.756-.426-1.756-2.924 0-3.35a1.724 1.724 0 001.066-2.573c-.94-1.543.826-3.31 2.37-2.37.996.608 2.296.07 2.572-1.065z" />
                     <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2.5"
                         d="M15 12a3 3 0 11-6 0 3 3 0 016 0z" />
                 </svg><span
-                    class="text-[10px] font-bold group-[.active]:text-zinc-900 dark:group-[.active]:text-white transition-colors">Réglages</span></button>
+                    class="text-[10px] font-bold group-[.active]:text-zinc-900 dark:group-[.active]:text-white transition-colors pointer-events-none">Réglages</span></button>
         </div>
     </nav>
 
@@ -244,12 +248,12 @@
                         class="text-xl font-bold">-10</span></button>
                 <button onclick="toggleTimer()"
                     class="w-24 h-24 rounded-full bg-red-600 hover:bg-red-500 active:scale-95 transition-all shadow-xl shadow-red-900/40 flex items-center justify-center border-4 border-zinc-900">
-                    <svg id="timer-icon-pause" class="w-10 h-10 text-white" fill="none" viewBox="0 0 24 24"
-                        stroke="currentColor">
+                    <svg id="timer-icon-pause" class="w-10 h-10 text-white pointer-events-none" fill="none"
+                        viewBox="0 0 24 24" stroke="currentColor">
                         <path stroke-linecap="round" stroke-linejoin="round" stroke-width="3" d="M10 9v6m4-6v6" />
                     </svg>
-                    <svg id="timer-icon-play" class="w-10 h-10 text-white hidden ml-1" fill="none" viewBox="0 0 24 24"
-                        stroke="currentColor">
+                    <svg id="timer-icon-play" class="w-10 h-10 text-white hidden pointer-events-none" fill="none"
+                        viewBox="0 0 24 24" stroke="currentColor">
                         <path stroke-linecap="round" stroke-linejoin="round" stroke-width="3" d="M5 3l14 9-14 9V3z" />
                     </svg>
                 </button>
@@ -263,9 +267,9 @@
         </div>
     </div>
 
-    <!-- ===== MODALS (REPLACING PROMPT/CONFIRM) ===== -->
+    <!-- MODALS -->
 
-    <!-- GENERIC CONFIRM MODAL -->
+    <!-- CONFIRM MODAL -->
     <div id="confirm-modal"
         class="modal-overlay fixed inset-0 bg-black/80 backdrop-blur-sm hidden flex items-center justify-center p-4">
         <div class="glass-panel w-full max-w-sm rounded-3xl p-6 shadow-2xl animate-slide-up text-center">
@@ -297,7 +301,8 @@
                 </div>
             </div>
             <div class="flex gap-3">
-                <button onclick="document.getElementById('set-edit-modal').classList.add('hidden')"
+                <button
+                    onclick="document.getElementById('set-edit-modal').classList.add('hidden'); document.getElementById('set-edit-modal').classList.remove('flex');"
                     class="flex-1 py-3 rounded-xl bg-gray-200 dark:bg-zinc-800 text-zinc-900 dark:text-white">Annuler</button>
                 <button onclick="saveSetEdit()"
                     class="flex-1 py-3 rounded-xl bg-red-600 text-white font-bold">Valider</button>
@@ -317,16 +322,14 @@
                     placeholder="dimanche">
             </div>
             <div class="flex gap-3">
-                <button onclick="document.getElementById('new-day-modal').classList.add('hidden')"
+                <button
+                    onclick="document.getElementById('new-day-modal').classList.add('hidden'); document.getElementById('new-day-modal').classList.remove('flex');"
                     class="flex-1 py-3 rounded-xl bg-gray-200 dark:bg-zinc-800 text-zinc-900 dark:text-white">Annuler</button>
                 <button onclick="confirmNewDay()"
                     class="flex-1 py-3 rounded-xl bg-red-600 text-white font-bold">Créer</button>
             </div>
         </div>
     </div>
-
-    <!-- EXISTING MODALS (Exercice, PR, Session Edit, Import) -->
-    <!-- (Garde les autres modales telles quelles, je les réinclus pour la complétude) -->
 
     <!-- Exercise Edit Modal -->
     <div id="edit-modal"
@@ -336,7 +339,7 @@
                 <h3 class="text-xl font-bold text-zinc-900 dark:text-white">Modifier l'exercice</h3><button
                     onclick="closeEditModal()"
                     class="p-2 bg-gray-200 dark:bg-zinc-800 rounded-full text-zinc-500 hover:text-zinc-900 dark:hover:text-white"><svg
-                        class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                        class="w-5 h-5 pointer-events-none" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                         <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
                             d="M6 18L18 6M6 6l12 12" />
                     </svg></button>
@@ -381,7 +384,7 @@
                 <h3 class="text-xl font-bold text-zinc-900 dark:text-white" id="pr-modal-title">Nouveau Record</h3>
                 <button onclick="closePRModal()"
                     class="p-2 bg-gray-200 dark:bg-zinc-800 rounded-full text-zinc-500 hover:text-zinc-900 dark:hover:text-white"><svg
-                        class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                        class="w-5 h-5 pointer-events-none" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                         <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
                             d="M6 18L18 6M6 6l12 12" />
                     </svg></button>
@@ -420,7 +423,7 @@
                 <h3 class="text-xl font-bold text-zinc-900 dark:text-white">Modifier la Séance</h3><button
                     onclick="closeSessionEditModal()"
                     class="p-2 bg-gray-200 dark:bg-zinc-800 rounded-full text-zinc-500 hover:text-zinc-900 dark:hover:text-white"><svg
-                        class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                        class="w-5 h-5 pointer-events-none" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                         <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
                             d="M6 18L18 6M6 6l12 12" />
                     </svg></button>
@@ -451,7 +454,7 @@
                 <h3 class="text-xl font-bold text-zinc-900 dark:text-white">Import Intelligent</h3><button
                     onclick="closeImportModal()"
                     class="p-2 bg-gray-200 dark:bg-zinc-800 rounded-full text-zinc-500 hover:text-zinc-900 dark:hover:text-white"><svg
-                        class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                        class="w-5 h-5 pointer-events-none" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                         <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
                             d="M6 18L18 6M6 6l12 12" />
                     </svg></button>
@@ -478,7 +481,6 @@
         function loadTheme() { if (localStorage.theme === 'dark' || (!('theme' in localStorage) && window.matchMedia('(prefers-color-scheme: dark)').matches)) document.documentElement.classList.add('dark'); }
         function toggleTheme() { document.documentElement.classList.toggle('dark'); localStorage.theme = document.documentElement.classList.contains('dark') ? 'dark' : 'light'; renderSettings(); }
 
-        // --- FIREBASE ---
         const firebaseConfig = { apiKey: "AIzaSyB5uqBRZFJRHILeLhYbizGYYfEvEOqTbHc", authDomain: "yutoow-fit.firebaseapp.com", projectId: "yutoow-fit", storageBucket: "yutoow-fit.firebasestorage.app", messagingSenderId: "139731145452", appId: "1:139731145452:web:9a139e7ec8c8acd42d4bc9" };
         let auth, db, currentUser;
         try { firebase.initializeApp(firebaseConfig); auth = firebase.auth(); db = firebase.firestore(); auth.onAuthStateChanged(user => { currentUser = user; if (user) setupRealtimeSync(); renderProfile(); renderSettings(); }); } catch (e) { console.log(e); }
@@ -514,7 +516,6 @@
             document.getElementById('confirm-modal').classList.remove('flex');
             confirmCallback = null;
         }
-        // Bind the yes button once to the callback
         document.getElementById('confirm-yes-btn').onclick = function () {
             if (confirmCallback) confirmCallback();
             closeConfirmModal();
@@ -567,7 +568,6 @@
             setTimeout(() => { const pr = getPRs()[exo.name]; if (pr) document.getElementById('weight-input').value = pr.weight; }, 50);
         }
 
-        // --- HISTORY UI ---
         function updateHistoryUI() {
             const container = document.getElementById('history-container');
             if (!container) return;
@@ -581,13 +581,11 @@
 
             if (done === 0) { container.innerHTML = ''; return; }
 
-            // MODAL EDIT/DELETE HOOKS
             container.innerHTML = `
                 <div class="animate-slide-up">
                     <h3 class="text-sm font-bold text-zinc-400 uppercase tracking-wider mb-3 px-1">Séries Terminées</h3>
                     <div class="space-y-2">
                         ${sets.map((s, i) => {
-                // Find actual index in sessionData to edit correctly
                 const realIndex = sessionData.indexOf(s);
                 return `
                             <div class="flex justify-between bg-white dark:bg-zinc-900 border border-gray-100 dark:border-zinc-800 rounded-xl p-4 shadow-sm">
@@ -606,7 +604,6 @@
                 </div>`;
         }
 
-        // --- NEW EDIT/DELETE LOGIC WITH MODALS ---
         function askDeleteSet(index) {
             openConfirmModal("Supprimer cette série ?", () => {
                 sessionData.splice(index, 1);
@@ -674,7 +671,10 @@
             const prs = getPRs(), old = prs[ex.name] || { weight: 0, reps: 0 };
             if (parseFloat(w) > old.weight || (parseFloat(w) === old.weight && parseInt(r) > old.reps)) { prs[ex.name] = { weight: parseFloat(w), reps: parseInt(r), date: new Date().toISOString() }; localStorage.setItem(STORAGE_KEY_PRS, JSON.stringify(prs)); }
             document.getElementById('reps-input').value = '';
+
+            // OPTIMIZATION: Update UI Only, don't reload full session
             updateHistoryUI();
+
             if (sessionData.filter(s => s.exercise === ex.name).length >= ex.sets) {
                 if (currentExerciseIndex < programs[currentDay].exercises.length - 1) { showToast("Exercice terminé ! Prochain..."); setTimeout(() => { currentExerciseIndex++; loadSession(); }, 1500); } else { showSessionComplete(); }
             }
@@ -709,9 +709,9 @@
             sessions.forEach(s => { const cat = s.programName.split(' ')[0] || "Autre"; if (!grouped[cat]) grouped[cat] = []; grouped[cat].push(s); });
 
             let html = `
-                <div class="glass-panel rounded-3xl p-6 shadow-sm mb-6"><h2 class="text-2xl font-bold mb-4 text-zinc-900 dark:text-white">Records (PRs)</h2><div class="grid grid-cols-2 gap-3 mb-4">${Object.entries(prs).map(([name, data]) => `<div class="relative bg-white dark:bg-zinc-900 border border-gray-100 dark:border-zinc-800 p-4 rounded-2xl shadow-sm hover:border-red-500 transition-colors"><button onclick="openPRModal('${name}', ${data.weight}, ${data.reps})" class="absolute top-2 right-2 bg-gray-200 dark:bg-zinc-800 rounded-full p-1 text-zinc-500 hover:text-white hover:bg-red-500 transition-colors"><svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15.232 5.232l3.536 3.536m-2.036-5.036a2.5 2.5 0 113.536 3.536L6.5 21.036H3v-3.572L16.732 3.732z" /></svg></button><p class="text-xs text-zinc-500 truncate mb-1 pr-6">${name}</p><p class="text-xl font-bold text-zinc-900 dark:text-white">${data.weight} <span class="text-sm text-zinc-400">kg</span></p></div>`).join('')}</div><button onclick="openPRModal()" class="w-full py-3 rounded-xl border border-dashed border-gray-300 dark:border-zinc-700 text-zinc-500 text-sm font-medium hover:text-red-500 hover:border-red-500 transition-colors">+ Ajouter un record</button></div>
+                <div class="glass-panel rounded-3xl p-6 shadow-sm mb-6"><h2 class="text-2xl font-bold mb-4 text-zinc-900 dark:text-white">Records (PRs)</h2><div class="grid grid-cols-2 gap-3 mb-4">${Object.entries(prs).map(([name, data]) => `<div class="relative bg-white dark:bg-zinc-900 border border-gray-100 dark:border-zinc-800 p-4 rounded-2xl shadow-sm hover:border-red-500 transition-colors"><button onclick="openPRModal('${name}', ${data.weight}, ${data.reps})" class="absolute top-2 right-2 bg-gray-200 dark:bg-zinc-800 rounded-full p-1 text-zinc-500 hover:text-white hover:bg-red-500 transition-colors"><svg class="w-4 h-4 pointer-events-none" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15.232 5.232l3.536 3.536m-2.036-5.036a2.5 2.5 0 113.536 3.536L6.5 21.036H3v-3.572L16.732 3.732z" /></svg></button><p class="text-xs text-zinc-500 truncate mb-1 pr-6">${name}</p><p class="text-xl font-bold text-zinc-900 dark:text-white">${data.weight} <span class="text-sm text-zinc-400">kg</span></p></div>`).join('')}</div><button onclick="openPRModal()" class="w-full py-3 rounded-xl border border-dashed border-gray-300 dark:border-zinc-700 text-zinc-500 text-sm font-medium hover:text-red-500 hover:border-red-500 transition-colors">+ Ajouter un record</button></div>
                 <div class="glass-panel rounded-3xl p-6 shadow-sm mb-6"><div class="flex justify-between items-center mb-4"><h2 class="text-2xl font-bold text-zinc-900 dark:text-white">Import Note</h2><button onclick="document.getElementById('import-modal').classList.remove('hidden'); document.getElementById('import-modal').classList.add('flex')" class="text-xs bg-red-100 dark:bg-red-900/30 text-red-600 dark:text-red-400 px-3 py-1 rounded-full font-bold">IA Local</button></div><p class="text-xs text-zinc-500">Collez un résumé texte pour l'ajouter à l'historique.</p></div>
-                <div class="space-y-6 pb-20"><h2 class="text-2xl font-bold px-2 text-zinc-900 dark:text-white">Historique</h2>${Object.entries(grouped).map(([cat, list]) => `<div><h3 class="font-bold text-red-500 uppercase tracking-wider text-xs mb-3 px-2 border-b border-gray-200 dark:border-zinc-800 pb-1">${cat}</h3><div class="space-y-2">${list.map(s => { const date = new Date(s.startTime).toLocaleDateString('fr-FR', { day: 'numeric', month: 'short' }); return `<div class="bg-white dark:bg-zinc-900 border border-gray-100 dark:border-zinc-800 p-4 rounded-2xl flex justify-between items-center shadow-sm group"><div><p class="font-bold text-zinc-900 dark:text-white">${s.programName}</p><p class="text-xs text-zinc-500">${date} • ${s.data ? s.data.length : 0} séries</p></div><div class="flex gap-2"><button onclick="openSessionEditModal('${s.id}', '${s.programName}', '${new Date(s.startTime).toISOString().split('T')[0]}')" class="bg-gray-100 dark:bg-zinc-800 p-2 rounded-full text-zinc-500 hover:text-white hover:bg-blue-500 transition-colors"><svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15.232 5.232l3.536 3.536m-2.036-5.036a2.5 2.5 0 113.536 3.536L6.5 21.036H3v-3.572L16.732 3.732z" /></svg></button><button onclick="askDeleteSession('${s.id}')" class="bg-gray-100 dark:bg-zinc-800 p-2 rounded-full text-zinc-500 hover:text-white hover:bg-red-500 transition-colors"><svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16"/></svg></button></div></div>` }).join('')}</div></div>`).join('')}</div>`;
+                <div class="space-y-6 pb-20"><h2 class="text-2xl font-bold px-2 text-zinc-900 dark:text-white">Historique</h2>${Object.entries(grouped).map(([cat, list]) => `<div><h3 class="font-bold text-red-500 uppercase tracking-wider text-xs mb-3 px-2 border-b border-gray-200 dark:border-zinc-800 pb-1">${cat}</h3><div class="space-y-2">${list.map(s => { const date = new Date(s.startTime).toLocaleDateString('fr-FR', { day: 'numeric', month: 'short' }); return `<div class="bg-white dark:bg-zinc-900 border border-gray-100 dark:border-zinc-800 p-4 rounded-2xl flex justify-between items-center shadow-sm group"><div><p class="font-bold text-zinc-900 dark:text-white">${s.programName}</p><p class="text-xs text-zinc-500">${date} • ${s.data ? s.data.length : 0} séries</p></div><div class="flex gap-2"><button onclick="openSessionEditModal('${s.id}', '${s.programName}', '${new Date(s.startTime).toISOString().split('T')[0]}')" class="bg-gray-100 dark:bg-zinc-800 p-2 rounded-full text-zinc-500 hover:text-white hover:bg-blue-500 transition-colors"><svg class="w-4 h-4 pointer-events-none" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15.232 5.232l3.536 3.536m-2.036-5.036a2.5 2.5 0 113.536 3.536L6.5 21.036H3v-3.572L16.732 3.732z" /></svg></button><button onclick="askDeleteSession('${s.id}')" class="bg-gray-100 dark:bg-zinc-800 p-2 rounded-full text-zinc-500 hover:text-white hover:bg-red-500 transition-colors"><svg class="w-4 h-4 pointer-events-none" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16"/></svg></button></div></div>` }).join('')}</div></div>`).join('')}</div>`;
             document.getElementById('profile-view').innerHTML = html;
         }
 
