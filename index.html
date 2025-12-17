@@ -416,7 +416,7 @@
         try { firebase.initializeApp(firebaseConfig); auth = firebase.auth(); db = firebase.firestore(); auth.onAuthStateChanged(user => { currentUser = user; if (user) setupRealtimeSync(); renderProfile(); renderSettings(); }); } catch (e) { console.log(e); }
 
         // --- DATA ---
-        const STORAGE_KEY_SESSIONS = 'onair_sessions', STORAGE_KEY_CURRENT_SESSION = 'onair_current_session', STORAGE_KEY_PRS = 'onair_prs', STORAGE_KEY_PROGRAMS = 'onair_programs_v5', STORAGE_KEY_NOTES = 'onair_notes';
+        const STORAGE_KEY_SESSIONS = 'onair_sessions', STORAGE_KEY_CURRENT_SESSION = 'onair_current_session', STORAGE_KEY_PRS = 'onair_prs', STORAGE_KEY_PROGRAMS = 'onair_programs_v6', STORAGE_KEY_NOTES = 'onair_notes';
         let programs = {}, currentDay = 'lundi', currentExerciseIndex = 0, sessionData = [], currentSessionId = null, sessionStartTime = null, timerInterval = null, timerTargetTime = null, timerPausedRemaining = 0, isTimerPaused = false, wakeLock = null;
 
         const defaultPrograms = {
@@ -433,7 +433,18 @@
                     { name: "Mollets Debout Haltères", focus: "Mollets (Gastrocnémien)", sets: 4, reps: "12-20", rest: 60 }
                 ]
             },
-            vendredi: { id: 'vendredi', name: "Vendredi - Upper", exercises: [{ name: "Développé Militaire", focus: "Épaules", sets: 4, reps: "8-10", rest: 120 }, { name: "Dips", focus: "Pecs/Triceps", sets: 3, reps: "Max", rest: 90 }, { name: "Tirage Poitrine", focus: "Dos Largeur", sets: 4, reps: "10-12", rest: 90 }] },
+            vendredi: {
+                id: 'vendredi',
+                name: "Vendredi - Upper",
+                exercises: [
+                    { name: "Chest Presse Couché", focus: "Faisceau sternal", sets: 4, reps: "6-8", rest: 105 },
+                    { name: "Développé incliné haltères", focus: "Faisceau claviculaire", sets: 3, reps: "8-12", rest: 90 },
+                    { name: "PecFly", focus: "Faisceau sternal et étirement", sets: 3, reps: "12-15", rest: 60 },
+                    { name: "Développé Militaire Haltères", focus: "Faisceaux antérieur et moyen", sets: 3, reps: "10-12", rest: 90 },
+                    { name: "Élévations Latérales", focus: "Faisceau moyen", sets: 4, reps: "12-20", rest: 45 },
+                    { name: "Face Pulls", focus: "Faisceau postérieur", sets: 3, reps: "15-20", rest: 60 }
+                ]
+            },
             samedi: { id: 'samedi', name: "Samedi - Lower", exercises: [{ name: "Soulevé de Terre Roumain", focus: "Ischios/Fessiers", sets: 4, reps: "8-10", rest: 120 }, { name: "Fentes Bulgares", focus: "Fessiers", sets: 3, reps: "10/jambe", rest: 90 }, { name: "Leg Extension", focus: "Quadriceps", sets: 3, reps: "15", rest: 60 }] }
         };
 
